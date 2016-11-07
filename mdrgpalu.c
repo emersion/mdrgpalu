@@ -50,7 +50,7 @@ void editor_print(struct editor* e) {
 	}
 
 	char s[128];
-	sprintf((char*) &s, "%d:%d", curline+1, curchar+1);
+	snprintf((char*) &s, sizeof(s), "%d:%d", curline+1, curchar+1);
 	print_format("2m", (char*) &s);
 }
 
