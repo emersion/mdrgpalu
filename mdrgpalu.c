@@ -50,9 +50,26 @@ void line_insert_at(struct line* l, int i, char c) {
 		line_grow(l, l->cap);
 	}
 
-	memmove(&l->chars[i+1], &l->chars[i], l->len - i);
+	memmove(&l->chars[i+1], &l->chars[i], l->len-i);
 	l->chars[i] = c;
 	l->len++;
+}
+
+int line_remove_at(struct line* l, int i) {
+	if (l->len == 0) {
+		return -1;
+	}
+	if (i < 0) {
+		i = 0;
+	}
+	if (i >= l->len) {
+		i = l->len-1;
+	}
+
+	char c = l->chars[i];
+	memmove(&l->chars[i], &l->chars[i+1], l->len-i-1);
+	l->len--;
+	return c;
 }
 
 struct editor {
@@ -72,7 +89,7 @@ struct editor* editor_new() {
 	return e;
 }
 
-void editor_append_line(struct editor* e) {
+void editor_append_curline(struct editor* e) {
 	struct line* l = line_new();
 
 	l->prev = e->curline;
@@ -90,11 +107,66 @@ void editor_append_line(struct editor* e) {
 	e->curline = l;
 }
 
-void editor_append_char(struct editor* e, char c) {
+void editor_remove_curline(struct editor* e) {
 	if (e->curline == NULL) {
-		editor_append_line(e);
+		return;
 	}
 
+	struct line* l = e->curline;
+	if (l->prev != NULL && l->next != NULL) {
+		l->prev->next = l->next->prev;
+	} else if (l->prev != NULL) {
+		l->prev->next = NULL;
+	} else if (l->next != NULL) {
+		l->next->prev = NULL;
+	}
+	if (e->first == l) {
+		e->first = l->next;
+	}
+	if (e->last == l) {
+		e->last = l->prev;
+	}
+	e->curline = l->prev;
+
+	free(l);
+}
+
+int editor_remove_curchar(struct editor* e) {
+	if (e->curline == NULL) {
+		return -1;
+	}
+	if (e->curline->len == 0 || e->curindex == 0) {
+		editor_remove_curline(e);
+		return '\n';
+	}
+
+	int c = line_remove_at(e->curline, e->curindex-1);
+
+	e->curindex--;
+	if (e->curindex > e->curline->len) {
+		e->curindex = e->curline->len;
+	}
+
+	return c;
+}
+
+void editor_append_curchar(struct editor* e, char c) {
+	// Handle control chars
+	switch (c) {
+	case '\n':
+		editor_append_curline(e);
+		return;
+	case 127: // backspace
+		editor_remove_curchar(e);
+		return;
+	}
+	if (c < 32) {
+		return;
+	}
+
+	if (e->curline == NULL) {
+		editor_append_curline(e);
+	}
 	line_insert_at(e->curline, e->curindex, c);
 
 	e->curindex++;
@@ -173,19 +245,19 @@ void editor_print(struct editor* e) {
 		i++;
 	}
 
-	printf("\e[2m%d:%d\e[0m", linenum, e->curindex);
+	printf("\e[2m%d:%d\e[0m", linenum+1, e->curindex+1);
 }
 
 int main() {
 	struct editor* e = editor_new();
-	editor_append_line(e);
-	editor_append_char(e, 'c');
-	editor_append_char(e, 'c');
-	editor_append_line(e);
-	editor_append_char(e, 's');
-	editor_append_char(e, 'a');
-	editor_append_char(e, 'v');
-	editor_append_char(e, 'a');
+	editor_append_curline(e);
+	editor_append_curchar(e, 'c');
+	editor_append_curchar(e, 'c');
+	editor_append_curline(e);
+	editor_append_curchar(e, 's');
+	editor_append_curchar(e, 'a');
+	editor_append_curchar(e, 'v');
+	editor_append_curchar(e, 'a');
 
 	struct termios t;
 	tcgetattr(0, &t);
@@ -222,14 +294,11 @@ int main() {
 			}
 		} else if (prev == 27 && c == 91) {
 			escseq = 1; // Entering escape sequence
-		} else if (c >= 32) { // printable char
-			editor_append_char(e, (char) c);
-		} else if (c == 10) { // line feed
-			editor_append_line(e);
+		} else {
+			editor_append_curchar(e, (char) c);
 		}
 
 		editor_print(e);
-		//printf("%d", c);
 
 		prev = c;
 	}
