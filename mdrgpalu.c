@@ -10,11 +10,11 @@ void editor_print(struct editor* e) {
 	printf("\n\e[2J"); // clear
 
 	int i = 0;
-	int linenum = 0;
+	int curline = 0, curchar = 0;
 	for (struct line* l = e->first; l != NULL; l = l->next) {
 		int needsCursor = (e->curline == l);
 		if (needsCursor) {
-			linenum = i;
+			curline = i;
 		}
 
 		for (int i = 0; i < l->len; i++) {
@@ -22,6 +22,7 @@ void editor_print(struct editor* e) {
 			if (needsCursor && e->curchar == i) {
 				printf("\e[7m%c\e[0m", c); // highlight cursor pos
 				needsCursor = 0;
+				curchar = i;
 			} else {
 				printf("%c", c);
 			}
@@ -29,13 +30,14 @@ void editor_print(struct editor* e) {
 
 		if (needsCursor) {
 			printf("\e[7m \e[0m");
+			curchar = l->len;
 		}
 		printf("\n");
 
 		i++;
 	}
 
-	printf("\e[2m%d:%d\e[0m", linenum+1, e->curchar+1);
+	printf("\e[2m%d:%d\e[0m", curline+1, curchar+1);
 }
 
 int main() {
