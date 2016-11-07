@@ -18,37 +18,28 @@ struct line* line_new() {
 	return l;
 }
 
-void line_grow(struct line* l, int more) {
-	l->cap += more;
-	l->chars = realloc(l->chars, l->cap);
-}
+void line_insert_at(struct line* l, int i, char c) {
+	if (i > l->len) {
+		i = l->len;
+	}
 
-void line_append(struct line* l, char c) {
 	if (l->len + 1 > l->cap) {
-		int more = l->cap;
-		if (more == 0) {
-			more = 1;
+		int more = 1;
+		if (l->cap > 0) {
+			more = l->cap;
 		}
-		if (more > 1024) {
+		if (l->cap > 1024) {
 			more = 1024;
 		}
-		line_grow(l, more);
+		l->cap += more;
+
+		l->chars = realloc(l->chars, l->cap);
 	}
 
-	l->chars[l->len] = c;
-	l->len++;
-}
-
-void line_insert_at(struct line* l, int i, char c) {
-	if (i >= l->len) {
-		return line_append(l, c);
+	if (i < l->len) {
+		memmove(&l->chars[i+1], &l->chars[i], l->len-i);
 	}
 
-	if (l->len + 1 > l->cap) {
-		line_grow(l, l->cap);
-	}
-
-	memmove(&l->chars[i+1], &l->chars[i], l->len-i);
 	l->chars[i] = c;
 	l->len++;
 }
