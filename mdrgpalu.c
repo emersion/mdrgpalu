@@ -6,8 +6,19 @@
 
 #include "src/editor.c"
 
+void print_escape(char* seq) {
+	printf("\033[%s", seq);
+}
+
+void print_format(char* seq, char* text) {
+	print_escape(seq);
+	printf(text);
+	print_escape("0m");
+}
+
 void editor_print(struct editor* e) {
-	printf("\n\e[2J"); // clear
+	printf("\n");
+	print_escape("2J"); // clear
 
 	int i = 0;
 	int curline = 0, curchar = 0;
@@ -20,7 +31,8 @@ void editor_print(struct editor* e) {
 		for (int i = 0; i < l->len; i++) {
 			char c = l->chars[i];
 			if (needsCursor && e->curchar == i) {
-				printf("\e[7m%c\e[0m", c); // highlight cursor pos
+				char s[2] = {c, '\0'};
+				print_format("7m", (char*) &s);
 				needsCursor = 0;
 				curchar = i;
 			} else {
@@ -29,7 +41,7 @@ void editor_print(struct editor* e) {
 		}
 
 		if (needsCursor) {
-			printf("\e[7m \e[0m");
+			print_format("7m", " ");
 			curchar = l->len;
 		}
 		printf("\n");
@@ -37,7 +49,9 @@ void editor_print(struct editor* e) {
 		i++;
 	}
 
-	printf("\e[2m%d:%d\e[0m", curline+1, curchar+1);
+	char s[128];
+	sprintf((char*) &s, "%d:%d", curline+1, curchar+1);
+	print_format("2m", (char*) &s);
 }
 
 int main() {
