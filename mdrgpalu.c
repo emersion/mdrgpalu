@@ -91,8 +91,16 @@ void editor_append_line(struct editor* e) {
 }
 
 void editor_append_char(struct editor* e, char c) {
+	if (e->curline == NULL) {
+		editor_append_line(e);
+	}
+
 	line_insert_at(e->curline, e->curindex, c);
+
 	e->curindex++;
+	if (e->curindex > e->curline->len) {
+		e->curindex = e->curline->len;
+	}
 }
 
 void editor_move_line(struct editor* e, int delta) {
@@ -135,26 +143,42 @@ void editor_move_index(struct editor* e, int delta) {
 	if (target < 0) {
 		target = 0;
 	}
-	if (target >= e->curline->len) {
-		target = e->curline->len - 1;
+	if (target > e->curline->len) {
+		target = e->curline->len;
 	}
 	e->curindex = target;
 }
 
 void editor_print(struct editor* e) {
-	printf("\e[2J"); // clear
+	printf("\n\e[2J"); // clear
 
+	int i = 0;
+	int linenum = 0;
 	for (struct line* l = e->first; l != NULL; l = l->next) {
+		int needsCursor = (e->curline == l);
+		if (needsCursor) {
+			linenum = i;
+		}
+
 		for (int i = 0; i < l->len; i++) {
 			char c = l->chars[i];
-			if (e->curline == l && (e->curindex == i || (e->curindex >= l->len && i == l->len-1))) {
+			if (needsCursor && e->curindex == i) {
 				printf("\e[7m%c\e[0m", c); // highlight cursor pos
+				needsCursor = 0;
 			} else {
 				printf("%c", c);
 			}
 		}
+
+		if (needsCursor) {
+			printf("\e[7m \e[0m");
+		}
 		printf("\n");
+
+		i++;
 	}
+
+	printf("\e[2m%d:%d\e[0m", linenum, e->curindex);
 }
 
 int main() {
