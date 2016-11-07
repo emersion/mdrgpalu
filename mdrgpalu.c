@@ -33,13 +33,13 @@ void editor_print(struct editor* e) {
 			curline = i;
 		}
 
-		for (int i = 0; i < l->len; i++) {
-			char c = l->chars[i];
-			if (needsCursor && e->curchar == i) {
+		for (int j = 0; j < l->len; j++) {
+			char c = l->chars[j];
+			if (needsCursor && e->curchar == j) {
 				char s[2] = {c, '\0'};
 				print_format(FORMAT_REVERSE, (char*) &s);
 				needsCursor = 0;
-				curchar = i;
+				curchar = j;
 			} else {
 				printf("%c", c);
 			}
