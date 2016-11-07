@@ -1,4 +1,4 @@
 all:
-	gcc -o main -Wall -ggdb main.c
+	gcc -o mdrgpalu -Wall -ggdb mdrgpalu.c
 clean:
-	rm main
+	rm mdrgpalu
