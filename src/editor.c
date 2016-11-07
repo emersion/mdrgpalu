@@ -53,7 +53,7 @@ void editor_insert_line(struct editor* e) {
 	e->curchar = 0;
 }
 
-void editor_remove_curline(struct editor* e) {
+void editor_remove_line(struct editor* e) {
 	if (e->curline == NULL) {
 		return;
 	}
@@ -77,12 +77,12 @@ void editor_remove_curline(struct editor* e) {
 	free(l);
 }
 
-int editor_remove_curchar(struct editor* e) {
+int editor_remove_char(struct editor* e) {
 	if (e->curline == NULL) {
 		return -1;
 	}
 	if (e->curline->len == 0 || e->curchar == 0) {
-		editor_remove_curline(e);
+		editor_remove_line(e);
 		return '\n';
 	}
 
@@ -96,14 +96,14 @@ int editor_remove_curchar(struct editor* e) {
 	return c;
 }
 
-void editor_append_curchar(struct editor* e, char c) {
+void editor_insert_char(struct editor* e, char c) {
 	// Handle control chars
 	switch (c) {
 	case '\n':
 		editor_insert_line(e);
 		return;
 	case 127: // backspace
-		editor_remove_curchar(e);
+		editor_remove_char(e);
 		return;
 	}
 	if (c < 32) {

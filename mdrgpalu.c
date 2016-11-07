@@ -62,13 +62,13 @@ void editor_print(struct editor* e) {
 int main() {
 	struct editor* e = editor_new();
 	editor_insert_line(e);
-	editor_append_curchar(e, 'c');
-	editor_append_curchar(e, 'c');
+	editor_insert_char(e, 'c');
+	editor_insert_char(e, 'c');
 	editor_insert_line(e);
-	editor_append_curchar(e, 's');
-	editor_append_curchar(e, 'a');
-	editor_append_curchar(e, 'v');
-	editor_append_curchar(e, 'a');
+	editor_insert_char(e, 's');
+	editor_insert_char(e, 'a');
+	editor_insert_char(e, 'v');
+	editor_insert_char(e, 'a');
 	editor_set_curline(e, 0);
 	editor_set_curchar(e, 0);
 
@@ -110,7 +110,7 @@ int main() {
 		} else if (prev == 27 && c == 91) {
 			escseq = 1; // Entering escape sequence
 		} else {
-			editor_append_curchar(e, (char) c);
+			editor_insert_char(e, (char) c);
 		}
 
 		editor_print(e);
