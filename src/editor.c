@@ -105,7 +105,23 @@ void editor_append_curchar(struct editor* e, char c) {
 	}
 }
 
-void editor_move_line(struct editor* e, int delta) {
+void editor_set_curline(struct editor* e, int i) {
+	if (i < 0) {
+		return;
+	}
+
+	struct line* l = e->first;
+	while (i > 0) {
+		if (l->next == NULL) {
+			break;
+		}
+		l = l->next;
+		i--;
+	}
+	e->curline = l;
+}
+
+void editor_move_curline(struct editor* e, int delta) {
 	if (delta == 0) {
 		return;
 	}
@@ -131,17 +147,20 @@ void editor_move_line(struct editor* e, int delta) {
 	e->curline = l;
 }
 
-void editor_move_index(struct editor* e, int delta) {
-	if (delta == 0 || e->curline == NULL) {
+void editor_set_curchar(struct editor* e, int i) {
+	if (e->curline == NULL) {
 		return;
 	}
 
-	int target = e->curchar + delta;
-	if (target < 0) {
-		target = 0;
+	if (i < 0) {
+		i = 0;
 	}
-	if (target > e->curline->len) {
-		target = e->curline->len;
+	if (i > e->curline->len) {
+		i = e->curline->len;
 	}
-	e->curchar = target;
+	e->curchar = i;
+}
+
+void editor_move_curchar(struct editor* e, int delta) {
+	editor_set_curchar(e, e->curchar + delta);
 }

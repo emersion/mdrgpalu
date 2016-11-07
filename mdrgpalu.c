@@ -72,16 +72,16 @@ int main() {
 
 			switch (c) {
 			case 65: // up
-				editor_move_line(e, -1);
+				editor_move_curline(e, -1);
 				break;
 			case 66: // down
-				editor_move_line(e, 1);
+				editor_move_curline(e, 1);
 				break;
 			case 67: // right
-				editor_move_index(e, 1);
+				editor_move_curchar(e, 1);
 				break;
 			case 68: // left
-				editor_move_index(e, -1);
+				editor_move_curchar(e, -1);
 				break;
 			}
 		} else if (prev == 27 && c == 91) {
