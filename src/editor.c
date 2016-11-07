@@ -19,13 +19,28 @@ struct editor* editor_new() {
 	return e;
 }
 
-void editor_append_curline(struct editor* e) {
+void editor_insert_line(struct editor* e) {
 	struct line* l = line_new();
 
 	l->prev = e->curline;
 	if (e->curline != NULL) {
 		l->next = e->curline->next;
 		e->curline->next = l;
+
+		// Split text between two lines
+		if (e->curchar == 0) {
+			l->len = e->curline->len;
+			l->cap = e->curline->cap;
+			l->chars = e->curline->chars;
+			e->curline->len = 0;
+			e->curline->cap = 0;
+			e->curline->chars = NULL;
+		} else {
+			l->len = e->curline->len - e->curchar;
+			l->chars = (char*) malloc(l->len);
+			memcpy(l->chars, &e->curline->chars[e->curchar], l->len);
+			e->curline->len = e->curchar;
+		}
 	}
 
 	if (e->first == NULL) {
@@ -35,6 +50,7 @@ void editor_append_curline(struct editor* e) {
 		e->last = l;
 	}
 	e->curline = l;
+	e->curchar = 0;
 }
 
 void editor_remove_curline(struct editor* e) {
@@ -84,7 +100,7 @@ void editor_append_curchar(struct editor* e, char c) {
 	// Handle control chars
 	switch (c) {
 	case '\n':
-		editor_append_curline(e);
+		editor_insert_line(e);
 		return;
 	case 127: // backspace
 		editor_remove_curchar(e);
@@ -95,7 +111,7 @@ void editor_append_curchar(struct editor* e, char c) {
 	}
 
 	if (e->curline == NULL) {
-		editor_append_curline(e);
+		editor_insert_line(e);
 	}
 	line_insert_at(e->curline, e->curchar, c);
 

@@ -61,10 +61,10 @@ void editor_print(struct editor* e) {
 
 int main() {
 	struct editor* e = editor_new();
-	editor_append_curline(e);
+	editor_insert_line(e);
 	editor_append_curchar(e, 'c');
 	editor_append_curchar(e, 'c');
-	editor_append_curline(e);
+	editor_insert_line(e);
 	editor_append_curchar(e, 's');
 	editor_append_curchar(e, 'a');
 	editor_append_curchar(e, 'v');
