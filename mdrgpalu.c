@@ -48,6 +48,8 @@ int main() {
 	editor_append_curchar(e, 'a');
 	editor_append_curchar(e, 'v');
 	editor_append_curchar(e, 'a');
+	editor_set_curline(e, 0);
+	editor_set_curchar(e, 0);
 
 	#ifdef __linux__
 		struct termios t;
