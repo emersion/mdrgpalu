@@ -1,5 +1,8 @@
 #include <stdio.h>
-#include <termios.h>
+
+#ifdef __linux__
+	#include <termios.h>
+#endif
 
 #include "src/editor.c"
 
@@ -46,10 +49,12 @@ int main() {
 	editor_append_curchar(e, 'v');
 	editor_append_curchar(e, 'a');
 
-	struct termios t;
-	tcgetattr(0, &t);
-	t.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN);
-	tcsetattr(0, TCSANOW, &t);
+	#ifdef __linux__
+		struct termios t;
+		tcgetattr(0, &t);
+		t.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN);
+		tcsetattr(0, TCSANOW, &t);
+	#endif
 
 	editor_print(e);
 
