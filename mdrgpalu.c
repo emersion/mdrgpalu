@@ -1,220 +1,7 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <termios.h>
 
-struct line {
-	struct line* next;
-	struct line* prev;
-
-	char* chars;
-	int len;
-	int cap;
-};
-
-struct line* line_new() {
-	struct line* l = (struct line*) malloc(sizeof(struct line));
-	l->chars = NULL;
-	l->len = 0;
-	l->cap = 0;
-	return l;
-}
-
-void line_grow(struct line* l, int more) {
-	l->cap += more;
-	l->chars = realloc(l->chars, l->cap);
-}
-
-void line_append(struct line* l, char c) {
-	if (l->len + 1 > l->cap) {
-		int more = l->cap;
-		if (more == 0) {
-			more = 1;
-		}
-		if (more > 1024) {
-			more = 1024;
-		}
-		line_grow(l, more);
-	}
-
-	l->chars[l->len] = c;
-	l->len++;
-}
-
-void line_insert_at(struct line* l, int i, char c) {
-	if (i >= l->len) {
-		return line_append(l, c);
-	}
-
-	if (l->len + 1 > l->cap) {
-		line_grow(l, l->cap);
-	}
-
-	memmove(&l->chars[i+1], &l->chars[i], l->len-i);
-	l->chars[i] = c;
-	l->len++;
-}
-
-int line_remove_at(struct line* l, int i) {
-	if (l->len == 0) {
-		return -1;
-	}
-	if (i < 0) {
-		i = 0;
-	}
-	if (i >= l->len) {
-		i = l->len-1;
-	}
-
-	char c = l->chars[i];
-	memmove(&l->chars[i], &l->chars[i+1], l->len-i-1);
-	l->len--;
-	return c;
-}
-
-struct editor {
-	struct line* first;
-	struct line* last;
-
-	struct line* curline;
-	int curindex;
-};
-
-struct editor* editor_new() {
-	struct editor* e = malloc(sizeof(struct editor));
-	e->first = NULL;
-	e->last = NULL;
-	e->curline = NULL;
-	e->curindex = 0;
-	return e;
-}
-
-void editor_append_curline(struct editor* e) {
-	struct line* l = line_new();
-
-	l->prev = e->curline;
-	if (e->curline != NULL) {
-		l->next = e->curline->next;
-		e->curline->next = l;
-	}
-
-	if (e->first == NULL) {
-		e->first = l;
-	}
-	if (e->last == NULL || e->last == e->curline) {
-		e->last = l;
-	}
-	e->curline = l;
-}
-
-void editor_remove_curline(struct editor* e) {
-	if (e->curline == NULL) {
-		return;
-	}
-
-	struct line* l = e->curline;
-	if (l->prev != NULL && l->next != NULL) {
-		l->prev->next = l->next->prev;
-	} else if (l->prev != NULL) {
-		l->prev->next = NULL;
-	} else if (l->next != NULL) {
-		l->next->prev = NULL;
-	}
-	if (e->first == l) {
-		e->first = l->next;
-	}
-	if (e->last == l) {
-		e->last = l->prev;
-	}
-	e->curline = l->prev;
-
-	free(l);
-}
-
-int editor_remove_curchar(struct editor* e) {
-	if (e->curline == NULL) {
-		return -1;
-	}
-	if (e->curline->len == 0 || e->curindex == 0) {
-		editor_remove_curline(e);
-		return '\n';
-	}
-
-	int c = line_remove_at(e->curline, e->curindex-1);
-
-	e->curindex--;
-	if (e->curindex > e->curline->len) {
-		e->curindex = e->curline->len;
-	}
-
-	return c;
-}
-
-void editor_append_curchar(struct editor* e, char c) {
-	// Handle control chars
-	switch (c) {
-	case '\n':
-		editor_append_curline(e);
-		return;
-	case 127: // backspace
-		editor_remove_curchar(e);
-		return;
-	}
-	if (c < 32) {
-		return;
-	}
-
-	if (e->curline == NULL) {
-		editor_append_curline(e);
-	}
-	line_insert_at(e->curline, e->curindex, c);
-
-	e->curindex++;
-	if (e->curindex > e->curline->len) {
-		e->curindex = e->curline->len;
-	}
-}
-
-void editor_move_line(struct editor* e, int delta) {
-	if (delta == 0) {
-		return;
-	}
-
-	struct line* l = e->curline;
-	while (delta != 0) {
-		if (delta > 0) {
-			if (l->next != NULL) {
-				delta--;
-				l = l->next;
-			} else {
-				break;
-			}
-		} else {
-			if (l->prev != NULL) {
-				delta++;
-				l = l->prev;
-			} else {
-				break;
-			}
-		}
-	}
-	e->curline = l;
-}
-
-void editor_move_index(struct editor* e, int delta) {
-	if (delta == 0 || e->curline == NULL) {
-		return;
-	}
-
-	int target = e->curindex + delta;
-	if (target < 0) {
-		target = 0;
-	}
-	if (target > e->curline->len) {
-		target = e->curline->len;
-	}
-	e->curindex = target;
-}
+#include "src/editor.c"
 
 void editor_print(struct editor* e) {
 	printf("\n\e[2J"); // clear
@@ -229,7 +16,7 @@ void editor_print(struct editor* e) {
 
 		for (int i = 0; i < l->len; i++) {
 			char c = l->chars[i];
-			if (needsCursor && e->curindex == i) {
+			if (needsCursor && e->curchar == i) {
 				printf("\e[7m%c\e[0m", c); // highlight cursor pos
 				needsCursor = 0;
 			} else {
@@ -245,7 +32,7 @@ void editor_print(struct editor* e) {
 		i++;
 	}
 
-	printf("\e[2m%d:%d\e[0m", linenum+1, e->curindex+1);
+	printf("\e[2m%d:%d\e[0m", linenum+1, e->curchar+1);
 }
 
 int main() {
