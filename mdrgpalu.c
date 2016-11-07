@@ -6,6 +6,11 @@
 
 #include "src/editor.c"
 
+#define FORMAT_CLEAR   "2J"
+#define FORMAT_RESET   "0m"
+#define FORMAT_DIM     "2m"
+#define FORMAT_REVERSE "7m"
+
 void print_escape(char* seq) {
 	printf("\033[%s", seq);
 }
@@ -13,12 +18,12 @@ void print_escape(char* seq) {
 void print_format(char* seq, char* text) {
 	print_escape(seq);
 	printf(text);
-	print_escape("0m");
+	print_escape(FORMAT_RESET);
 }
 
 void editor_print(struct editor* e) {
 	printf("\n");
-	print_escape("2J"); // clear
+	print_escape(FORMAT_CLEAR); // clear
 
 	int i = 0;
 	int curline = 0, curchar = 0;
@@ -32,7 +37,7 @@ void editor_print(struct editor* e) {
 			char c = l->chars[i];
 			if (needsCursor && e->curchar == i) {
 				char s[2] = {c, '\0'};
-				print_format("7m", (char*) &s);
+				print_format(FORMAT_REVERSE, (char*) &s);
 				needsCursor = 0;
 				curchar = i;
 			} else {
@@ -41,7 +46,7 @@ void editor_print(struct editor* e) {
 		}
 
 		if (needsCursor) {
-			print_format("7m", " ");
+			print_format(FORMAT_REVERSE, " ");
 			curchar = l->len;
 		}
 		printf("\n");
@@ -51,7 +56,7 @@ void editor_print(struct editor* e) {
 
 	char s[128];
 	snprintf((char*) &s, sizeof(s), "%d:%d", curline+1, curchar+1);
-	print_format("2m", (char*) &s);
+	print_format(FORMAT_DIM, (char*) &s);
 }
 
 int main() {
