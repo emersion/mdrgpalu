@@ -108,11 +108,6 @@ void editor_move_line(struct editor* e, int delta) {
 		return;
 	}
 
-	int step = 1;
-	if (delta < 0) {
-		step = -1;
-	}
-
 	struct line* l = e->curline;
 	while (delta != 0) {
 		if (delta > 0) {
