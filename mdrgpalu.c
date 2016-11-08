@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#ifdef __linux__
+#ifdef __unix__
 	#include <termios.h>
 #endif
 #ifdef _WIN32
@@ -75,7 +75,7 @@ int main() {
 	editor_set_curline(e, 0);
 	editor_set_curchar(e, 0);
 
-	#ifdef __linux__
+	#ifdef __unix__
 		struct termios t;
 		tcgetattr(0, &t);
 		t.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN);
