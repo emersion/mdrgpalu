@@ -1,22 +1,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "line.c"
+//#include "line.c"
+#include "selection.c"
 
 struct buffer {
 	struct line* first;
 	struct line* last;
 
-	struct line* curline;
-	int curchar;
+	struct selection* sel;
 };
 
 struct buffer* buffer_new() {
 	struct buffer* e = malloc(sizeof(struct buffer));
-	e->first = NULL;
-	e->last = NULL;
-	e->curline = NULL;
-	e->curchar = 0;
+	struct line* l = line_new();
+	e->first = l;
+	e->last = l;
+	e->sel = selection_new();
+	e->sel->line = l;
 	return e;
 }
 
@@ -27,53 +28,54 @@ void buffer_free(struct buffer* e) {
 		line_free(l);
 		l = next;
 	}
-
+	selection_free(e->sel);
 	free(e);
 }
 
 void buffer_insert_line(struct buffer* e) {
 	struct line* l = line_new();
+	struct line* curline = e->sel->line;
 
-	l->prev = e->curline;
-	if (e->curline != NULL) {
-		if (e->curline->next != NULL) {
-			e->curline->next->prev = l;
+	l->prev = curline;
+	if (curline != NULL) {
+		if (curline->next != NULL) {
+			curline->next->prev = l;
 		}
-		l->next = e->curline->next;
-		e->curline->next = l;
+		l->next = curline->next;
+		curline->next = l;
 
 		// Split text between two lines
-		if (e->curchar == 0) {
-			l->len = e->curline->len;
-			l->cap = e->curline->cap;
-			l->chars = e->curline->chars;
-			e->curline->len = 0;
-			e->curline->cap = 0;
-			e->curline->chars = NULL;
+		if (e->sel->ch == 0) {
+			l->len = curline->len;
+			l->cap = curline->cap;
+			l->chars = curline->chars;
+			curline->len = 0;
+			curline->cap = 0;
+			curline->chars = NULL;
 		} else {
-			l->len = e->curline->len - e->curchar;
+			l->len = curline->len - e->sel->ch;
 			l->chars = (char*) malloc(l->len);
-			memcpy(l->chars, &e->curline->chars[e->curchar], l->len);
-			e->curline->len = e->curchar;
+			memcpy(l->chars, &curline->chars[e->sel->ch], l->len);
+			curline->len = e->sel->ch;
 		}
 	}
 
 	if (e->first == NULL) {
 		e->first = l;
 	}
-	if (e->last == NULL || e->last == e->curline) {
+	if (e->last == NULL || e->last == curline) {
 		e->last = l;
 	}
-	e->curline = l;
-	e->curchar = 0;
+	e->sel->line = l;
+	e->sel->ch = 0;
 }
 
 void buffer_remove_line(struct buffer* e) {
-	if (e->curline == NULL || e->curline->prev == NULL) {
+	if (e->sel->line == NULL || e->sel->line->prev == NULL) {
 		return;
 	}
 
-	struct line* l = e->curline;
+	struct line* l = e->sel->line;
 
 	// Copy the end of the current line to the end of the previous one
 	int len = l->prev->len + l->len;
@@ -84,7 +86,7 @@ void buffer_remove_line(struct buffer* e) {
 		}
 		memcpy(&l->prev->chars[l->prev->len], l->chars, l->len);
 	}
-	e->curchar = l->prev->len;
+	e->sel->ch = l->prev->len;
 	l->prev->len = len;
 
 	l->prev->next = l->next;
@@ -97,25 +99,22 @@ void buffer_remove_line(struct buffer* e) {
 	if (e->last == l) {
 		e->last = l->prev;
 	}
-	e->curline = l->prev;
+	e->sel->line = l->prev;
 
 	line_free(l);
 }
 
 int buffer_remove_char(struct buffer* e) {
-	if (e->curline == NULL) {
-		return -1;
-	}
-	if (e->curline->len == 0 || e->curchar == 0) {
+	if (e->sel->ch == 0) {
 		buffer_remove_line(e);
 		return '\n';
 	}
 
-	int c = line_remove_at(e->curline, e->curchar-1);
+	int c = line_remove_at(e->sel->line, e->sel->ch-1);
 
-	e->curchar--;
-	if (e->curchar > e->curline->len) {
-		e->curchar = e->curline->len;
+	e->sel->ch--;
+	if (e->sel->ch > e->sel->line->len) {
+		e->sel->ch = e->sel->line->len;
 	}
 
 	return c;
@@ -135,18 +134,15 @@ void buffer_insert_char(struct buffer* e, char c) {
 		return;
 	}
 
-	if (e->curline == NULL) {
-		buffer_insert_line(e);
-	}
-	line_insert_at(e->curline, e->curchar, c);
+	line_insert_at(e->sel->line, e->sel->ch, c);
 
-	e->curchar++;
-	if (e->curchar > e->curline->len) {
-		e->curchar = e->curline->len;
+	e->sel->ch++;
+	if (e->sel->ch > e->sel->line->len) {
+		e->sel->ch = e->sel->line->len;
 	}
 }
 
-void buffer_set_curline(struct buffer* e, int i) {
+void buffer_set_selection_line(struct buffer* e, int i) {
 	if (i < 0) {
 		return;
 	}
@@ -159,15 +155,15 @@ void buffer_set_curline(struct buffer* e, int i) {
 		l = l->next;
 		i--;
 	}
-	e->curline = l;
+	e->sel->line = l;
 }
 
-void buffer_move_curline(struct buffer* e, int delta) {
+void buffer_move_selection_line(struct buffer* e, int delta) {
 	if (delta == 0) {
 		return;
 	}
 
-	struct line* l = e->curline;
+	struct line* l = e->sel->line;
 	while (delta != 0) {
 		if (delta > 0) {
 			if (l->next == NULL) {
@@ -183,23 +179,19 @@ void buffer_move_curline(struct buffer* e, int delta) {
 			l = l->prev;
 		}
 	}
-	e->curline = l;
+	e->sel->line = l;
 }
 
-void buffer_set_curchar(struct buffer* e, int i) {
-	if (e->curline == NULL) {
-		return;
-	}
-
+void buffer_set_selection_char(struct buffer* e, int i) {
 	if (i < 0) {
 		i = 0;
 	}
-	if (i > e->curline->len) {
-		i = e->curline->len;
+	if (i > e->sel->line->len) {
+		i = e->sel->line->len;
 	}
-	e->curchar = i;
+	e->sel->ch = i;
 }
 
-void buffer_move_curchar(struct buffer* e, int delta) {
-	buffer_set_curchar(e, e->curchar + delta);
+void buffer_move_selection_char(struct buffer* e, int delta) {
+	buffer_set_selection_char(e, e->sel->ch + delta);
 }

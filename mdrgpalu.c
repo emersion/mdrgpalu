@@ -30,28 +30,38 @@ void buffer_print(struct buffer* e) {
 
 	int i = 0;
 	int curline = 0, curchar = 0;
+	int selch = -1, sellen = -1;
 	for (struct line* l = e->first; l != NULL; l = l->next) {
-		int needsCursor = (e->curline == l);
-		if (needsCursor) {
+		if (e->sel->line == l) {
 			curline = i;
-		}
-
-		for (int j = 0; j < l->len; j++) {
-			char c = l->chars[j];
-			if (needsCursor && e->curchar == j) {
-				char s[2] = {c, '\0'};
-				print_format(FORMAT_REVERSE, (char*) &s);
-				needsCursor = 0;
-				curchar = j;
-			} else {
-				printf("%c", c);
+			selch = e->sel->ch;
+			sellen = e->sel->len;
+			if (selch > l->len) {
+				selch = l->len;
 			}
 		}
 
-		if (needsCursor) {
-			print_format(FORMAT_REVERSE, " ");
-			curchar = l->len;
+		char c;
+		for (int j = 0; j <= l->len; j++) {
+			if (j == l->len) {
+				c = ' ';
+			} else {
+				c = l->chars[j];
+			}
+			if (sellen >= 0 && j == selch) {
+				print_escape(FORMAT_REVERSE);
+				curchar = j;
+				selch = -1;
+			}
+			printf("%c", c);
+			if (selch == -1 && sellen >= 0) {
+				sellen--;
+				if (sellen < 0) {
+					print_escape(FORMAT_RESET);
+				}
+			}
 		}
+
 		printf("\n");
 
 		i++;
@@ -64,7 +74,6 @@ void buffer_print(struct buffer* e) {
 
 int main() {
 	struct buffer* e = buffer_new();
-	buffer_insert_line(e);
 	buffer_insert_char(e, 'c');
 	buffer_insert_char(e, 'c');
 	buffer_insert_line(e);
@@ -72,8 +81,8 @@ int main() {
 	buffer_insert_char(e, 'a');
 	buffer_insert_char(e, 'v');
 	buffer_insert_char(e, 'a');
-	buffer_set_curline(e, 0);
-	buffer_set_curchar(e, 0);
+	buffer_set_selection_line(e, 0);
+	buffer_set_selection_char(e, 0);
 
 	#ifdef __unix__
 		struct termios t;
@@ -102,16 +111,16 @@ int main() {
 
 			switch (c) {
 			case 65: // up
-				buffer_move_curline(e, -1);
+				buffer_move_selection_line(e, -1);
 				break;
 			case 66: // down
-				buffer_move_curline(e, 1);
+				buffer_move_selection_line(e, 1);
 				break;
 			case 67: // right
-				buffer_move_curchar(e, 1);
+				buffer_move_selection_char(e, 1);
 				break;
 			case 68: // left
-				buffer_move_curchar(e, -1);
+				buffer_move_selection_char(e, -1);
 				break;
 			}
 		} else if (prev == 27 && c == 91) {
