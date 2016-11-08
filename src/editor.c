@@ -19,6 +19,17 @@ struct editor* editor_new() {
 	return e;
 }
 
+void editor_free(struct editor* e) {
+	struct line* l = e->first;
+	while (l != NULL) {
+		struct line* next = l->next;
+		line_free(l);
+		l = next;
+	}
+
+	free(e);
+}
+
 void editor_insert_line(struct editor* e) {
 	struct line* l = line_new();
 
@@ -77,7 +88,7 @@ void editor_remove_line(struct editor* e) {
 	}
 	e->curline = l->prev;
 
-	free(l);
+	line_free(l);
 }
 
 int editor_remove_char(struct editor* e) {

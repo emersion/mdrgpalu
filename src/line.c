@@ -20,6 +20,11 @@ struct line* line_new() {
 	return l;
 }
 
+void line_free(struct line* l) {
+	free(l->chars);
+	free(l);
+}
+
 void line_insert_at(struct line* l, int i, char c) {
 	if (i > l->len) {
 		i = l->len;
