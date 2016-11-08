@@ -24,6 +24,9 @@ void editor_insert_line(struct editor* e) {
 
 	l->prev = e->curline;
 	if (e->curline != NULL) {
+		if (e->curline->next != NULL) {
+			e->curline->next->prev = l;
+		}
 		l->next = e->curline->next;
 		e->curline->next = l;
 
@@ -145,19 +148,17 @@ void editor_move_curline(struct editor* e, int delta) {
 	struct line* l = e->curline;
 	while (delta != 0) {
 		if (delta > 0) {
-			if (l->next != NULL) {
-				delta--;
-				l = l->next;
-			} else {
+			if (l->next == NULL) {
 				break;
 			}
+			delta--;
+			l = l->next;
 		} else {
-			if (l->prev != NULL) {
-				delta++;
-				l = l->prev;
-			} else {
+			if (l->prev == NULL) {
 				break;
 			}
+			delta++;
+			l = l->prev;
 		}
 	}
 	e->curline = l;
