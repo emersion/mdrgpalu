@@ -1,7 +1,3 @@
-#include <stdlib.h>
-
-#include "line.c"
-
 struct selection {
 	struct line* line;
 	int ch;

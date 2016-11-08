@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS = -std=gnu11 -O2 
+CFLAGS = -std=gnu11 -O2
 DBGFLAGS = -W -Wall -Werror -Wextra -pedantic -pedantic-errors -ggdb3 -std=gnu11
 
 all:

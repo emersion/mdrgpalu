@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
-
 struct line {
 	struct line* prev;
 	struct line* next;
