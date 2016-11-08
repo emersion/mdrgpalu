@@ -2,8 +2,8 @@
 #include <string.h>
 
 struct line {
-	struct line* next;
 	struct line* prev;
+	struct line* next;
 
 	char* chars;
 	int len;
@@ -12,6 +12,8 @@ struct line {
 
 struct line* line_new() {
 	struct line* l = (struct line*) malloc(sizeof(struct line));
+	l->prev = NULL;
+	l->next = NULL;
 	l->chars = NULL;
 	l->len = 0;
 	l->cap = 0;
