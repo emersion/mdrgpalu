@@ -2,46 +2,40 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __unix__
-	#include <sys/termios.h>
-#endif
-#ifdef _WIN32
-	#include <windows.h>
-#endif
-
 #include "line.c"
 #include "selection.c"
 #include "buffer.c"
 
-#define FORMAT_CLEAR   "2J"
-#define FORMAT_RESET   "0m"
-#define FORMAT_DIM     "2m"
-#define FORMAT_REVERSE "7m"
+#ifdef __unix__
+	#include <sys/termios.h>
+	#include "unix/term.c"
+#elif _WIN32
+	#include <windows.h>
+	#include "windows/term.c"
+#endif
 
-void print_escape(char* seq) {
-	printf("\033[%s", seq);
-}
+#include "unix/format.c"
+#include "unix/sequence.c"
 
-void print_format(char* seq, char* text) {
-	print_escape(seq);
-	printf(text);
-	print_escape(FORMAT_RESET);
-}
+#define ESC '\033'
 
-void buffer_print(struct buffer* e) {
+void buffer_print(struct buffer* b) {
 	printf("\n");
 	print_escape(FORMAT_CLEAR); // clear
 
 	int i = 0;
 	int curline = 0, curchar = 0;
 	int selch = -1, sellen = -1;
-	for (struct line* l = e->first; l != NULL; l = l->next) {
-		if (e->sel->line == l) {
+	for (struct line* l = b->first; l != NULL; l = l->next) {
+		if (b->sel->line == l) {
 			curline = i;
-			selch = e->sel->ch;
-			sellen = e->sel->len;
+			selch = b->sel->ch;
 			if (selch > l->len) {
 				selch = l->len;
+			}
+			sellen = b->sel->len;
+			if (sellen == 0) {
+				sellen = 1;
 			}
 		}
 
@@ -60,82 +54,99 @@ void buffer_print(struct buffer* e) {
 				continue;
 			}
 			printf("%c", c);
-			if (selch == -1 && sellen >= 0) {
+			if (selch == -1 && sellen > 0) {
 				sellen--;
-				if (sellen < 0) {
+				if (sellen <= 0) {
 					print_escape(FORMAT_RESET);
 				}
 			}
 		}
 
 		printf("\n");
-
 		i++;
 	}
 
 	char s[128];
-	snprintf((char*) &s, sizeof(s), "%d:%d", curline+1, curchar+1);
+	int n = sizeof(s);
+	n -= snprintf((char*) &s, n, "%d:%d", curline+1, curchar+1);
+	if (b->sel->len > 0 && n > 0) {
+		n -= snprintf((char*) &s[n], n, " (%d)", b->sel->len);
+	}
 	print_format(FORMAT_DIM, (char*) &s);
 }
 
 int main() {
-	struct buffer* e = buffer_new();
-	buffer_insert_char(e, 'c');
-	buffer_insert_char(e, 'c');
-	buffer_insert_line(e);
-	buffer_insert_char(e, 's');
-	buffer_insert_char(e, 'a');
-	buffer_insert_char(e, 'v');
-	buffer_insert_char(e, 'a');
-	buffer_set_selection_line(e, 0);
-	buffer_set_selection_char(e, 0);
+	struct buffer* b = buffer_new();
+	buffer_insert_char(b, 'c');
+	buffer_insert_char(b, 'c');
+	buffer_insert_line(b);
+	buffer_insert_char(b, 's');
+	buffer_insert_char(b, 'a');
+	buffer_insert_char(b, 'v');
+	buffer_insert_char(b, 'a');
+	buffer_set_selection(b, 0, 0, 0);
 
-	#ifdef __unix__
-		struct termios t;
-		tcgetattr(0, &t);
-		t.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN);
-		tcsetattr(0, TCSANOW, &t);
-	#endif
-	#ifdef _WIN32
-		HANDLE stdinh = GetStdHandle(STD_INPUT_HANDLE);
-		SetConsoleMode(stdinh, ENABLE_PROCESSED_INPUT);
-	#endif
-
-	buffer_print(e);
+	setup_term();
+	buffer_print(b);
 
 	int c;
 	int prev = -1;
-	int escseq = 0;
 	while (1) {
 		c = getchar();
 		if (c < 0) {
 			break;
 		}
 
-		if (escseq) {
-			escseq = 0;
+		if (prev == ESC && c == '[') {
+			struct sequence* s = sequence_parse();
+			if (s == NULL) {
+				printf("Cannot parse escape sequence\n");
+				continue;
+			}
 
-			switch (c) {
-			case 65: // up
-				buffer_move_selection_line(e, -1);
-				break;
-			case 66: // down
-				buffer_move_selection_line(e, 1);
-				break;
-			case 67: // right
-				buffer_move_selection_char(e, 1);
-				break;
-			case 68: // left
-				buffer_move_selection_char(e, -1);
+			switch (s->code) {
+			case CODE_CUU:
+			case CODE_CUD:
+			case CODE_CUF:
+			case CODE_CUB:;
+				int delta = s->params[0];
+				if (delta == 0) {
+					delta = 1;
+				}
+				int modifiers = s->params[1];
+
+				int i = 0, j = 0;
+				switch (s->code) {
+				case CODE_CUU:
+					i = -delta;
+					break;
+				case CODE_CUD:
+					i = delta;
+					break;
+				case CODE_CUF:
+					j = delta;
+					break;
+				case CODE_CUB:
+					j = -delta;
+					break;
+				}
+				if (modifiers & MODIFIER_SHIFT) {
+					buffer_extend_selection(b, i, j);
+				} else {
+					buffer_move_selection(b, i, j);
+				}
 				break;
 			}
-		} else if (prev == 27 && c == 91) {
-			escseq = 1; // Entering escape sequence
+
+			sequence_free(s);
+		} else if (c == ESC) {
+			prev = c;
+			continue;
 		} else {
-			buffer_insert_char(e, (char) c);
+			buffer_insert_char(b, (char) c);
 		}
 
-		buffer_print(e);
+		buffer_print(b);
 
 		prev = c;
 	}
