@@ -7,7 +7,7 @@
 	#include <windows.h>
 #endif
 
-#include "src/buffer.c"
+#include "buffer.c"
 
 #define ESC '\033'
 
