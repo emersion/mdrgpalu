@@ -52,6 +52,8 @@ void buffer_print(struct buffer* e) {
 				print_escape(FORMAT_REVERSE);
 				curchar = j;
 				selch = -1;
+			} else if (j == l->len) {
+				continue;
 			}
 			printf("%c", c);
 			if (selch == -1 && sellen >= 0) {
