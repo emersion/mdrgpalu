@@ -3,6 +3,9 @@
 #ifdef __linux__
 	#include <termios.h>
 #endif
+#ifdef _WIN32
+	#include <windows.h>
+#endif
 
 #include "src/editor.c"
 
@@ -77,6 +80,10 @@ int main() {
 		tcgetattr(0, &t);
 		t.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN);
 		tcsetattr(0, TCSANOW, &t);
+	#endif
+	#ifdef _WIN32
+		HANDLE stdin = GetStdHandle(STD_INPUT_HANDLE);
+		SetConsoleMode(stdin, ENABLE_PROCESSED_INPUT);
 	#endif
 
 	editor_print(e);
