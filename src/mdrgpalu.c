@@ -2,33 +2,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __unix__
-	#include <sys/termios.h>
-#endif
-#ifdef _WIN32
-	#include <windows.h>
-#endif
-
 #include "line.c"
 #include "selection.c"
 #include "buffer.c"
 
+#ifdef __unix__
+	#include <sys/termios.h>
+	#include "unix/term.c"
+#elif _WIN32
+	#include <windows.h>
+	#include "windows/term.c"
+#endif
+
+#include "unix/format.c"
+#include "unix/sequence.c"
+
 #define ESC '\033'
-
-#define FORMAT_CLEAR   "2J"
-#define FORMAT_RESET   "0m"
-#define FORMAT_DIM     "2m"
-#define FORMAT_REVERSE "7m"
-
-void print_escape(char* seq) {
-	printf("\033[%s", seq);
-}
-
-void print_format(char* seq, char* text) {
-	print_escape(seq);
-	printf(text);
-	print_escape(FORMAT_RESET);
-}
 
 void buffer_print(struct buffer* e) {
 	printf("\n");
@@ -71,7 +60,6 @@ void buffer_print(struct buffer* e) {
 		}
 
 		printf("\n");
-
 		i++;
 	}
 
@@ -81,82 +69,77 @@ void buffer_print(struct buffer* e) {
 }
 
 int main() {
-	struct buffer* e = buffer_new();
-	buffer_insert_char(e, 'c');
-	buffer_insert_char(e, 'c');
-	buffer_insert_line(e);
-	buffer_insert_char(e, 's');
-	buffer_insert_char(e, 'a');
-	buffer_insert_char(e, 'v');
-	buffer_insert_char(e, 'a');
-	buffer_set_selection_line(e, 0);
-	buffer_set_selection_char(e, 0);
+	struct buffer* b = buffer_new();
+	buffer_insert_char(b, 'c');
+	buffer_insert_char(b, 'c');
+	buffer_insert_line(b);
+	buffer_insert_char(b, 's');
+	buffer_insert_char(b, 'a');
+	buffer_insert_char(b, 'v');
+	buffer_insert_char(b, 'a');
+	buffer_set_selection(b, 0, 0, 0);
 
-	#ifdef __unix__
-		struct termios t;
-		tcgetattr(0, &t);
-		t.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN);
-		tcsetattr(0, TCSANOW, &t);
-	#endif
-	#ifdef _WIN32
-		HANDLE stdinh = GetStdHandle(STD_INPUT_HANDLE);
-		SetConsoleMode(stdinh, ENABLE_PROCESSED_INPUT);
-	#endif
-
-	buffer_print(e);
+	setup_term();
+	buffer_print(b);
 
 	int c;
 	int prev = -1;
-	int csi = 0;
 	while (1) {
 		c = getchar();
 		if (c < 0) {
 			break;
 		}
 
-		if (csi) {
-			csi = 0;
-			int handled = 1;
-			switch (c) {
-			case 'A': // up
-				buffer_move_selection_line(e, -1);
-				break;
-			case 'B': // down
-				buffer_move_selection_line(e, 1);
-				break;
-			case 'C': // forward
-				buffer_move_selection_char(e, 1);
-				break;
-			case 'D': // back
-				buffer_move_selection_char(e, -1);
-				break;
-			case 'E': // next line
-				break;
-			case 'F': // previous line
-				break;
-			case 'G': // column horizontal absolute
-				break;
-			case 'H': // cursor position
-				break;
-			default:
-				printf("Unhandled escape sequence: %d\n", c);
-				handled = 0;
-			}
-			if (!handled) {
+		if (prev == ESC && c == '[') {
+			struct sequence* s = sequence_parse();
+			if (s == NULL) {
+				printf("Cannot parse escape sequence\n");
 				continue;
 			}
-		} else if (prev == ESC && c == '[') {
-			csi = 1; // Entering escape sequence
-			continue;
+
+			switch (s->code) {
+			case CODE_CUU:
+			case CODE_CUD:
+			case CODE_CUF:
+			case CODE_CUB:;
+				int delta = s->params[0];
+				if (delta == 0) {
+					delta = 1;
+				}
+				int modifiers = s->params[1];
+
+				int i = 0, j = 0;
+				switch (s->code) {
+				case CODE_CUU:
+					i = -delta;
+					break;
+				case CODE_CUD:
+					i = delta;
+					break;
+				case CODE_CUF:
+					j = delta;
+					break;
+				case CODE_CUB:
+					j = -delta;
+					break;
+				}
+				if (modifiers & MODIFIER_SHIFT) {
+					buffer_extend_selection(b, i, j);
+				} else {
+					buffer_move_selection(b, i, j);
+				}
+				break;
+			}
+
+			sequence_free(s);
 		} else if (c == ESC) {
 			prev = c;
 			continue;
 		} else {
-			buffer_insert_char(e, (char) c);
+			buffer_insert_char(b, (char) c);
 		}
 
-		buffer_print(e);
-		printf(" %d", c);
+		buffer_print(b);
 
 		prev = c;
 	}
