@@ -195,12 +195,40 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 	}
 
 	if (j != 0) {
-		// TODO: backward
-		// TODO: bounds check
-		int at = b->sel->len + j;
-		if (at < 0) {
-			at = 0;
+		int len = b->sel->len;
+
+		if (j < 0) {
+			// Move the start of the selection
+			len -= j;
+
+			int at = b->sel->ch + j;
+			struct line* l = b->sel->line;
+			while (at < 0 && l != NULL) {
+				at += l->len;
+				l = l->prev;
+			}
+			if (at < 0) {
+				at = 0;
+			}
+			b->sel->line = l;
+			b->sel->ch = at;
+		} else {
+			len += j;
 		}
-		b->sel->len = at;
+
+		// Check that selection is not beyond the end of the buffer
+		int end = b->sel->ch + len;
+		if (end > b->sel->line->len) {
+			struct line* l = b->sel->line;
+			while (l != NULL && end - l->len >= 0) {
+				end -= l->len;
+				l = l->next;
+			}
+			if (end > 0) {
+				len -= end;
+			}
+		}
+
+		b->sel->len = len;
 	}
 }

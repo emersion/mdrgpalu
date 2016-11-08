@@ -30,9 +30,12 @@ void buffer_print(struct buffer* b) {
 		if (b->sel->line == l) {
 			curline = i;
 			selch = b->sel->ch;
-			sellen = b->sel->len;
 			if (selch > l->len) {
 				selch = l->len;
+			}
+			sellen = b->sel->len;
+			if (sellen == 0) {
+				sellen = 1;
 			}
 		}
 
@@ -51,9 +54,9 @@ void buffer_print(struct buffer* b) {
 				continue;
 			}
 			printf("%c", c);
-			if (selch == -1 && sellen >= 0) {
+			if (selch == -1 && sellen > 0) {
 				sellen--;
-				if (sellen < 0) {
+				if (sellen <= 0) {
 					print_escape(FORMAT_RESET);
 				}
 			}
@@ -64,7 +67,11 @@ void buffer_print(struct buffer* b) {
 	}
 
 	char s[128];
-	snprintf((char*) &s, sizeof(s), "%d:%d (%d)", curline+1, curchar+1, b->sel->len);
+	int n = sizeof(s);
+	n -= snprintf((char*) &s, n, "%d:%d", curline+1, curchar+1);
+	if (b->sel->len > 0 && n > 0) {
+		n -= snprintf((char*) &s[n], n, " (%d)", b->sel->len);
+	}
 	print_format(FORMAT_DIM, (char*) &s);
 }
 
