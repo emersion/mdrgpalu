@@ -9,6 +9,8 @@
 
 #include "src/buffer.c"
 
+#define ESC '\033'
+
 #define FORMAT_CLEAR   "2J"
 #define FORMAT_RESET   "0m"
 #define FORMAT_DIM     "2m"
@@ -101,37 +103,56 @@ int main() {
 
 	int c;
 	int prev = -1;
-	int escseq = 0;
+	int csi = 0;
 	while (1) {
 		c = getchar();
 		if (c < 0) {
 			break;
 		}
 
-		if (escseq) {
-			escseq = 0;
-
+		if (csi) {
+			csi = 0;
+			int handled = 1;
 			switch (c) {
-			case 65: // up
+			case 'A': // up
 				buffer_move_selection_line(e, -1);
 				break;
-			case 66: // down
+			case 'B': // down
 				buffer_move_selection_line(e, 1);
 				break;
-			case 67: // right
+			case 'C': // forward
 				buffer_move_selection_char(e, 1);
 				break;
-			case 68: // left
+			case 'D': // back
 				buffer_move_selection_char(e, -1);
 				break;
+			case 'E': // next line
+				break;
+			case 'F': // previous line
+				break;
+			case 'G': // column horizontal absolute
+				break;
+			case 'H': // cursor position
+				break;
+			default:
+				printf("Unhandled escape sequence: %d\n", c);
+				handled = 0;
 			}
-		} else if (prev == 27 && c == 91) {
-			escseq = 1; // Entering escape sequence
+			if (!handled) {
+				continue;
+			}
+		} else if (prev == ESC && c == '[') {
+			csi = 1; // Entering escape sequence
+			continue;
+		} else if (c == ESC) {
+			prev = c;
+			continue;
 		} else {
 			buffer_insert_char(e, (char) c);
 		}
 
 		buffer_print(e);
+		printf(" %d", c);
 
 		prev = c;
 	}
