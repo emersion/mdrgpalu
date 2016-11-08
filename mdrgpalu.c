@@ -7,7 +7,7 @@
 	#include <windows.h>
 #endif
 
-#include "src/editor.c"
+#include "src/buffer.c"
 
 #define FORMAT_CLEAR   "2J"
 #define FORMAT_RESET   "0m"
@@ -24,7 +24,7 @@ void print_format(char* seq, char* text) {
 	print_escape(FORMAT_RESET);
 }
 
-void editor_print(struct editor* e) {
+void buffer_print(struct buffer* e) {
 	printf("\n");
 	print_escape(FORMAT_CLEAR); // clear
 
@@ -63,17 +63,17 @@ void editor_print(struct editor* e) {
 }
 
 int main() {
-	struct editor* e = editor_new();
-	editor_insert_line(e);
-	editor_insert_char(e, 'c');
-	editor_insert_char(e, 'c');
-	editor_insert_line(e);
-	editor_insert_char(e, 's');
-	editor_insert_char(e, 'a');
-	editor_insert_char(e, 'v');
-	editor_insert_char(e, 'a');
-	editor_set_curline(e, 0);
-	editor_set_curchar(e, 0);
+	struct buffer* e = buffer_new();
+	buffer_insert_line(e);
+	buffer_insert_char(e, 'c');
+	buffer_insert_char(e, 'c');
+	buffer_insert_line(e);
+	buffer_insert_char(e, 's');
+	buffer_insert_char(e, 'a');
+	buffer_insert_char(e, 'v');
+	buffer_insert_char(e, 'a');
+	buffer_set_curline(e, 0);
+	buffer_set_curchar(e, 0);
 
 	#ifdef __unix__
 		struct termios t;
@@ -86,7 +86,7 @@ int main() {
 		SetConsoleMode(stdinh, ENABLE_PROCESSED_INPUT);
 	#endif
 
-	editor_print(e);
+	buffer_print(e);
 
 	int c;
 	int prev = -1;
@@ -102,25 +102,25 @@ int main() {
 
 			switch (c) {
 			case 65: // up
-				editor_move_curline(e, -1);
+				buffer_move_curline(e, -1);
 				break;
 			case 66: // down
-				editor_move_curline(e, 1);
+				buffer_move_curline(e, 1);
 				break;
 			case 67: // right
-				editor_move_curchar(e, 1);
+				buffer_move_curchar(e, 1);
 				break;
 			case 68: // left
-				editor_move_curchar(e, -1);
+				buffer_move_curchar(e, -1);
 				break;
 			}
 		} else if (prev == 27 && c == 91) {
 			escseq = 1; // Entering escape sequence
 		} else {
-			editor_insert_char(e, (char) c);
+			buffer_insert_char(e, (char) c);
 		}
 
-		editor_print(e);
+		buffer_print(e);
 
 		prev = c;
 	}

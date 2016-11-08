@@ -3,7 +3,7 @@
 
 #include "line.c"
 
-struct editor {
+struct buffer {
 	struct line* first;
 	struct line* last;
 
@@ -11,8 +11,8 @@ struct editor {
 	int curchar;
 };
 
-struct editor* editor_new() {
-	struct editor* e = malloc(sizeof(struct editor));
+struct buffer* buffer_new() {
+	struct buffer* e = malloc(sizeof(struct buffer));
 	e->first = NULL;
 	e->last = NULL;
 	e->curline = NULL;
@@ -20,7 +20,7 @@ struct editor* editor_new() {
 	return e;
 }
 
-void editor_free(struct editor* e) {
+void buffer_free(struct buffer* e) {
 	struct line* l = e->first;
 	while (l != NULL) {
 		struct line* next = l->next;
@@ -31,7 +31,7 @@ void editor_free(struct editor* e) {
 	free(e);
 }
 
-void editor_insert_line(struct editor* e) {
+void buffer_insert_line(struct buffer* e) {
 	struct line* l = line_new();
 
 	l->prev = e->curline;
@@ -68,7 +68,7 @@ void editor_insert_line(struct editor* e) {
 	e->curchar = 0;
 }
 
-void editor_remove_line(struct editor* e) {
+void buffer_remove_line(struct buffer* e) {
 	if (e->curline == NULL || e->curline->prev == NULL) {
 		return;
 	}
@@ -102,12 +102,12 @@ void editor_remove_line(struct editor* e) {
 	line_free(l);
 }
 
-int editor_remove_char(struct editor* e) {
+int buffer_remove_char(struct buffer* e) {
 	if (e->curline == NULL) {
 		return -1;
 	}
 	if (e->curline->len == 0 || e->curchar == 0) {
-		editor_remove_line(e);
+		buffer_remove_line(e);
 		return '\n';
 	}
 
@@ -121,14 +121,14 @@ int editor_remove_char(struct editor* e) {
 	return c;
 }
 
-void editor_insert_char(struct editor* e, char c) {
+void buffer_insert_char(struct buffer* e, char c) {
 	// Handle control chars
 	switch (c) {
 	case '\n':
-		editor_insert_line(e);
+		buffer_insert_line(e);
 		return;
 	case 127: // backspace
-		editor_remove_char(e);
+		buffer_remove_char(e);
 		return;
 	}
 	if (c < 32) {
@@ -136,7 +136,7 @@ void editor_insert_char(struct editor* e, char c) {
 	}
 
 	if (e->curline == NULL) {
-		editor_insert_line(e);
+		buffer_insert_line(e);
 	}
 	line_insert_at(e->curline, e->curchar, c);
 
@@ -146,7 +146,7 @@ void editor_insert_char(struct editor* e, char c) {
 	}
 }
 
-void editor_set_curline(struct editor* e, int i) {
+void buffer_set_curline(struct buffer* e, int i) {
 	if (i < 0) {
 		return;
 	}
@@ -162,7 +162,7 @@ void editor_set_curline(struct editor* e, int i) {
 	e->curline = l;
 }
 
-void editor_move_curline(struct editor* e, int delta) {
+void buffer_move_curline(struct buffer* e, int delta) {
 	if (delta == 0) {
 		return;
 	}
@@ -186,7 +186,7 @@ void editor_move_curline(struct editor* e, int delta) {
 	e->curline = l;
 }
 
-void editor_set_curchar(struct editor* e, int i) {
+void buffer_set_curchar(struct buffer* e, int i) {
 	if (e->curline == NULL) {
 		return;
 	}
@@ -200,6 +200,6 @@ void editor_set_curchar(struct editor* e, int i) {
 	e->curchar = i;
 }
 
-void editor_move_curchar(struct editor* e, int delta) {
-	editor_set_curchar(e, e->curchar + delta);
+void buffer_move_curchar(struct buffer* e, int delta) {
+	buffer_set_curchar(e, e->curchar + delta);
 }
