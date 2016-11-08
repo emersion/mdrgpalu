@@ -82,8 +82,8 @@ int main() {
 		tcsetattr(0, TCSANOW, &t);
 	#endif
 	#ifdef _WIN32
-		HANDLE stdin = GetStdHandle(STD_INPUT_HANDLE);
-		SetConsoleMode(stdin, ENABLE_PROCESSED_INPUT);
+		HANDLE stdinh = GetStdHandle(STD_INPUT_HANDLE);
+		SetConsoleMode(stdinh, ENABLE_PROCESSED_INPUT);
 	#endif
 
 	editor_print(e);
