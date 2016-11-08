@@ -1,9 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
-
-//#include "line.c"
-#include "selection.c"
-
 struct buffer {
 	struct line* first;
 	struct line* last;

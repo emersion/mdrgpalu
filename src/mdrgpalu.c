@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef __unix__
 	#include <sys/termios.h>
@@ -7,6 +9,8 @@
 	#include <windows.h>
 #endif
 
+#include "line.c"
+#include "selection.c"
 #include "buffer.c"
 
 #define ESC '\033'
