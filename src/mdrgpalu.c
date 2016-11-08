@@ -19,18 +19,18 @@
 
 #define ESC '\033'
 
-void buffer_print(struct buffer* e) {
+void buffer_print(struct buffer* b) {
 	printf("\n");
 	print_escape(FORMAT_CLEAR); // clear
 
 	int i = 0;
 	int curline = 0, curchar = 0;
 	int selch = -1, sellen = -1;
-	for (struct line* l = e->first; l != NULL; l = l->next) {
-		if (e->sel->line == l) {
+	for (struct line* l = b->first; l != NULL; l = l->next) {
+		if (b->sel->line == l) {
 			curline = i;
-			selch = e->sel->ch;
-			sellen = e->sel->len;
+			selch = b->sel->ch;
+			sellen = b->sel->len;
 			if (selch > l->len) {
 				selch = l->len;
 			}
@@ -64,7 +64,7 @@ void buffer_print(struct buffer* e) {
 	}
 
 	char s[128];
-	snprintf((char*) &s, sizeof(s), "%d:%d", curline+1, curchar+1);
+	snprintf((char*) &s, sizeof(s), "%d:%d (%d)", curline+1, curchar+1, b->sel->len);
 	print_format(FORMAT_DIM, (char*) &s);
 }
 

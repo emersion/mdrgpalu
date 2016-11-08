@@ -197,6 +197,10 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 	if (j != 0) {
 		// TODO: backward
 		// TODO: bounds check
-		b->sel->len += j;
+		int at = b->sel->len + j;
+		if (at < 0) {
+			at = 0;
+		}
+		b->sel->len = at;
 	}
 }

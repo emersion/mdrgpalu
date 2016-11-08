@@ -1,4 +1,4 @@
-// See https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
+// See http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 #define CODE_CUU 'A'
 #define CODE_CUD 'B'
 #define CODE_CUF 'C'
