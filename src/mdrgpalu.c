@@ -7,7 +7,7 @@
 	#include <windows.h>
 #endif
 
-#include "src/buffer.c"
+#include "buffer.c"
 
 #define FORMAT_CLEAR   "2J"
 #define FORMAT_RESET   "0m"
