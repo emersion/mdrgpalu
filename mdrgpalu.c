@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #ifdef __unix__
-	#include <termios.h>
+	#include <sys/termios.h>
 #endif
 #ifdef _WIN32
 	#include <windows.h>
