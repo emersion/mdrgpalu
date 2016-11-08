@@ -1,4 +1,12 @@
+CC ?= gcc
+CFLAGS = -std=gnu11 -O2 
+DBGFLAGS = -W -Wall -Werror -Wextra -pedantic -pedantic-errors -ggdb3 -std=gnu11
+
 all:
-	$(GCC_PREFIX)gcc -W -Wall -Werror -Wextra -pedantic -pedantic-errors -std=gnu11 -o mdrgpalu -ggdb mdrgpalu.c
+	$(CC) $(CFLAGS) -o mdrgpalu src/mdrgpalu.c
+debug:
+	$(CC) $(DBGFLAGS) -o mdrgpalu src/mdrgpalu.c
 clean:
-	rm -f mdrgpalu
+	rm -rf mdrgpalu src/*.o
+
+.PHONY: clean all debug
