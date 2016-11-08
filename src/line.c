@@ -40,7 +40,7 @@ void line_insert_at(struct line* l, int i, char c) {
 		}
 		l->cap += more;
 
-		l->chars = realloc(l->chars, l->cap);
+		l->chars = (char*) realloc(l->chars, l->cap);
 	}
 
 	if (i < l->len) {

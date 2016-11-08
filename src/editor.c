@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "line.c"
 
@@ -68,17 +69,27 @@ void editor_insert_line(struct editor* e) {
 }
 
 void editor_remove_line(struct editor* e) {
-	if (e->curline == NULL) {
+	if (e->curline == NULL || e->curline->prev == NULL) {
 		return;
 	}
 
 	struct line* l = e->curline;
-	if (l->prev != NULL && l->next != NULL) {
-		l->prev->next = l->next->prev;
-	} else if (l->prev != NULL) {
-		l->prev->next = NULL;
-	} else if (l->next != NULL) {
-		l->next->prev = NULL;
+
+	// Copy the end of the current line to the end of the previous one
+	int len = l->prev->len + l->len;
+	if (l->len > 0) {
+		if (l->prev->cap < len) {
+			l->prev->cap = len;
+			l->prev->chars = (char*) realloc(l->prev->chars, l->prev->cap);
+		}
+		memcpy(&l->prev->chars[l->prev->len], l->chars, l->len);
+	}
+	e->curchar = l->prev->len;
+	l->prev->len = len;
+
+	l->prev->next = l->next;
+	if (l->next != NULL) {
+		l->next->prev = l->prev;
 	}
 	if (e->first == l) {
 		e->first = l->next;
