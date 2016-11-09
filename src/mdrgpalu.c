@@ -67,10 +67,9 @@ void buffer_print(struct buffer* b) {
 	}
 
 	char s[128];
-	int n = sizeof(s);
-	n -= snprintf((char*) &s, n, "%d:%d", curline+1, curchar+1);
-	if (b->sel->len > 0 && n > 0) {
-		n -= snprintf((char*) &s[n], n, " (%d)", b->sel->len);
+	int n = snprintf((char*) &s, sizeof(s), "%d:%d", curline+1, curchar+1);
+	if (b->sel->len > 0 && (uint) n < sizeof(s)) {
+		n += snprintf((char*) &s[n], sizeof(s)-n, " (%d)", b->sel->len);
 	}
 	print_format(FORMAT_DIM, (char*) &s);
 }
