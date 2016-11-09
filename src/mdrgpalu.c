@@ -20,7 +20,22 @@
 
 #define ESC '\033'
 
-void buffer_print(struct buffer* b) {
+struct status {
+	int curline;
+	int curcol;
+	int sellen;
+};
+
+void status_print(struct status* s) {
+	char t[128];
+	int n = snprintf((char*) &t, sizeof(t), "%d:%d", s->curline+1, s->curcol+1);
+	if (s->sellen > 0 && (uint) n < sizeof(t)) {
+		n += snprintf((char*) &t[n], sizeof(t)-n, " (%d)", s->sellen);
+	}
+	print_format(FORMAT_DIM, (char*) &t);
+}
+
+void buffer_print(struct buffer* b, struct status* s) {
 	printf("\n");
 	print_escape(FORMAT_CLEAR); // clear
 
@@ -67,12 +82,11 @@ void buffer_print(struct buffer* b) {
 		i++;
 	}
 
-	char s[128];
-	int n = snprintf((char*) &s, sizeof(s), "%d:%d", curline+1, curchar+1);
-	if (b->sel->len > 0 && (uint) n < sizeof(s)) {
-		n += snprintf((char*) &s[n], sizeof(s)-n, " (%d)", b->sel->len);
+	if (s != NULL) {
+		s->curline = curline;
+		s->curcol = curchar;
+		s->sellen = b->sel->len;
 	}
-	print_format(FORMAT_DIM, (char*) &s);
 }
 
 int main(int argc, char** argv) {
@@ -103,10 +117,14 @@ int main(int argc, char** argv) {
 
 	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering
 	setup_term();
-	buffer_print(b);
+
+	struct status* s = (struct status*) malloc(sizeof(struct status));
+	buffer_print(b, s);
+	status_print(s);
 
 	int c;
 	int prev = -1;
+	char* statustext = NULL;
 	while (1) {
 		c = fgetc(stdin);
 		if (feof(stdin)) {
@@ -178,11 +196,20 @@ int main(int argc, char** argv) {
 					if (err) {
 						return err;
 					}
+					statustext = "File saved.";
 				}
 			}
 		}
 
-		buffer_print(b);
+		buffer_print(b, s);
+		if (statustext != NULL) {
+			print_format(FORMAT_DIM, statustext);
+			free(statustext);
+			statustext = NULL;
+		} else {
+			status_print(s);
+		}
+
 		prev = c;
 	}
 
