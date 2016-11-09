@@ -85,14 +85,15 @@ int main() {
 	buffer_insert_char(b, 'a');
 	buffer_set_selection(b, 0, 0, 0);
 
+	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering
 	setup_term();
 	buffer_print(b);
 
 	int c;
 	int prev = -1;
 	while (1) {
-		c = getchar();
-		if (c < 0) {
+		c = fgetc(stdin);
+		if (c == EOF) {
 			break;
 		}
 
@@ -141,12 +142,19 @@ int main() {
 		} else if (c == ESC) {
 			prev = c;
 			continue;
-		} else {
+		} else if (c > ' ') {
 			buffer_insert_char(b, (char) c);
+		} else {
+			switch (c) {
+			case 17: // ctrl+Q
+			case 23: // ctrl+W
+				return 0;
+			}
 		}
 
 		buffer_print(b);
-
 		prev = c;
 	}
+
+	return 0;
 }
