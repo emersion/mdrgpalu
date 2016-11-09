@@ -185,31 +185,33 @@ void buffer_move_selection(struct buffer* b, int i, int j) {
 
 	if (j != 0) {
 		int at = b->sel->ch;
-		if (at > b->sel->len) {
-			at = b->sel->len;
+		if (at > b->sel->line->len) {
+			at = b->sel->line->len;
 		}
 		at += j;
+
+		struct line* l = b->sel->line;
 		if (at < 0) {
 			// Want to move to a previous line
-			struct line* l = b->sel->line;
 			while (l->prev != NULL && at < 0) {
-				at += l->len;
+				at += l->len - 1;
 				l = l->prev;
 			}
-			b->sel->line = l;
-		}
-		if (at > b->sel->line->len) {
+			if (at < 0) {
+				at = 0;
+			}
+			printf("%d %d", at, l->len);
+		} else if (at > b->sel->line->len) {
 			// Want to move to a next line
-			struct line* l = b->sel->line;
-			while (l->next != NULL && at - l->len >= 0) {
-				at -= l->len;
+			while (l->next != NULL && at > l->len) {
+				at -= l->len + 1;
 				l = l->next;
 			}
 			if (at > l->len) {
 				at = l->len;
 			}
-			b->sel->line = l;
 		}
+		b->sel->line = l;
 		b->sel->ch = at;
 	}
 }
