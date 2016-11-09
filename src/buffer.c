@@ -1,3 +1,4 @@
+// A buffer is a set of lines.
 struct buffer {
 	struct line* first;
 	struct line* last;
@@ -5,6 +6,7 @@ struct buffer {
 	struct selection* sel;
 };
 
+// buffer_reset discards the buffer data and fills it with a new empty line.
 void buffer_reset(struct buffer* b) {
 	// Delete all lines
 	struct line* l = b->first;
@@ -23,12 +25,14 @@ void buffer_reset(struct buffer* b) {
 	b->sel->line = l;
 }
 
+// buffer_new allocates and initializes a new buffer.
 struct buffer* buffer_new() {
 	struct buffer* b = malloc(sizeof(struct buffer));
 	buffer_reset(b);
 	return b;
 }
 
+// buffer_free frees a buffer.
 void buffer_free(struct buffer* b) {
 	struct line* l = b->first;
 	while (l != NULL) {
@@ -40,6 +44,7 @@ void buffer_free(struct buffer* b) {
 	free(b);
 }
 
+// buffer_insert_line inserts a new line at the cursor's position.
 void buffer_insert_line(struct buffer* b) {
 	struct line* l = line_new();
 	struct line* curline = b->sel->line;
@@ -78,6 +83,7 @@ void buffer_insert_line(struct buffer* b) {
 	b->sel->ch = 0;
 }
 
+// buffer_remove_line removes a line at the current cursor's position.
 void buffer_remove_line(struct buffer* b) {
 	if (b->sel->line == NULL || b->sel->line->prev == NULL) {
 		return;
@@ -112,6 +118,7 @@ void buffer_remove_line(struct buffer* b) {
 	line_free(l);
 }
 
+// buffer_remove_char removes a character at the current cursor's position.
 int buffer_remove_char(struct buffer* b) {
 	if (b->sel->ch == 0) {
 		buffer_remove_line(b);
@@ -128,6 +135,7 @@ int buffer_remove_char(struct buffer* b) {
 	return c;
 }
 
+// buffer_insert_char inserts a character at the current cursor's position.
 void buffer_insert_char(struct buffer* b, char c) {
 	// Handle control chars
 	switch (c) {
@@ -147,6 +155,8 @@ void buffer_insert_char(struct buffer* b, char c) {
 	}
 }
 
+// buffer_set_selection sets the current selection. i is the line number, j is
+// the column number, and len is the selection's length.
 void buffer_set_selection(struct buffer* b, int i, int j, int len) {
 	if (i >= 0) {
 		struct line* l = b->first;
@@ -173,6 +183,8 @@ void buffer_set_selection(struct buffer* b, int i, int j, int len) {
 	}
 }
 
+// buffer_move_selection moves the current selection. i is the line delta and j
+// is the column delta.
 void buffer_move_selection(struct buffer* b, int i, int j) {
 	if (i != 0) {
 		struct line* l = b->sel->line;
@@ -227,6 +239,8 @@ void buffer_move_selection(struct buffer* b, int i, int j) {
 	}
 }
 
+// buffer_extend_selection extends the current selection of i lines and j
+// columns.
 void buffer_extend_selection(struct buffer* b, int i, int j) {
 	if (i != 0) {
 		// TODO: backward

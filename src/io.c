@@ -1,3 +1,4 @@
+// buffer_read_stream reads f until EOF and replaces data in the buffer.
 int buffer_read_stream(struct buffer* b, FILE* f) {
 	buffer_reset(b);
 
@@ -20,6 +21,7 @@ int buffer_read_stream(struct buffer* b, FILE* f) {
 	return 0;
 }
 
+// buffer_write_stream writes the buffer's data to f.
 int buffer_write_stream(struct buffer* b, FILE* f) {
 	int err;
 	for (struct line* l = b->first; l != NULL; l = l->next) {
