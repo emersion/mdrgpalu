@@ -77,8 +77,11 @@ void buffer_print(struct buffer* b) {
 
 int main(int argc, char** argv) {
 	struct buffer* b = buffer_new();
+
+	char* filename = NULL;
 	if (argc == 2) {
-		FILE* f = fopen(argv[1], "r");
+		filename = argv[1];
+		FILE* f = fopen(filename, "r");
 		if (f == NULL) {
 			return 1;
 		}
@@ -164,6 +167,18 @@ int main(int argc, char** argv) {
 			case 17: // ctrl+Q
 			case 23: // ctrl+W
 				return 0;
+			case 19: // ctrl+S
+				if (filename != NULL) {
+					FILE* f = fopen(filename, "w+");
+					if (f == NULL) {
+						return 1;
+					}
+					int err = buffer_write_stream(b, f);
+					fclose(f);
+					if (err) {
+						return err;
+					}
+				}
 			}
 		}
 
