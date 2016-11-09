@@ -5,6 +5,7 @@
 #include "line.c"
 #include "selection.c"
 #include "buffer.c"
+#include "io.c"
 
 #ifdef __unix__
 	#include <sys/termios.h>
@@ -74,15 +75,27 @@ void buffer_print(struct buffer* b) {
 	print_format(FORMAT_DIM, (char*) &s);
 }
 
-int main() {
+int main(int argc, char** argv) {
 	struct buffer* b = buffer_new();
-	buffer_insert_char(b, 'c');
-	buffer_insert_char(b, 'c');
-	buffer_insert_line(b);
-	buffer_insert_char(b, 's');
-	buffer_insert_char(b, 'a');
-	buffer_insert_char(b, 'v');
-	buffer_insert_char(b, 'a');
+	if (argc == 2) {
+		FILE* f = fopen(argv[1], "r");
+		if (f == NULL) {
+			return 1;
+		}
+		int err = buffer_read_stream(b, f);
+		fclose(f);
+		if (err) {
+			return err;
+		}
+	} else {
+		buffer_insert_char(b, 'c');
+		buffer_insert_char(b, 'c');
+		buffer_insert_line(b);
+		buffer_insert_char(b, 's');
+		buffer_insert_char(b, 'a');
+		buffer_insert_char(b, 'v');
+		buffer_insert_char(b, 'a');
+	}
 	buffer_set_selection(b, 0, 0, 0);
 
 	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering
@@ -93,8 +106,10 @@ int main() {
 	int prev = -1;
 	while (1) {
 		c = fgetc(stdin);
-		if (c == EOF) {
+		if (feof(stdin)) {
 			break;
+		} else if (ferror(stdin)) {
+			return 1;
 		}
 
 		if (prev == ESC && c == '[') {

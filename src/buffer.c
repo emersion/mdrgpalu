@@ -5,13 +5,27 @@ struct buffer {
 	struct selection* sel;
 };
 
-struct buffer* buffer_new() {
-	struct buffer* b = malloc(sizeof(struct buffer));
-	struct line* l = line_new();
+void buffer_reset(struct buffer* b) {
+	// Delete all lines
+	struct line* l = b->first;
+	while (l != NULL) {
+		struct line* next = l->next;
+		line_free(l);
+		l = next;
+	}
+	selection_free(b->sel);
+
+	// Create a new empty line
+	l = line_new();
 	b->first = l;
 	b->last = l;
 	b->sel = selection_new();
 	b->sel->line = l;
+}
+
+struct buffer* buffer_new() {
+	struct buffer* b = malloc(sizeof(struct buffer));
+	buffer_reset(b);
 	return b;
 }
 
@@ -122,9 +136,6 @@ void buffer_insert_char(struct buffer* b, char c) {
 		return;
 	case 127: // backspace
 		buffer_remove_char(b);
-		return;
-	}
-	if (c < 32) {
 		return;
 	}
 
