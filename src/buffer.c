@@ -46,37 +46,32 @@ void buffer_free(struct buffer* b) {
 
 // buffer_insert_line inserts a new line at the cursor's position.
 void buffer_insert_line(struct buffer* b) {
+	// Create a new line after the current one
 	struct line* l = line_new();
 	struct line* curline = b->sel->line;
-
 	l->prev = curline;
-	if (curline != NULL) {
-		if (curline->next != NULL) {
-			curline->next->prev = l;
-		}
-		l->next = curline->next;
-		curline->next = l;
+	l->next = curline->next;
+	if (l->next != NULL) {
+		l->next->prev = l;
+	}
+	curline->next = l;
 
-		// Split text between two lines
-		if (b->sel->ch == 0) {
-			l->len = curline->len;
-			l->cap = curline->cap;
-			l->chars = curline->chars;
-			curline->len = 0;
-			curline->cap = 0;
-			curline->chars = NULL;
-		} else {
-			l->len = curline->len - b->sel->ch;
-			l->chars = (char*) malloc(l->len);
-			memcpy(l->chars, &curline->chars[b->sel->ch], l->len);
-			curline->len = b->sel->ch;
-		}
+	// Split text between two lines
+	if (b->sel->ch == 0) {
+		l->len = curline->len;
+		l->cap = curline->cap;
+		l->chars = curline->chars;
+		curline->len = 0;
+		curline->cap = 0;
+		curline->chars = NULL;
+	} else {
+		l->len = curline->len - b->sel->ch;
+		l->chars = (char*) malloc(l->len);
+		memcpy(l->chars, &curline->chars[b->sel->ch], l->len);
+		curline->len = b->sel->ch;
 	}
 
-	if (b->first == NULL) {
-		b->first = l;
-	}
-	if (b->last == NULL || b->last == curline) {
+	if (b->last == curline) {
 		b->last = l;
 	}
 	b->sel->line = l;
@@ -139,6 +134,8 @@ int buffer_remove_char(struct buffer* b) {
 void buffer_insert_char(struct buffer* b, char c) {
 	// Handle control chars
 	switch (c) {
+	case '\r':
+		return;
 	case '\n':
 		buffer_insert_line(b);
 		return;
