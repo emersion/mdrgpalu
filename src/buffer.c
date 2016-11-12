@@ -246,8 +246,18 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 
 	if (j != 0) {
 		int len = b->sel->len;
+		if (len == 0) {
+			// Extending selection from a cursor, set dir
+			if (i < 0 || (i == 0 && j < 0)) {
+				b->sel->dir = SELECTION_DIR_LEFT;
+			} else {
+				b->sel->dir = SELECTION_DIR_RIGHT;
+			}
+		}
 
-		if (j < 0) {
+		if (b->sel->dir == SELECTION_DIR_RIGHT) {
+			len += j;
+		} else {
 			// Move the start of the selection
 			len -= j;
 
@@ -262,8 +272,6 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 			}
 			b->sel->line = l;
 			b->sel->ch = at;
-		} else {
-			len += j;
 		}
 
 		// Check that selection is not beyond the end of the buffer
