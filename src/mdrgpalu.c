@@ -93,6 +93,7 @@ int main(int argc, char** argv) {
 	struct buffer* b = buffer_new();
 
 	char* filename = NULL;
+	filename = "sava.txt";
 	if (argc == 2) {
 		filename = argv[1];
 		FILE* f = fopen(filename, "r");
@@ -196,7 +197,7 @@ int main(int argc, char** argv) {
 					if (err) {
 						return err;
 					}
-					statustext = "File saved.";
+					statustext = strdup("File saved.");
 				}
 			}
 		}
