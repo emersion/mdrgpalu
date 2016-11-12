@@ -3,11 +3,9 @@ int buffer_read_stream(struct buffer* b, FILE* f) {
 	buffer_reset(b);
 
 	char buf[1024];
-	int n;
-	int err;
 	while (!feof(f)) {
-		n = fread(buf, sizeof(char), sizeof(buf)/sizeof(char), f);
-		err = ferror(f);
+		int n = fread(buf, sizeof(char), sizeof(buf)/sizeof(char), f);
+		int err = ferror(f);
 		if (err) {
 			return err;
 		}
@@ -23,14 +21,43 @@ int buffer_read_stream(struct buffer* b, FILE* f) {
 
 // buffer_write_stream writes the buffer's data to f.
 int buffer_write_stream(struct buffer* b, FILE* f) {
-	int err;
+	char buf[1024];
+	int n = 0; // Number of bytes written to buf
 	for (struct line* l = b->first; l != NULL; l = l->next) {
-		fwrite(l->chars, sizeof(char), l->len, f);
-		err = ferror(f);
-		if (err) {
-			return err;
+		int len = l->len + 1; // Length of the line that will be written (line + \n)
+		int i = 0; // Number of bytes written from l->chars
+		while (i < len) {
+			int ncpy = sizeof(buf) - n; // Number of bytes that will be written to buf
+			if (len - i < ncpy) {
+				ncpy = len - i;
+			}
+			if (i + ncpy == len) {
+				// Last char is \n, not included in l->chars
+				memcpy(&buf[n], &l->chars[i], ncpy-1);
+				buf[n+ncpy-1] = '\n';
+			} else {
+				memcpy(&buf[n], &l->chars[i], ncpy);
+			}
+			n += ncpy;
+			i += ncpy;
+
+			if (n == sizeof(buf)) {
+				// Buffer is full, flush to file
+				fwrite(&buf, sizeof(char), n, f);
+				int err = ferror(f);
+				if (err) {
+					return err;
+				}
+				n = 0;
+			}
 		}
 	}
 
-	return 0;
+	// Is there something left that needs to be written in buf?
+	if (n > 0) {
+		fwrite(&buf, sizeof(char), n, f);
+		return ferror(f);
+	} else {
+		return 0;
+	}
 }
