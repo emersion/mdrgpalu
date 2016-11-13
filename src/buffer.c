@@ -258,10 +258,6 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 		if (b->sel->dir == SELECTION_DIR_RIGHT) {
 			len += j;
 		} else {
-			len -= j;
-		}
-
-		if (b->sel->dir == SELECTION_DIR_LEFT) {
 			// Move the start of the selection
 			int at = b->sel->ch + j;
 			struct line* l = b->sel->line;
@@ -271,6 +267,8 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 			}
 			if (at < 0) {
 				at = 0;
+			} else {
+				len -= j;
 			}
 			b->sel->line = l;
 			b->sel->ch = at;
