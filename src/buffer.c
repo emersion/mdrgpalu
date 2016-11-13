@@ -280,7 +280,7 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 		int end = b->sel->ch + len;
 		if (end > b->sel->line->len) {
 			struct line* l = b->sel->line;
-			while (l != NULL && end - l->len >= 0) {
+			while (l != NULL && end >= 0) {
 				end -= l->len;
 				l = l->next;
 			}
