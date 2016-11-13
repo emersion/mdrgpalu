@@ -1,10 +1,12 @@
+#define BUF_SIZE 1024
+
 // buffer_read_stream reads f until EOF and replaces data in the buffer.
 int buffer_read_stream(struct buffer* b, FILE* f) {
 	buffer_reset(b);
 
-	char buf[1024];
+	char buf[BUF_SIZE];
 	while (!feof(f)) {
-		int n = fread(buf, sizeof(char), sizeof(buf)/sizeof(char), f);
+		int n = fread(&buf, sizeof(char), sizeof(buf)/sizeof(char), f);
 		int err = ferror(f);
 		if (err) {
 			return err;
@@ -21,7 +23,7 @@ int buffer_read_stream(struct buffer* b, FILE* f) {
 
 // buffer_write_stream writes the buffer's data to f.
 int buffer_write_stream(struct buffer* b, FILE* f) {
-	char buf[1024];
+	char buf[BUF_SIZE];
 	int n = 0; // Number of bytes written to buf
 	for (struct line* l = b->first; l != NULL; l = l->next) {
 		int len = l->len + 1; // Length of the line that will be written (line + \n)

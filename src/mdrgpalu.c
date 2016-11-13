@@ -15,8 +15,10 @@
 	#include "windows/term.c"
 #endif
 
+// TODO: create windows counterparts for this
 #include "unix/format.c"
 #include "unix/sequence.c"
+#include "unix/clipboard.c"
 
 #define ESC '\033'
 
