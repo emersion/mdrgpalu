@@ -12,6 +12,7 @@
 	#include <sys/termios.h>
 	#include "unix/term.c"
 #elif _WIN32
+	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 	#include "windows/term.c"
 #endif
