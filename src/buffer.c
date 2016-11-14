@@ -57,7 +57,7 @@ struct line* buffer_insert_line(struct buffer* b) {
 	return l;
 }
 
-// buffer_delete_line removes a line at the current cursor's position.
+// buffer_delete_line removes a line from the buffer.
 void buffer_delete_line(struct buffer* b, struct line* l) {
 	if (b->first == l && b->last == l) {
 		return;
