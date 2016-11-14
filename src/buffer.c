@@ -268,3 +268,10 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 		b->sel->len = len;
 	}
 }
+
+void buffer_shrink_selection(struct buffer* b, int dir) {
+	if (dir > 0) {
+		buffer_move_selection(b, 0, b->sel->len);
+	}
+	b->sel->len = 0;
+}

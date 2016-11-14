@@ -97,7 +97,11 @@ int main(int argc, char** argv) {
 				if (modifiers & MODIFIER_SHIFT) {
 					buffer_extend_selection(b, i, j);
 				} else {
-					buffer_move_selection(b, i, j);
+					if (b->sel->len > 0) {
+						buffer_shrink_selection(b, i + j);
+					} else {
+						buffer_move_selection(b, i, j);
+					}
 				}
 				break;
 			}
