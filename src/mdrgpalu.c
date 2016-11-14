@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
 			buffer_insert_char(b, (char) c);
 		} else {
 			switch (c) {
-				case 3: { // ctrl+C
+				case 3: { // Ctrl+C
 					FILE* f = clipboard_open("w");
 					if (f == NULL) {
 						return 1;
@@ -131,10 +131,10 @@ int main(int argc, char** argv) {
 					}
 					break;
 				}
-				case 17: // ctrl+Q
-				case 23: // ctrl+W
+				case 17: // Ctrl+Q
+				case 23: // Ctrl+W
 					return 0;
-				case 19: // ctrl+S
+				case 19: // Ctrl+S
 					if (filename != NULL) {
 						FILE* f = fopen(filename, "w+");
 						if (f == NULL) {
@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
 						statustext = strdup("File saved.");
 					}
 					break;
-				case 22: { // ctrl+V
+				case 22: { // Ctrl+V
 					FILE* f = clipboard_open("r");
 					if (f == NULL) {
 						return 1;
@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
 					}
 					break;
 				}
-				case 24: { // ctrl+X
+				case 24: { // Ctrl+X
 					// TODO
 				}
 			}
