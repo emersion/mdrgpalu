@@ -138,7 +138,9 @@ int line_delete_char(struct line* l, int at) {
 // line_delete deletes l without deallocating it. It's useful for instance when
 // deleting a line from a buffer and inserting it somewhere else.
 void line_delete(struct line* l) {
-	l->prev->next = l->next;
+	if (l->prev != NULL) {
+		l->prev->next = l->next;
+	}
 	if (l->next != NULL) {
 		l->next->prev = l->prev;
 	}

@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 			return 1;
 		}
 
-		if (prev == '\033' && c == '[') {
+		if (prev == '\033' && c == '[') { // Escape sequence
 			struct sequence* s = sequence_parse();
 			if (s == NULL) {
 				printf("Cannot parse escape sequence\n");
@@ -114,7 +114,8 @@ int main(int argc, char** argv) {
 			buffer_insert_char(b, (char) c);
 		} else {
 			switch (c) {
-				case 3: { // Ctrl+C
+				case 3: // Ctrl+C
+				case 24: { // Ctrl+X
 					FILE* f = clipboard_open("w");
 					if (f == NULL) {
 						return 1;
@@ -128,6 +129,14 @@ int main(int argc, char** argv) {
 					clipboard_close(f);
 					if (err) {
 						return err;
+					}
+
+					if (c == 24) { // Cut
+						if (b->sel->len == 0) {
+							buffer_delete_line(b, b->sel->line);
+						} else {
+							buffer_delete_selection(b);
+						}
 					}
 					break;
 				}
@@ -160,9 +169,6 @@ int main(int argc, char** argv) {
 						return err;
 					}
 					break;
-				}
-				case 24: { // Ctrl+X
-					// TODO
 				}
 			}
 		}

@@ -1,12 +1,12 @@
 // See http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
-#define CODE_CUU 'A'
-#define CODE_CUD 'B'
-#define CODE_CUF 'C'
-#define CODE_CUB 'D'
-#define CODE_CNL 'E'
-#define CODE_CPL 'F'
-#define CODE_CHA 'G'
-#define CODE_CUP 'H'
+#define CODE_CUU 'A' // Cursor Up
+#define CODE_CUD 'B' // Cursor Down
+#define CODE_CUF 'C' // Cursor Forward
+#define CODE_CUB 'D' // Cursor Backward
+#define CODE_CNL 'E' // Cursor Next Line
+#define CODE_CPL 'F' // Cursor Preceding Line
+#define CODE_CHA 'G' // Cursor Character Absolute
+#define CODE_CUP 'H' // Cursor Position
 
 #define MODIFIER_SHIFT 2
 #define MODIFIER_ALT   3
