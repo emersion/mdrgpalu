@@ -19,7 +19,7 @@ int buffer_read_from(struct buffer* b, FILE* f) {
 		}
 
 		b->sel->line = l;
-		b->sel->ch = at + n + 1;
+		b->sel->ch = at + n;
 		N += n + 1; // line + \n
 		l = NULL;
 		at = 0;
