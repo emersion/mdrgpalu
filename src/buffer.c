@@ -46,32 +46,9 @@ void buffer_free(struct buffer* b) {
 
 // buffer_insert_line inserts a new line at the cursor's position.
 struct line* buffer_insert_line(struct buffer* b) {
-	// Create a new line after the current one
-	struct line* l = line_new();
-	struct line* curline = b->sel->line;
-	l->prev = curline;
-	l->next = curline->next;
-	if (l->next != NULL) {
-		l->next->prev = l;
-	}
-	curline->next = l;
+	struct line* l = line_split(b->sel->line, b->sel->ch);
 
-	// Split text between two lines
-	if (b->sel->ch == 0) {
-		l->len = curline->len;
-		l->cap = curline->cap;
-		l->chars = curline->chars;
-		curline->len = 0;
-		curline->cap = 0;
-		curline->chars = NULL;
-	} else {
-		l->len = curline->len - b->sel->ch;
-		l->chars = (char*) malloc(l->len);
-		memcpy(l->chars, &curline->chars[b->sel->ch], l->len);
-		curline->len = b->sel->ch;
-	}
-
-	if (b->last == curline) {
+	if (b->last == b->sel->line) {
 		b->last = l;
 	}
 	b->sel->line = l;

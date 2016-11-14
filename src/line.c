@@ -37,34 +37,41 @@ void line_realloc(struct line* l) {
 	}
 }
 
-int line_read_range_from(struct line* l, int at, int len, FILE* f) {
+// line_read_range_from reads a single line from f and adds it to the line, at
+// the provided position. Returns the number of bytes appended to the line.
+int line_read_range_from(struct line* l, int at, FILE* f) {
+	int n = 0;
 	while (1) {
 		int c = fgetc(f);
 		if (c == EOF) {
 			break;
 		}
-		int err = ferror(f);
-		if (err) {
-			return err;
-		}
-
 		if (c == '\r') {
 			continue;
 		}
 		if (c == '\n') {
-			return 0;
+			break;
 		}
 
-		line_realloc(l);
-		l->chars[l->len] = (char) c;
+		if (l->len + 1 >= l->cap) {
+			line_realloc(l);
+		}
+		if (at < l->len) {
+			// TODO: optimize this
+			memmove(&l->chars[at+1], &l->chars[at], l->len-at);
+		}
+
+		l->chars[at] = (char) c;
+		at++;
+		n++;
 		l->len++;
 	}
 
-	return 0;
+	return n;
 }
 
 int line_read_from(struct line* l, FILE* f) {
-	return line_read_range_from(l, 0, -1, f);
+	return line_read_range_from(l, 0, f);
 }
 
 int line_write_range_to(struct line* l, int at, int len, FILE* f) {
@@ -125,4 +132,36 @@ int line_remove_at(struct line* l, int i) {
 	memmove(&l->chars[i], &l->chars[i+1], l->len-i-1);
 	l->len--;
 	return c;
+}
+
+// line_split splits l in two lines, l will contain the part before at and the
+// returned line will contain the remainder.
+struct line* line_split(struct line* l, int at) {
+	struct line* next = line_new();
+	next->prev = l;
+	next->next = l->next;
+	if (l->next != NULL) {
+		l->next->prev = next;
+	}
+	l->next = next;
+
+	if (at < l->len) {
+		// Split chars between two lines if necessary
+		if (at == 0) {
+			// next contains all chars, l is empty
+			next->len = l->len;
+			next->cap = l->cap;
+			next->chars = l->chars;
+			l->len = 0;
+			l->cap = 0;
+			l->chars = NULL;
+		} else {
+			next->len = l->len - at;
+			next->chars = (char*) malloc(next->len);
+			memcpy(next->chars, &l->chars[at], next->len);
+			l->len = at;
+		}
+	}
+
+	return next;
 }

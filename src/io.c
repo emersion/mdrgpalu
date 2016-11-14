@@ -1,4 +1,5 @@
 // buffer_read_from reads f until EOF and appends data in the buffer.
+// Returns EOF on error or the number of bytes appended to b on success.
 int buffer_read_from(struct buffer* b, FILE* f) {
 	if (b->sel->len > 0) {
 		// TODO: delete selection
@@ -6,21 +7,25 @@ int buffer_read_from(struct buffer* b, FILE* f) {
 
 	struct line* l = b->sel->line;
 	int at = b->sel->ch;
+	int N = 0; // Number of bytes read from f
 	while (!feof(f)) {
 		if (l == NULL) {
 			l = buffer_insert_line(b);
 		}
 
-		int err = line_read_range_from(l, at, -1, f);
-		if (err) {
-			return err;
+		int n = line_read_range_from(l, at, f);
+		if (n == EOF) {
+			return EOF;
 		}
 
+		b->sel->line = l;
+		b->sel->ch = at + n + 1;
+		N += n + 1; // line + \n
 		l = NULL;
 		at = 0;
 	}
 
-	return 0;
+	return N;
 }
 
 // buffer_write_to writes the buffer's data to f.

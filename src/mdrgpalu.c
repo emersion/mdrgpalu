@@ -100,7 +100,8 @@ int main(int argc, char** argv) {
 		filename = argv[1];
 		FILE* f = fopen(filename, "r");
 		if (f != NULL) {
-			int err = buffer_read_from(b, f);
+			buffer_read_from(b, f);
+			int err = ferror(f);
 			fclose(f);
 			if (err) {
 				return err;
@@ -217,12 +218,16 @@ int main(int argc, char** argv) {
 					if (f == NULL) {
 						return 1;
 					}
-					int err = buffer_read_from(b, f);
+					buffer_read_from(b, f);
+					int err = ferror(f);
 					clipboard_close(f);
 					if (err) {
 						return err;
 					}
 					break;
+				}
+				case 24: { // ctrl+X
+					// TODO
 				}
 			}
 		}
