@@ -290,3 +290,25 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 		b->sel->len = len;
 	}
 }
+
+char* buffer_selection_text(struct buffer* b) {
+	char* s = (char*) malloc(b->sel->len);
+
+	struct line* l = b->sel->line;
+	int len = b->sel->len;
+	int from = b->sel->ch;
+	while (len > 0 && l != NULL) {
+		int to = len;
+		if (to > l->len) {
+			to = l->len;
+		}
+
+		memcpy(&s[b->sel->len-len], &l->chars[from], to-from);
+
+		len -= to-from;
+		l = l->next;
+		from = 0;
+	}
+
+	return s;
+}

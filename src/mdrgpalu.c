@@ -184,6 +184,15 @@ int main(int argc, char** argv) {
 			buffer_insert_char(b, (char) c);
 		} else {
 			switch (c) {
+			case 3:; // ctrl+C
+				if (b->sel->len == 0) {
+					clipboard_put(b->sel->line->chars);
+				} else {
+					char* s = buffer_selection_text(b);
+					clipboard_put(s);
+					free(s);
+				}
+				break;
 			case 17: // ctrl+Q
 			case 23: // ctrl+W
 				return 0;
@@ -200,6 +209,9 @@ int main(int argc, char** argv) {
 					}
 					statustext = strdup("File saved.");
 				}
+				break;
+			case 22: // ctrl+V
+				break; // TODO
 			}
 		}
 
