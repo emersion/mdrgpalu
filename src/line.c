@@ -22,6 +22,47 @@ void line_free(struct line* l) {
 	free(l);
 }
 
+void line_realloc(struct line* l) {
+	if (l->len + 1 > l->cap) {
+		int more = 1;
+		if (l->cap > 0) {
+			more = l->cap;
+		}
+		if (l->cap > 1024) {
+			more = 1024;
+		}
+		l->cap += more;
+
+		l->chars = (char*) realloc(l->chars, l->cap);
+	}
+}
+
+int line_read_from(struct line* l, FILE* f) {
+	while (1) {
+		int c = fgetc(f);
+		if (c == EOF) {
+			break;
+		}
+		int err = ferror(f);
+		if (err) {
+			return err;
+		}
+
+		if (c == '\r') {
+			continue;
+		}
+		if (c == '\n') {
+			return 0;
+		}
+
+		line_realloc(l);
+		l->chars[l->len] = (char) c;
+		l->len++;
+	}
+
+	return 0;
+}
+
 int line_write_range_to(struct line* l, int from, int len, FILE* f) {
 	if (len < 0) {
 		len = l->len+1;
@@ -55,18 +96,7 @@ void line_insert_at(struct line* l, int i, char c) {
 		i = l->len;
 	}
 
-	if (l->len + 1 > l->cap) {
-		int more = 1;
-		if (l->cap > 0) {
-			more = l->cap;
-		}
-		if (l->cap > 1024) {
-			more = 1024;
-		}
-		l->cap += more;
-
-		l->chars = (char*) realloc(l->chars, l->cap);
-	}
+	line_realloc(l);
 
 	if (i < l->len) {
 		memmove(&l->chars[i+1], &l->chars[i], l->len-i);

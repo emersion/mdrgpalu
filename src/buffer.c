@@ -45,7 +45,7 @@ void buffer_free(struct buffer* b) {
 }
 
 // buffer_insert_line inserts a new line at the cursor's position.
-void buffer_insert_line(struct buffer* b) {
+struct line* buffer_insert_line(struct buffer* b) {
 	// Create a new line after the current one
 	struct line* l = line_new();
 	struct line* curline = b->sel->line;
@@ -76,6 +76,8 @@ void buffer_insert_line(struct buffer* b) {
 	}
 	b->sel->line = l;
 	b->sel->ch = 0;
+
+	return l;
 }
 
 // buffer_remove_line removes a line at the current cursor's position.

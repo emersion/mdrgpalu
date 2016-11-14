@@ -1,18 +1,23 @@
 // buffer_read_from reads f until EOF and appends data in the buffer.
 int buffer_read_from(struct buffer* b, FILE* f) {
-	char buf[512];
+	struct line* l = b->last;
+	struct line* prev = NULL;
 	while (!feof(f)) {
-		int n = fread(&buf, sizeof(char), sizeof(buf)/sizeof(char), f);
-		int err = ferror(f);
+		if (l == NULL) {
+			l = line_new();
+			l->prev = prev;
+			prev->next = l;
+		}
+
+		int err = line_read_from(l, f);
 		if (err) {
 			return err;
 		}
 
-		// TODO: optimize this
-		for (int i = 0; i < n; i++) {
-			buffer_insert_char(b, buf[i]);
-		}
+		prev = l;
+		l = NULL;
 	}
+	b->last = l;
 
 	return 0;
 }

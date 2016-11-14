@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
 		} else if (c == ESC) {
 			prev = c;
 			continue;
-		} else if (c == '\t' || c == '\n' || c > ' ') {
+		} else if (c == '\t' || c == '\n' || c >= ' ') {
 			buffer_insert_char(b, (char) c);
 		} else {
 			switch (c) {
