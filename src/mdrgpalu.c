@@ -108,16 +108,7 @@ int main(int argc, char** argv) {
 		} else if (errno != ENOENT) {
 			return 1;
 		}
-	} else {
-		buffer_insert_char(b, 'c');
-		buffer_insert_char(b, 'c');
-		buffer_insert_line(b);
-		buffer_insert_char(b, 's');
-		buffer_insert_char(b, 'a');
-		buffer_insert_char(b, 'v');
-		buffer_insert_char(b, 'a');
 	}
-	buffer_set_selection(b, 0, 0, 0);
 
 	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering
 	setup_term();
