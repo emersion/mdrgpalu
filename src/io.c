@@ -1,23 +1,24 @@
 // buffer_read_from reads f until EOF and appends data in the buffer.
 int buffer_read_from(struct buffer* b, FILE* f) {
-	struct line* l = b->last;
-	struct line* prev = NULL;
+	if (b->sel->len > 0) {
+		// TODO: delete selection
+	}
+
+	struct line* l = b->sel->line;
+	int at = b->sel->ch;
 	while (!feof(f)) {
 		if (l == NULL) {
-			l = line_new();
-			l->prev = prev;
-			prev->next = l;
+			l = buffer_insert_line(b);
 		}
 
-		int err = line_read_from(l, f);
+		int err = line_read_range_from(l, at, -1, f);
 		if (err) {
 			return err;
 		}
 
-		prev = l;
 		l = NULL;
+		at = 0;
 	}
-	b->last = l;
 
 	return 0;
 }

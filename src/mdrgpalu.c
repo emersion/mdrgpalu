@@ -105,6 +105,7 @@ int main(int argc, char** argv) {
 			if (err) {
 				return err;
 			}
+			buffer_set_selection(b, 0, 0, 0);
 		} else if (errno != ENOENT) {
 			return 1;
 		}
@@ -177,37 +178,52 @@ int main(int argc, char** argv) {
 			buffer_insert_char(b, (char) c);
 		} else {
 			switch (c) {
-			case 3:; // ctrl+C
-				FILE* f = clipboard_open("w");
-				if (f == NULL) {
-					return 1;
-				}
-				if (b->sel->len == 0) {
-					line_write_to(b->sel->line, f);
-				} else {
-					buffer_write_selection_to(b, f);
-				}
-				clipboard_close(f);
-				break;
-			case 17: // ctrl+Q
-			case 23: // ctrl+W
-				return 0;
-			case 19: // ctrl+S
-				if (filename != NULL) {
-					FILE* f = fopen(filename, "w+");
+				case 3: { // ctrl+C
+					FILE* f = clipboard_open("w");
 					if (f == NULL) {
 						return 1;
 					}
-					int err = buffer_write_to(b, f);
-					fclose(f);
+					int err;
+					if (b->sel->len == 0) {
+						err = line_write_to(b->sel->line, f);
+					} else {
+						err = buffer_write_selection_to(b, f);
+					}
+					clipboard_close(f);
 					if (err) {
 						return err;
 					}
-					statustext = strdup("File saved.");
+					break;
 				}
-				break;
-			case 22: // ctrl+V
-				break; // TODO
+				case 17: // ctrl+Q
+				case 23: // ctrl+W
+					return 0;
+				case 19: // ctrl+S
+					if (filename != NULL) {
+						FILE* f = fopen(filename, "w+");
+						if (f == NULL) {
+							return 1;
+						}
+						int err = buffer_write_to(b, f);
+						fclose(f);
+						if (err) {
+							return err;
+						}
+						statustext = strdup("File saved.");
+					}
+					break;
+				case 22: { // ctrl+V
+					FILE* f = clipboard_open("r");
+					if (f == NULL) {
+						return 1;
+					}
+					int err = buffer_read_from(b, f);
+					clipboard_close(f);
+					if (err) {
+						return err;
+					}
+					break;
+				}
 			}
 		}
 

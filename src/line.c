@@ -37,7 +37,7 @@ void line_realloc(struct line* l) {
 	}
 }
 
-int line_read_from(struct line* l, FILE* f) {
+int line_read_range_from(struct line* l, int at, int len, FILE* f) {
 	while (1) {
 		int c = fgetc(f);
 		if (c == EOF) {
@@ -63,17 +63,21 @@ int line_read_from(struct line* l, FILE* f) {
 	return 0;
 }
 
-int line_write_range_to(struct line* l, int from, int len, FILE* f) {
+int line_read_from(struct line* l, FILE* f) {
+	return line_read_range_from(l, 0, -1, f);
+}
+
+int line_write_range_to(struct line* l, int at, int len, FILE* f) {
 	if (len < 0) {
 		len = l->len+1;
 	}
 
-	if (from < l->len) {
+	if (at < l->len) {
 		int n = len;
 		if (n > l->len) {
 			n = l->len;
 		}
-		fwrite(&l->chars[from], sizeof(char), n, f);
+		fwrite(&l->chars[at], sizeof(char), n, f);
 		int err = ferror(f);
 		if (err) {
 			return err;
