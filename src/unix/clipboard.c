@@ -1,5 +1,23 @@
+FILE* clipboard_open(char* mode) {
+	char* cmd;
+	if (mode[0] == 'r') {
+		cmd = "xclip -selection clipboard -o";
+	} else {
+		cmd = "xclip -selection clipboard -i";
+	}
+
+	return popen(cmd, mode);
+}
+
+int clipboard_close(FILE* p) {
+	return pclose(p);
+}
+
 char* clipboard_get() {
-	FILE* p = popen("xclip -selection clipboard -o", "r");
+	FILE* p = clipboard_open("r");
+	if (p == NULL) {
+		return NULL;
+	}
 
 	int cap = 32;
 	int len = 0;
@@ -23,22 +41,10 @@ char* clipboard_get() {
 		}
 	}
 
-	int err = pclose(p);
+	int err = clipboard_close(p);
 	if (err) {
 		free(s);
 		return NULL;
 	}
 	return s;
-}
-
-int clipboard_put(char* s) {
-	FILE* p = popen("xclip -selection clipboard -i", "w");
-
-	int n = fputs(s, p);
-	if (n == EOF) {
-		pclose(p);
-		return 1;
-	}
-
-	return pclose(p);
 }

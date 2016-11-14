@@ -1,9 +1,7 @@
 #define BUF_SIZE 1024
 
-// buffer_read_stream reads f until EOF and replaces data in the buffer.
-int buffer_read_stream(struct buffer* b, FILE* f) {
-	buffer_reset(b);
-
+// buffer_read_from reads f until EOF and appends data in the buffer.
+int buffer_read_from(struct buffer* b, FILE* f) {
 	char buf[BUF_SIZE];
 	while (!feof(f)) {
 		int n = fread(&buf, sizeof(char), sizeof(buf)/sizeof(char), f);
@@ -21,45 +19,37 @@ int buffer_read_stream(struct buffer* b, FILE* f) {
 	return 0;
 }
 
-// buffer_write_stream writes the buffer's data to f.
-int buffer_write_stream(struct buffer* b, FILE* f) {
-	char buf[BUF_SIZE];
-	int n = 0; // Number of bytes written to buf
+// buffer_write_to writes the buffer's data to f.
+int buffer_write_to(struct buffer* b, FILE* f) {
 	for (struct line* l = b->first; l != NULL; l = l->next) {
-		int len = l->len + 1; // Length of the line that will be written (line + \n)
-		int i = 0; // Number of bytes written from l->chars
-		while (i < len) {
-			int ncpy = sizeof(buf) - n; // Number of bytes that will be written to buf
-			if (len - i < ncpy) {
-				ncpy = len - i;
-			}
-			if (i + ncpy == len) {
-				// Last char is \n, not included in l->chars
-				memcpy(&buf[n], &l->chars[i], ncpy-1);
-				buf[n+ncpy-1] = '\n';
-			} else {
-				memcpy(&buf[n], &l->chars[i], ncpy);
-			}
-			n += ncpy;
-			i += ncpy;
-
-			if (n == sizeof(buf)) {
-				// Buffer is full, flush to file
-				fwrite(&buf, sizeof(char), n, f);
-				int err = ferror(f);
-				if (err) {
-					return err;
-				}
-				n = 0;
-			}
+		int err = line_write_to(l, f);
+		if (err) {
+			return err;
 		}
 	}
 
-	// Is there something left that needs to be written in buf?
-	if (n > 0) {
-		fwrite(&buf, sizeof(char), n, f);
-		return ferror(f);
-	} else {
-		return 0;
+	return 0;
+}
+
+int buffer_write_selection_to(struct buffer* b, FILE* f) {
+	struct line* l = b->sel->line;
+	int from = b->sel->ch;
+	int len = b->sel->len;
+	while (len > 0 && l != NULL) {
+		int n = len;
+		if (n > l->len) {
+			n = l->len+1; // line + \n
+		}
+
+		int err = line_write_range_to(l, from, n, f);
+		if (err) {
+			return err;
+		}
+
+		len -= n;
+		l = l->next;
+		from = 0;
 	}
+
+	return 0;
 }

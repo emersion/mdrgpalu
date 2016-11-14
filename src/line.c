@@ -22,6 +22,34 @@ void line_free(struct line* l) {
 	free(l);
 }
 
+int line_write_range_to(struct line* l, int from, int len, FILE* f) {
+	if (len < 0) {
+		len = l->len+1;
+	}
+
+	if (from < l->len) {
+		int n = len;
+		if (n > l->len) {
+			n = l->len;
+		}
+		fwrite(&l->chars[from], sizeof(char), n, f);
+		int err = ferror(f);
+		if (err) {
+			return err;
+		}
+	}
+
+	if (len > l->len) {
+		fputc('\n', f);
+		return ferror(f);
+	}
+	return 0;
+}
+
+int line_write_to(struct line* l, FILE* f) {
+	return line_write_range_to(l, 0, -1, f);
+}
+
 void line_insert_at(struct line* l, int i, char c) {
 	if (i > l->len) {
 		i = l->len;

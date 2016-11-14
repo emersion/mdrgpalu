@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "line.c"
 #include "selection.c"
@@ -98,13 +99,14 @@ int main(int argc, char** argv) {
 	if (argc == 2) {
 		filename = argv[1];
 		FILE* f = fopen(filename, "r");
-		if (f == NULL) {
+		if (f != NULL) {
+			int err = buffer_read_from(b, f);
+			fclose(f);
+			if (err) {
+				return err;
+			}
+		} else if (errno != ENOENT) {
 			return 1;
-		}
-		int err = buffer_read_stream(b, f);
-		fclose(f);
-		if (err) {
-			return err;
 		}
 	} else {
 		buffer_insert_char(b, 'c');
@@ -185,13 +187,16 @@ int main(int argc, char** argv) {
 		} else {
 			switch (c) {
 			case 3:; // ctrl+C
-				if (b->sel->len == 0) {
-					clipboard_put(b->sel->line->chars);
-				} else {
-					char* s = buffer_selection_text(b);
-					clipboard_put(s);
-					free(s);
+				FILE* f = clipboard_open("w");
+				if (f == NULL) {
+					return 1;
 				}
+				if (b->sel->len == 0) {
+					line_write_to(b->sel->line, f);
+				} else {
+					buffer_write_selection_to(b, f);
+				}
+				clipboard_close(f);
 				break;
 			case 17: // ctrl+Q
 			case 23: // ctrl+W
@@ -202,7 +207,7 @@ int main(int argc, char** argv) {
 					if (f == NULL) {
 						return 1;
 					}
-					int err = buffer_write_stream(b, f);
+					int err = buffer_write_to(b, f);
 					fclose(f);
 					if (err) {
 						return err;
