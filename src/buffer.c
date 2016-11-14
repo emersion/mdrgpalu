@@ -193,7 +193,7 @@ void buffer_move_selection(struct buffer* b, int i, int j) {
 		if (at < 0) {
 			// Want to move to a previous line
 			while (l->prev != NULL && at < 0) {
-				at += l->len + 1;
+				at += l->prev->len + 1;
 				l = l->prev;
 			}
 			if (at < 0) {
