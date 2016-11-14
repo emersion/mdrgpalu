@@ -37,9 +37,9 @@ void line_realloc(struct line* l) {
 	}
 }
 
-// line_read_range_from reads a single line from f and adds it to the line, at
-// the provided position. Returns the number of bytes appended to the line.
-int line_read_range_from(struct line* l, int at, FILE* f) {
+// line_read_from reads a single line from f and adds it to the line, at the
+// specified position. Returns the number of bytes appended to the line.
+int line_read_from(struct line* l, int at, FILE* f) {
 	int n = 0;
 	while (1) {
 		int c = fgetc(f);
@@ -70,10 +70,6 @@ int line_read_range_from(struct line* l, int at, FILE* f) {
 	return n;
 }
 
-int line_read_from(struct line* l, FILE* f) {
-	return line_read_range_from(l, 0, f);
-}
-
 int line_write_range_to(struct line* l, int at, int len, FILE* f) {
 	if (len < 0) {
 		len = l->len+1;
@@ -102,36 +98,50 @@ int line_write_to(struct line* l, FILE* f) {
 	return line_write_range_to(l, 0, -1, f);
 }
 
-void line_insert_at(struct line* l, int i, char c) {
-	if (i > l->len) {
-		i = l->len;
+void line_insert_char(struct line* l, int at, char c) {
+	if (at > l->len) {
+		at = l->len;
 	}
 
 	line_realloc(l);
 
-	if (i < l->len) {
-		memmove(&l->chars[i+1], &l->chars[i], l->len-i);
+	if (at < l->len) {
+		memmove(&l->chars[at+1], &l->chars[at], l->len-at);
 	}
 
-	l->chars[i] = c;
+	l->chars[at] = c;
 	l->len++;
 }
 
-int line_remove_at(struct line* l, int i) {
+void line_delete_range(struct line* l, int at, int len) {
+	memmove(&l->chars[at], &l->chars[at+len], l->len-at-len);
+	l->len -= len;
+	// TODO: realloc
+}
+
+int line_delete_char(struct line* l, int at) {
 	if (l->len == 0) {
 		return -1;
 	}
-	if (i < 0) {
-		i = 0;
+	if (at < 0) {
+		at = 0;
 	}
-	if (i >= l->len) {
-		i = l->len-1;
+	if (at >= l->len) {
+		at = l->len-1;
 	}
 
-	char c = l->chars[i];
-	memmove(&l->chars[i], &l->chars[i+1], l->len-i-1);
-	l->len--;
+	char c = l->chars[at];
+	line_delete_range(l, at, 1);
 	return c;
+}
+
+// line_delete deletes l without deallocating it. It's useful for instance when
+// deleting a line from a buffer and inserting it somewhere else.
+void line_delete(struct line* l) {
+	l->prev->next = l->next;
+	if (l->next != NULL) {
+		l->next->prev = l->prev;
+	}
 }
 
 // line_split splits l in two lines, l will contain the part before at and the

@@ -13,7 +13,7 @@ int buffer_read_from(struct buffer* b, FILE* f) {
 			l = buffer_insert_line(b);
 		}
 
-		int n = line_read_range_from(l, at, f);
+		int n = line_read_from(l, at, f);
 		if (n == EOF) {
 			return EOF;
 		}
