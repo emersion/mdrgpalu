@@ -36,7 +36,7 @@ void buffer_print(struct buffer* b, struct status* s) {
 		char c;
 		for (int j = 0; j <= l->len; j++) {
 			if (j == l->len) {
-				c = ' ';
+				c = '\n';
 			} else {
 				c = l->chars[j];
 			}
@@ -44,8 +44,9 @@ void buffer_print(struct buffer* b, struct status* s) {
 				print_escape(FORMAT_REVERSE);
 				curchar = j;
 				selch = -1;
-			} else if (j == l->len) {
-				continue;
+				if (j == l->len) {
+					printf(" ");
+				}
 			}
 			printf("%c", c);
 			if (selch == -1 && sellen > 0) {
@@ -56,7 +57,6 @@ void buffer_print(struct buffer* b, struct status* s) {
 			}
 		}
 
-		printf("\n");
 		i++;
 	}
 
