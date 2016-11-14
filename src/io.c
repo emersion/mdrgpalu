@@ -1,8 +1,6 @@
-#define BUF_SIZE 1024
-
 // buffer_read_from reads f until EOF and appends data in the buffer.
 int buffer_read_from(struct buffer* b, FILE* f) {
-	char buf[BUF_SIZE];
+	char buf[512];
 	while (!feof(f)) {
 		int n = fread(&buf, sizeof(char), sizeof(buf)/sizeof(char), f);
 		int err = ferror(f);
