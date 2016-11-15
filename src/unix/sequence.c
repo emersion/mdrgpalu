@@ -1,4 +1,5 @@
 // See http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+// See https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
 #define CODE_CUU 'A' // Cursor Up
 #define CODE_CUD 'B' // Cursor Down
 #define CODE_CUF 'C' // Cursor Forward
@@ -7,6 +8,9 @@
 #define CODE_CPL 'F' // Cursor Preceding Line
 #define CODE_CHA 'G' // Cursor Character Absolute
 #define CODE_CUP 'H' // Cursor Position
+
+#define CODE_CURSOR_HIDE "?25l"
+#define CODE_CURSOR_SHOW "?25h"
 
 #define MODIFIER_SHIFT 2
 #define MODIFIER_ALT   3

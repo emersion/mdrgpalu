@@ -186,7 +186,9 @@ int editor_run(int argc, char** argv) {
 int main(int argc, char** argv) {
 	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering
 	term_setup();
+	print_escape(CODE_CURSOR_HIDE);
 	int exitcode = editor_run(argc, argv);
 	term_close();
+	print_escape(CODE_CURSOR_SHOW);
 	return exitcode;
 }
