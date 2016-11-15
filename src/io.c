@@ -55,7 +55,7 @@ int buffer_write_selection_to(struct buffer* b, FILE* f) {
 			return err;
 		}
 
-		len -= n;
+		len -= n - from;
 		l = l->next;
 		from = 0;
 	}

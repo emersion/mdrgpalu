@@ -301,6 +301,9 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 			struct line* l = b->sel->line;
 			while (l != NULL && end >= 0) {
 				end -= l->len;
+				if (l != b->last) {
+					end -= 1;
+				}
 				l = l->next;
 			}
 			if (end > 0) {
