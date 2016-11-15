@@ -87,7 +87,7 @@ int line_write_range_to(struct line* l, int at, int len, FILE* f) {
 		}
 	}
 
-	if (len > l->len) {
+	if (at + len > l->len) {
 		fputc('\n', f);
 		return ferror(f);
 	}

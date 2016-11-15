@@ -46,8 +46,8 @@ int buffer_write_selection_to(struct buffer* b, FILE* f) {
 	int len = b->sel->len;
 	while (len > 0 && l != NULL) {
 		int n = len;
-		if (n > l->len) {
-			n = l->len+1; // line + \n
+		if (n > l->len - from) {
+			n = l->len + 1 - from; // line + \n
 		}
 
 		int err = line_write_range_to(l, from, n, f);
@@ -55,7 +55,7 @@ int buffer_write_selection_to(struct buffer* b, FILE* f) {
 			return err;
 		}
 
-		len -= n - from;
+		len -= n;
 		l = l->next;
 		from = 0;
 	}
