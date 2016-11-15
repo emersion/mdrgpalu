@@ -25,4 +25,4 @@ Keystroke | Effect
 
 ## License
 
-MIT
+The Unlicense
