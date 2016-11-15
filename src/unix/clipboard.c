@@ -1,14 +1,16 @@
-FILE* clipboard_open(char* mode) {
-	char* cmd;
-	if (mode[0] == 'r') {
-		cmd = "xclip -selection clipboard -o";
-	} else {
-		cmd = "xclip -selection clipboard -i";
-	}
+char* clipboard_buffer = NULL;
+size_t clipboard_len = 0;
 
-	return popen(cmd, mode);
+FILE* clipboard_open(char* mode) {
+	if (mode[0] == 'r') {
+		return fmemopen(clipboard_buffer, clipboard_len, mode);
+	} else {
+		free(clipboard_buffer);
+		clipboard_len = 0;
+		return open_memstream(&clipboard_buffer, &clipboard_len);
+	}
 }
 
-int clipboard_close(FILE* p) {
-	return pclose(p);
+int clipboard_close(FILE* s) {
+	return fclose(s);
 }

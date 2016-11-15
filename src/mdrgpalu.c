@@ -17,10 +17,10 @@
 	#include "windows/term.c"
 #endif
 
-// TODO: create windows counterparts for this
+// TODO: create windows counterparts for these
 #include "unix/format.c"
 #include "unix/sequence.c"
-#include "unix/clipboard.c"
+#include "unix/clipboard_xclip.c"
 #include "unix/buffer.c"
 
 int main(int argc, char** argv) {
