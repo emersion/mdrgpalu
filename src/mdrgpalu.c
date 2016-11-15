@@ -23,7 +23,7 @@
 #include "unix/clipboard_xclip.c"
 #include "unix/buffer.c"
 
-int main(int argc, char** argv) {
+int editor_run(int argc, char** argv) {
 	struct buffer* b = buffer_new();
 
 	char* filename = NULL;
@@ -43,9 +43,6 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering
-	setup_term();
-
 	struct status* s = (struct status*) malloc(sizeof(struct status));
 	buffer_print(b, s);
 	status_print(s);
@@ -56,7 +53,7 @@ int main(int argc, char** argv) {
 	while (1) {
 		c = fgetc(stdin);
 		if (feof(stdin)) {
-			break;
+			return 0;
 		} else if (ferror(stdin)) {
 			return 1;
 		}
@@ -184,6 +181,12 @@ int main(int argc, char** argv) {
 
 		prev = c;
 	}
+}
 
-	return 0;
+int main(int argc, char** argv) {
+	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering
+	term_setup();
+	int exitcode = editor_run(argc, argv);
+	term_close();
+	return exitcode;
 }
