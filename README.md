@@ -1,6 +1,6 @@
 # mdrgpalu
 
-Yet another command-line editor.
+Yet another command-line text editor.
 
 ## Usage
 
