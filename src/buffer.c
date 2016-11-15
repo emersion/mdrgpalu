@@ -1,9 +1,9 @@
 // A buffer is a set of lines.
 struct buffer {
-	struct line* first;
-	struct line* last;
+	struct line* first; // The first line in the buffer
+	struct line* last; // The last line in the buffer
 
-	struct selection* sel;
+	struct selection* sel; // The buffer's current selection
 };
 
 // buffer_reset discards the buffer data and fills it with a new empty line.
@@ -25,7 +25,8 @@ void buffer_reset(struct buffer* b) {
 	b->sel->line = l;
 }
 
-// buffer_new allocates and initializes a new buffer.
+// buffer_new allocates a new empty buffer. The buffer initially contains an
+// empty line and the selection is set to the first character.
 struct buffer* buffer_new() {
 	struct buffer* b = malloc(sizeof(struct buffer));
 	buffer_reset(b);
@@ -116,6 +117,7 @@ int buffer_delete_char(struct buffer* b) {
 	return c;
 }
 
+// buffer_delete_selection deletes the current selection.
 void buffer_delete_selection(struct buffer* b) {
 	struct line* l = b->sel->line;
 	int from = b->sel->ch;
@@ -315,6 +317,7 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 	}
 }
 
+// buffer_shrink_selection sets the current selection's length to zero.
 void buffer_shrink_selection(struct buffer* b, int dir) {
 	if (dir > 0) {
 		buffer_move_selection(b, 0, b->sel->len);

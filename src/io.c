@@ -10,9 +10,11 @@ int buffer_read_from(struct buffer* b, FILE* f) {
 	int N = 0; // Number of bytes read from f
 	while (!feof(f)) {
 		if (l == NULL) {
+			// If the first line has be filled, create a new one
 			l = buffer_insert_line(b);
 		}
 
+		// Read a single line
 		int n = line_read_from(l, at, f);
 		if (n == EOF) {
 			return EOF;
@@ -28,7 +30,8 @@ int buffer_read_from(struct buffer* b, FILE* f) {
 	return N;
 }
 
-// buffer_write_to writes the buffer's data to f.
+// buffer_write_to writes the buffer's data to f. It returns a non-zero value on
+// error.
 int buffer_write_to(struct buffer* b, FILE* f) {
 	for (struct line* l = b->first; l != NULL; l = l->next) {
 		int err = line_write_to(l, f);
@@ -40,6 +43,8 @@ int buffer_write_to(struct buffer* b, FILE* f) {
 	return 0;
 }
 
+// buffer_write_selection_to writes the buffer's selection to f. It returns a
+// non-zero value on error.
 int buffer_write_selection_to(struct buffer* b, FILE* f) {
 	struct line* l = b->sel->line;
 	int from = b->sel->ch;
