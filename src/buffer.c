@@ -283,7 +283,6 @@ void buffer_extend_selection(struct buffer* b, int i, int j) {
 		} else {
 			// Move the start of the selection
 			int at = b->sel->ch + j;
-			printf(" %d ", at);
 			struct line* l = b->sel->line;
 			while (at < 0 && l->prev != NULL) {
 				at += l->prev->len + 1;
