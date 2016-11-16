@@ -25,6 +25,7 @@ Arrow | Move selection
 <kbd>Shift</kbd> + Arrow | Extend selection
 <kbd>Home</kbd>/<kbd>End</kbd> | Go to start/end of line
 <kbd>Ctrl</kbd> + <kbd>←</kbd>/<kbd>→</kbd> | Jump to previous/next word
+<kbd>Ctrl</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> | Move line
 
 ## License
 

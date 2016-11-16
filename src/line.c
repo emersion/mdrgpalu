@@ -25,6 +25,21 @@ void line_free(struct line* l) {
 	free(l);
 }
 
+// line_walk gets the i-th line after (or before) l. If no such line exists, it
+// returns NULL.
+struct line* line_walk(struct line* l, int i) {
+	while (i != 0 && l != NULL) {
+		if (i > 0) {
+			i--;
+			l = l->next;
+		} else {
+			i++;
+			l = l->prev;
+		}
+	}
+	return l;
+}
+
 // line_insert inserts l between prev and next. l must do not be inserted.
 void line_insert(struct line* l, struct line* prev, struct line* next) {
 	l->prev = prev;
@@ -50,6 +65,36 @@ void line_delete(struct line* l) {
 
 	l->prev = NULL;
 	l->next = NULL;
+}
+
+// line_swap swaps l1 with l2.
+void line_swap(struct line* l1, struct line* l2) {
+	// We need a temporary variable as we'll need to swap next and prev
+	struct line* tmp;
+
+	// Swap next
+	tmp = l1->next;
+	l1->next = l2->next;
+	l2->next = tmp;
+
+	if (l1->next != NULL) {
+		l1->next->prev = l1;
+	}
+	if (l2->next != NULL) {
+		l2->next->prev = l2;
+	}
+
+	// Swap prev
+	tmp = l1->prev;
+	l1->prev = l2->prev;
+	l2->prev = tmp;
+
+	if (l1->prev != NULL) {
+		l1->prev->next = l1;
+	}
+	if (l2->prev != NULL) {
+		l2->prev->next = l2;
+	}
 }
 
 // line_realloc is an internal function that grows l's capacity by at least one

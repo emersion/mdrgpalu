@@ -69,7 +69,7 @@ int editor_run(int argc, char** argv) {
 			case CODE_CUU:
 			case CODE_CUD:
 			case CODE_CUF:
-			case CODE_CUB:;
+			case CODE_CUB:; // Arrow
 				int delta = s->params[0];
 				if (delta == 0) {
 					delta = 1;
@@ -93,11 +93,14 @@ int editor_run(int argc, char** argv) {
 				}
 
 				if (modifiers & MODIFIER_CTRL) {
-					// TODO: support Ctrl+Shift too
 					if (j != 0) {
+						// TODO: support Ctrl+Shift too
 						buffer_jump_selection(b, j);
-					} else {
-						// TODO: swap lines
+					} else if (i != 0) {
+						struct line* other = line_walk(b->sel->line, i);
+						if (other != NULL) {
+							buffer_swap_lines(b, b->sel->line, other);
+						}
 					}
 				} else if (modifiers & MODIFIER_SHIFT) {
 					buffer_extend_selection(b, i, j);

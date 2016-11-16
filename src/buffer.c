@@ -265,3 +265,18 @@ void buffer_shrink_selection(struct buffer* b, int dir) {
 void buffer_jump_selection(struct buffer* b, int dir) {
 	selection_jump(b->sel, dir);
 }
+
+void buffer_swap_lines(struct buffer* b, struct line* l1, struct line* l2) {
+	if (b->first == l1) {
+		b->first = l2;
+	} else if (b->first == l2) {
+		b->first = l1;
+	}
+	if (b->last == l1) {
+		b->last = l2;
+	} else if (b->last == l2) {
+		b->last = l1;
+	}
+
+	line_swap(l1, l2);
+}
