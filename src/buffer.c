@@ -324,3 +324,29 @@ void buffer_shrink_selection(struct buffer* b, int dir) {
 	}
 	b->sel->len = 0;
 }
+
+// buffer_jump_selection jumps the selection to the right if dir > 0, to the
+// left if dir < 0.
+void buffer_jump_selection(struct buffer* b, int dir) {
+	struct line* l = b->sel->line;
+	int at = line_jump(l, b->sel->ch, dir);
+
+	if (at < 0) {
+		if (l->prev != NULL) {
+			l = l->prev;
+			at = l->len;
+		} else {
+			at = 0;
+		}
+	} else if (at > l->len) {
+		if (l->next != NULL) {
+			l = l->next;
+			at = 0;
+		} else {
+			at = l->len;
+		}
+	}
+
+	b->sel->line = l;
+	b->sel->ch = at;
+}

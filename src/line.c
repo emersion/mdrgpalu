@@ -208,3 +208,37 @@ struct line* line_split(struct line* l, int at) {
 
 	return next;
 }
+
+// line_jump jumps to a neighbor word. It jumps forward if dir > 0 and backward
+// if dir < 0. It returns the new index.
+int line_jump(struct line* l, int at, int dir) {
+	if (dir == 0) {
+		return at; // Nothing to do
+	}
+	if (dir > 0) {
+		dir = 1;
+	}
+	if (dir < 0) {
+		dir = -1;
+	}
+
+	int inword = 0;
+	for (at += dir; at >= 0 && at <= l->len; at += dir) {
+		char c = l->chars[at];
+		if (c == ' ' || c == '\t') { // Whitespace char
+			if (inword) {
+				break;
+			}
+		} else {
+			if (inword) {
+				if (at == 0 || at == l->len) {
+					break;
+				}
+			} else {
+				inword = 1;
+			}
+		}
+	}
+
+	return at;
+}
