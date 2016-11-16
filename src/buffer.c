@@ -176,31 +176,53 @@ void buffer_insert_char(struct buffer* b, char c) {
 	}
 }
 
-// buffer_set_selection sets the current selection. i is the line number, j is
-// the column number, and len is the selection's length.
-void buffer_set_selection(struct buffer* b, int i, int j, int len) {
-	if (i >= 0) {
-		struct line* l = b->first;
-		while (i > 0) {
+// buffer_set_selection_line sets the current line index.
+void buffer_set_selection_line(struct buffer* b, int i) {
+	struct line* l = b->first;
+	while (i > 0) {
+		if (l->next == NULL) {
+			break;
+		}
+		l = l->next;
+		i--;
+	}
+	b->sel->line = l;
+}
+
+// buffer_move_selection_line moves the current line index. Negative values move
+// to previous lines, positive values move to next lines.
+void buffer_move_selection_line(struct buffer* b, int i) {
+	struct line* l = b->sel->line;
+	while (i != 0) {
+		if (i > 0) {
 			if (l->next == NULL) {
 				break;
 			}
-			l = l->next;
 			i--;
+			l = l->next;
+		} else {
+			if (l->prev == NULL) {
+				break;
+			}
+			i++;
+			l = l->prev;
 		}
-		b->sel->line = l;
 	}
+	b->sel->line = l;
+}
 
+// buffer_set_selection sets the current selection. i is the line number, j is
+// the column number, and len is the selection's length. If i < 0, the current
+// line number is not changed. Same for j and len.
+void buffer_set_selection(struct buffer* b, int i, int j, int len) {
+	if (i >= 0) {
+		buffer_set_selection_line(b, i);
+	}
 	if (j >= 0) {
-		if (j > b->sel->line->len) {
-			j = b->sel->line->len;
-		}
-		b->sel->ch = j;
+		selection_set_ch(b->sel, j);
 	}
-
 	if (len >= 0) {
-		// TODO: bounds check
-		b->sel->len = len;
+		selection_set_len(b->sel, len);
 	}
 }
 
@@ -208,145 +230,38 @@ void buffer_set_selection(struct buffer* b, int i, int j, int len) {
 // is the column delta.
 void buffer_move_selection(struct buffer* b, int i, int j) {
 	if (i != 0) {
-		struct line* l = b->sel->line;
-		while (i != 0) {
-			if (i > 0) {
-				if (l->next == NULL) {
-					break;
-				}
-				i--;
-				l = l->next;
-			} else {
-				if (l->prev == NULL) {
-					break;
-				}
-				i++;
-				l = l->prev;
-			}
-		}
-		b->sel->line = l;
+		buffer_move_selection_line(b, i);
 	}
-
 	if (j != 0) {
-		int at = b->sel->ch;
-		if (at > b->sel->line->len) {
-			at = b->sel->line->len;
-		}
-		at += j;
-
-		struct line* l = b->sel->line;
-		if (at < 0) {
-			// Want to move to a previous line
-			while (l->prev != NULL && at < 0) {
-				at += l->prev->len + 1;
-				l = l->prev;
-			}
-			if (at < 0) {
-				at = 0;
-			}
-		} else if (at > b->sel->line->len) {
-			// Want to move to a next line
-			while (l->next != NULL && at > l->len) {
-				at -= l->len + 1;
-				l = l->next;
-			}
-			if (at > l->len) {
-				at = l->len;
-			}
-		}
-		b->sel->line = l;
-		b->sel->ch = at;
+		selection_move_ch(b->sel, j);
 	}
 }
 
 // buffer_extend_selection extends the current selection of i lines and j
 // columns.
 void buffer_extend_selection(struct buffer* b, int i, int j) {
+	if (b->sel->len == 0) {
+		// Extending selection from a cursor, set dir
+		if (i < 0 || (i == 0 && j < 0)) {
+			b->sel->dir = SELECTION_DIR_LEFT;
+		} else {
+			b->sel->dir = SELECTION_DIR_RIGHT;
+		}
+	}
+
 	if (i != 0) {
-		// TODO: backward
 		// TODO
 	}
 
 	if (j != 0) {
-		int len = b->sel->len;
-		if (len == 0) {
-			// Extending selection from a cursor, set dir
-			if (i < 0 || (i == 0 && j < 0)) {
-				b->sel->dir = SELECTION_DIR_LEFT;
-			} else {
-				b->sel->dir = SELECTION_DIR_RIGHT;
-			}
-		}
-
-		if (b->sel->dir == SELECTION_DIR_RIGHT) {
-			len += j;
-		} else {
-			// Move the start of the selection
-			int at = b->sel->ch + j;
-			struct line* l = b->sel->line;
-			while (at < 0 && l->prev != NULL) {
-				at += l->prev->len + 1;
-				l = l->prev;
-			}
-			if (at < 0) {
-				at = 0;
-			} else {
-				len -= j;
-			}
-			b->sel->line = l;
-			b->sel->ch = at;
-		}
-
-		// Check that selection is not beyond the end of the buffer
-		int end = b->sel->ch + len;
-		if (end > b->sel->line->len) {
-			struct line* l = b->sel->line;
-			while (l != NULL && end >= 0) {
-				end -= l->len;
-				if (l != b->last) {
-					end -= 1;
-				}
-				l = l->next;
-			}
-			if (end > 0) {
-				len -= end;
-			}
-		}
-
-		b->sel->len = len;
+		selection_extend_ch(b->sel, j);
 	}
 }
 
-// buffer_shrink_selection sets the current selection's length to zero.
 void buffer_shrink_selection(struct buffer* b, int dir) {
-	if (dir > 0) {
-		buffer_move_selection(b, 0, b->sel->len);
-	}
-	b->sel->len = 0;
+	selection_shrink(b->sel, dir);
 }
 
-// buffer_jump_selection jumps the selection to the right if dir > 0, to the
-// left if dir < 0.
 void buffer_jump_selection(struct buffer* b, int dir) {
-	struct line* l = b->sel->line;
-	int at = line_jump(l, b->sel->ch, dir);
-
-	if (at < 0) {
-		if (l->prev != NULL) {
-			l = l->prev;
-			at = l->len;
-		} else {
-			at = 0;
-		}
-	} else if (at > l->len) {
-		if (l->next != NULL) {
-			l = l->next;
-			at = 0;
-		} else {
-			at = l->len;
-		}
-	}
-
-	b->sel->line = l;
-	b->sel->ch = at;
+	selection_jump(b->sel, dir);
 }
