@@ -64,7 +64,7 @@ int editor_run(int argc, char** argv) {
 				printf("Cannot parse escape sequence\n");
 				continue;
 			}
-
+printf(" %c %d %d ", s->code, s->params[0], s->params[1]);
 			switch (s->code) {
 			case CODE_CUU:
 			case CODE_CUD:
@@ -99,6 +99,20 @@ int editor_run(int argc, char** argv) {
 					} else {
 						buffer_move_selection(b, i, j);
 					}
+				}
+				break;
+			case CODE_CPL:
+				if (s->params[0] == 0) { // End
+					b->sel->ch = b->sel->line->len;
+				} else {
+					// TODO
+				}
+				break;
+			case CODE_CUP:
+				if (s->params[0] == 0 && s->params[1] == 0) { // Home
+					b->sel->ch = 0;
+				} else {
+					// TODO
 				}
 				break;
 			}
