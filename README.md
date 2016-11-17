@@ -21,6 +21,7 @@ Keystroke | Effect
 <kbd>Ctrl</kbd> + <kbd>X</kbd> | Cut line/selection
 <kbd>Ctrl</kbd> + <kbd>C</kbd> | Copy line/selection
 <kbd>Ctrl</kbd> + <kbd>V</kbd> | Paste line/selection
+<kbd>Ctrl</kbd> + <kbd>A</kbd> | Select all
 Arrow | Move selection
 <kbd>Shift</kbd> + Arrow | Extend selection
 <kbd>Home</kbd>/<kbd>End</kbd> | Go to start/end of line

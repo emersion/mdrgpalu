@@ -45,6 +45,18 @@ void buffer_free(struct buffer* b) {
 	free(b);
 }
 
+// buffer_len returns the length of the buffer's text.
+int buffer_len(struct buffer* b) {
+	int len = 0;
+	for (struct line* l = b->first; l != NULL; l = l->next) {
+		len += l->len;
+		if (l->next != NULL) {
+			len += 1;
+		}
+	}
+	return len;
+}
+
 // buffer_insert_line inserts a new line at the cursor's position.
 struct line* buffer_insert_line(struct buffer* b) {
 	struct line* l = line_split(b->sel->line, b->sel->ch);

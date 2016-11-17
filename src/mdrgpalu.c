@@ -136,6 +136,8 @@ int editor_run(int argc, char** argv) {
 			buffer_insert_char(b, (char) c);
 		} else {
 			switch (c) {
+				case 1: // Ctrl+A
+					buffer_set_selection(b, 0, 0, buffer_len(b));
 				case 3: // Ctrl+C
 				case 24: { // Ctrl+X
 					FILE* f = clipboard_open("w");
