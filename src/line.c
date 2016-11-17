@@ -299,12 +299,12 @@ void line_join(struct line* l, struct line* other) {
 	int len = l->len + other->len;
 	if (other->len > 0) {
 		if (l->cap < len) {
-			l->prev->cap = len;
-			l->prev->chars = (char*) realloc(l->prev->chars, l->prev->cap);
+			l->cap = len;
+			l->chars = (char*) realloc(l->chars, l->cap);
 		}
-		memcpy(&l->prev->chars[l->prev->len], l->chars, l->len);
+		memcpy(&l->chars[l->len], other->chars, other->len);
 	}
-	l->prev->len = len;
+	l->len = len;
 }
 
 // line_jump jumps to a neighbor word. It jumps forward if dir > 0 and backward

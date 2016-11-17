@@ -99,43 +99,47 @@ void buffer_delete_line(struct buffer* b, struct line* l) {
 int buffer_delete_char(struct buffer* b, int dir) {
 	int at = b->sel->ch + dir;
 
-	// TODO: at >= b->sel->len
-	// TODO: use line_join
+	if (at >= 0 && at < b->sel->line->len) {
+		// Delete a character in this line
+		int c = line_delete_char(b->sel->line, at);
+
+		if (at > b->sel->line->len) {
+			at = b->sel->line->len;
+		}
+		if (at < 0) {
+			at = 0;
+		}
+		b->sel->ch = at;
+
+		return c;
+	}
+
+	// Delete a line
+	struct line* l = NULL;
+	struct line* other = NULL;
 	if (at < 0) {
-		struct line* l = b->sel->line;
-		if (l->prev == NULL) {
+		if (b->sel->line->prev == NULL) {
 			return EOF;
 		}
 
-		b->sel->ch = l->prev->len;
-
-		// Copy the end of the current line to the end of the previous one
-		int len = l->prev->len + l->len;
-		if (l->len > 0) {
-			if (l->prev->cap < len) {
-				l->prev->cap = len;
-				l->prev->chars = (char*) realloc(l->prev->chars, l->prev->cap);
-			}
-			memcpy(&l->prev->chars[l->prev->len], l->chars, l->len);
+		l = b->sel->line->prev;
+		other = b->sel->line;
+	} else { // at >= b->sel->line->len
+		if (b->sel->line->next == NULL) {
+			return EOF;
 		}
-		l->prev->len = len;
 
-		buffer_delete_line(b, l);
-
-		return '\n';
+		l = b->sel->line;
+		other = b->sel->line->next;
 	}
 
-	int c = line_delete_char(b->sel->line, at);
+	b->sel->line = l;
+	b->sel->ch = l->len;
 
-	if (at > b->sel->line->len) {
-		at = b->sel->line->len;
-	}
-	if (at < 0) {
-		at = 0;
-	}
-	b->sel->ch = at;
+	line_join(l, other);
+	buffer_delete_line(b, other);
 
-	return c;
+	return '\n';
 }
 
 // buffer_delete_selection deletes the current selection.
