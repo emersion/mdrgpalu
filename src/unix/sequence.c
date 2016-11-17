@@ -8,6 +8,7 @@
 #define CODE_CPL 'F' // Cursor Preceding Line
 #define CODE_CHA 'G' // Cursor Character Absolute
 #define CODE_CUP 'H' // Cursor Position
+#define CODE_DECDC '~' // Delete Column
 
 #define CODE_CURSOR_HIDE "?25l"
 #define CODE_CURSOR_SHOW "?25h"

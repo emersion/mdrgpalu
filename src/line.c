@@ -293,6 +293,20 @@ struct line* line_split(struct line* l, int at) {
 	return next;
 }
 
+// line_join joins l and other to l.
+void line_join(struct line* l, struct line* other) {
+	// Copy the other line to the end of this one
+	int len = l->len + other->len;
+	if (other->len > 0) {
+		if (l->cap < len) {
+			l->prev->cap = len;
+			l->prev->chars = (char*) realloc(l->prev->chars, l->prev->cap);
+		}
+		memcpy(&l->prev->chars[l->prev->len], l->chars, l->len);
+	}
+	l->prev->len = len;
+}
+
 // line_jump jumps to a neighbor word. It jumps forward if dir > 0 and backward
 // if dir < 0. It returns the difference between at and the new index.
 int line_jump(struct line* l, int at, int dir) {

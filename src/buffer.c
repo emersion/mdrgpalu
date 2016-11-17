@@ -94,13 +94,20 @@ void buffer_delete_line(struct buffer* b, struct line* l) {
 	line_free(l);
 }
 
-// buffer_delete_char removes a character at the current cursor's position.
-int buffer_delete_char(struct buffer* b) {
-	if (b->sel->ch == 0) {
+// buffer_delete_char removes a character at the current cursor's position if
+// dir == 0 or the previous if dir = -1. It returns the deleted char.
+int buffer_delete_char(struct buffer* b, int dir) {
+	int at = b->sel->ch + dir;
+
+	// TODO: at >= b->sel->len
+	// TODO: use line_join
+	if (at < 0) {
 		struct line* l = b->sel->line;
 		if (l->prev == NULL) {
 			return EOF;
 		}
+
+		b->sel->ch = l->prev->len;
 
 		// Copy the end of the current line to the end of the previous one
 		int len = l->prev->len + l->len;
@@ -111,7 +118,6 @@ int buffer_delete_char(struct buffer* b) {
 			}
 			memcpy(&l->prev->chars[l->prev->len], l->chars, l->len);
 		}
-		b->sel->ch = l->prev->len;
 		l->prev->len = len;
 
 		buffer_delete_line(b, l);
@@ -119,12 +125,15 @@ int buffer_delete_char(struct buffer* b) {
 		return '\n';
 	}
 
-	int c = line_delete_char(b->sel->line, b->sel->ch-1);
+	int c = line_delete_char(b->sel->line, at);
 
-	b->sel->ch--;
-	if (b->sel->ch > b->sel->line->len) {
-		b->sel->ch = b->sel->line->len;
+	if (at > b->sel->line->len) {
+		at = b->sel->line->len;
 	}
+	if (at < 0) {
+		at = 0;
+	}
+	b->sel->ch = at;
 
 	return c;
 }
@@ -175,7 +184,7 @@ void buffer_insert_char(struct buffer* b, char c) {
 		return;
 	case 127:; // backspace
 		if (!deleted_selection) {
-			buffer_delete_char(b);
+			buffer_delete_char(b, -1);
 		}
 		return;
 	}

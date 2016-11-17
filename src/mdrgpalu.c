@@ -127,6 +127,10 @@ int editor_run(int argc, char** argv) {
 					// TODO
 				}
 				break;
+			case CODE_DECDC:
+				//int modifier = s->params[1]; // TODO: support Ctrl
+				buffer_delete_char(b, 0);
+				break;
 			}
 
 			sequence_free(s);
