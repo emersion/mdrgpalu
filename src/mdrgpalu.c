@@ -8,7 +8,7 @@
 #include "buffer.c"
 #include "io.c"
 
-#ifdef __unix__
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 	#include <sys/termios.h>
 	#include "unix/term.c"
 #elif _WIN32
