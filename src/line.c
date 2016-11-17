@@ -25,19 +25,58 @@ void line_free(struct line* l) {
 	free(l);
 }
 
-// line_walk gets the i-th line after (or before) l. If no such line exists, it
-// returns NULL.
-struct line* line_walk(struct line* l, int i) {
-	while (i != 0 && l != NULL) {
+// line_walk_line gets the i-th line after (or before) l. If no such line
+// exists, it returns the closest one.
+struct line* line_walk_line(struct line* l, int i) {
+	while (i != 0) {
 		if (i > 0) {
 			i--;
+			if (l->next == NULL) {
+				return l;
+			}
 			l = l->next;
 		} else {
 			i++;
+			if (l->prev == NULL) {
+				return l;
+			}
 			l = l->prev;
 		}
 	}
 	return l;
+}
+
+// line_walk_char gets the position of the i-th character after (or before) the
+// first character of l. If no such character exists, it selects the closest
+// one.
+void line_walk_char(struct line* l, int i, struct line** ol, int* och) {
+	while (1) {
+		// We are at the first character of line l
+		if (i > 0) { // Move forward
+			if (i > l->len) { // Move to next line
+				if (l->next != NULL) {
+					i -= l->len+1;
+					l = l->next;
+				} else {
+					*och = l->len;
+					break;
+				}
+			} else {
+				*och = i;
+				break;
+			}
+		} else { // Move backward, to previous line
+			if (l->prev != NULL) {
+				i += l->prev->len+1;
+				l = l->prev;
+			} else {
+				*och = 0;
+				break;
+			}
+		}
+	}
+
+	*ol = l;
 }
 
 // line_insert inserts l between prev and next. l must do not be inserted.

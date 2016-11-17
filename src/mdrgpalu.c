@@ -97,10 +97,8 @@ int editor_run(int argc, char** argv) {
 						// TODO: support Ctrl+Shift too
 						buffer_jump_selection(b, j);
 					} else if (i != 0) {
-						struct line* other = line_walk(b->sel->line, i);
-						if (other != NULL) {
-							buffer_swap_lines(b, b->sel->line, other);
-						}
+						struct line* other = line_walk_line(b->sel->line, i);
+						buffer_swap_lines(b, b->sel->line, other);
 					}
 				} else if (modifiers & MODIFIER_SHIFT) {
 					buffer_extend_selection(b, i, j);
