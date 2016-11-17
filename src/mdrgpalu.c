@@ -92,15 +92,18 @@ int editor_run(int argc, char** argv) {
 					break;
 				}
 
-				if (modifiers & MODIFIER_CTRL) {
+				if (modifiers == MODIFIER_CTRL_SHIFT) {
 					if (j != 0) {
-						// TODO: support Ctrl+Shift too
+						buffer_extend_jump_selection(b, j);
+					}
+				} else if (modifiers == MODIFIER_CTRL) {
+					if (j != 0) {
 						buffer_jump_selection(b, j);
 					} else if (i != 0) {
 						struct line* other = line_walk_line(b->sel->line, i);
 						buffer_swap_lines(b, b->sel->line, other);
 					}
-				} else if (modifiers & MODIFIER_SHIFT) {
+				} else if (modifiers == MODIFIER_SHIFT) {
 					buffer_extend_selection(b, i, j);
 				} else {
 					if (b->sel->len > 0) {

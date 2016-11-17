@@ -31,28 +31,11 @@ void selection_free(struct selection* s) {
 // and the character if needed (e.g. if the index is after the end of line or
 // if the index is negative).
 void selection_set_ch(struct selection* s, int at) {
-	struct line* l = s->line;
-	if (at < 0) {
-		// Want to move to a previous line
-		while (l->prev != NULL && at < 0) {
-			at += l->prev->len + 1;
-			l = l->prev;
-		}
-		if (at < 0) {
-			at = 0;
-		}
-	} else if (at > s->line->len) {
-		// Want to move to a next line
-		while (l->next != NULL && at > l->len) {
-			at -= l->len + 1;
-			l = l->next;
-		}
-		if (at > l->len) {
-			at = l->len;
-		}
-	}
+	struct line* l = NULL;
+	int ch = 0;
+	line_walk_char(s->line, at, &l, &ch);
 	s->line = l;
-	s->ch = at;
+	s->ch = ch;
 }
 
 // selection_move_ch moves the selection's character by i.
@@ -123,25 +106,13 @@ void selection_shrink(struct selection* s, int dir) {
 // selection_jump jumps the selection s to the right if dir > 0, to the left if
 // dir < 0.
 void selection_jump(struct selection* s, int dir) {
-	struct line* l = s->line;
-	int at = line_jump(l, s->ch, dir);
+	int d = line_jump(s->line, s->ch, dir);
+	selection_move_ch(s, d);
+}
 
-	if (at < 0) {
-		if (l->prev != NULL) {
-			l = l->prev;
-			at = l->len;
-		} else {
-			at = 0;
-		}
-	} else if (at > l->len) {
-		if (l->next != NULL) {
-			l = l->next;
-			at = 0;
-		} else {
-			at = l->len;
-		}
-	}
-
-	s->line = l;
-	s->ch = at;
+// selection_extend_jump jumps and extends the selection s to the right if dir >
+// 0, to the left if dir < 0.
+void selection_extend_jump(struct selection* s, int dir) {
+	int d = line_jump(s->line, s->ch, dir);
+	selection_extend_ch(s, d);
 }

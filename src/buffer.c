@@ -278,7 +278,15 @@ void buffer_jump_selection(struct buffer* b, int dir) {
 	selection_jump(b->sel, dir);
 }
 
+void buffer_extend_jump_selection(struct buffer* b, int dir) {
+	selection_extend_jump(b->sel, dir);
+}
+
 void buffer_swap_lines(struct buffer* b, struct line* l1, struct line* l2) {
+	if (l1 == l2) {
+		return;
+	}
+
 	if (b->first == l1) {
 		b->first = l2;
 	} else if (b->first == l2) {

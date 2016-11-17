@@ -50,7 +50,7 @@ struct line* line_walk_line(struct line* l, int i) {
 // first character of l. If no such character exists, it selects the closest
 // one.
 void line_walk_char(struct line* l, int i, struct line** ol, int* och) {
-	while (1) {
+	while (i != 0) {
 		// We are at the first character of line l
 		if (i > 0) { // Move forward
 			if (i > l->len) { // Move to next line
@@ -294,7 +294,7 @@ struct line* line_split(struct line* l, int at) {
 }
 
 // line_jump jumps to a neighbor word. It jumps forward if dir > 0 and backward
-// if dir < 0. It returns the new index.
+// if dir < 0. It returns the difference between at and the new index.
 int line_jump(struct line* l, int at, int dir) {
 	if (dir == 0) {
 		return at; // Nothing to do
@@ -307,15 +307,16 @@ int line_jump(struct line* l, int at, int dir) {
 	}
 
 	int inword = 0;
-	for (at += dir; at >= 0 && at <= l->len; at += dir) {
-		char c = l->chars[at];
+	int d = 0;
+	for (d += dir; at + d >= 0 && at + d <= l->len; d += dir) {
+		char c = l->chars[at + d];
 		if (c == ' ' || c == '\t') { // Whitespace char
 			if (inword) {
 				break;
 			}
 		} else {
 			if (inword) {
-				if (at == 0 || at == l->len) {
+				if (at + d == 0 || at + d == l->len) {
 					break;
 				}
 			} else {
@@ -324,5 +325,5 @@ int line_jump(struct line* l, int at, int dir) {
 		}
 	}
 
-	return at;
+	return d;
 }

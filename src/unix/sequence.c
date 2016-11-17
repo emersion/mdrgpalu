@@ -12,9 +12,11 @@
 #define CODE_CURSOR_HIDE "?25l"
 #define CODE_CURSOR_SHOW "?25h"
 
-#define MODIFIER_SHIFT 2
-#define MODIFIER_ALT   3
-#define MODIFIER_CTRL  5
+#define MODIFIER_SHIFT      2
+#define MODIFIER_ALT        3
+#define MODIFIER_ALT_SHIFT  4
+#define MODIFIER_CTRL       5
+#define MODIFIER_CTRL_SHIFT 6
 
 struct sequence {
 	char code;
