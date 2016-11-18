@@ -161,20 +161,28 @@ int editor_main(int argc, char** argv) {
 					}
 				}
 				break;
-			case CODE_CPL:
-				if (s->params[0] == 0) { // End
+			case CODE_CPL: { // End
+				// TODO: s->params[0] support
+				int modifiers = s->params[1];
+				if (modifiers == MODIFIER_CTRL) {
+					b->sel->line = b->last;
 					b->sel->ch = b->sel->line->len;
 				} else {
-					// TODO
+					b->sel->ch = b->sel->line->len;
 				}
 				break;
-			case CODE_CUP:
-				if (s->params[0] == 0 && s->params[1] == 0) { // Home
+			}
+			case CODE_CUP: { // Home
+				// TODO: s->params[0] support
+				int modifiers = s->params[1];
+				if (modifiers == MODIFIER_CTRL) {
+					b->sel->line = b->first;
 					b->sel->ch = 0;
 				} else {
-					// TODO
+					b->sel->ch = 0;
 				}
 				break;
+			}
 			case CODE_DECDC:
 				//int modifier = s->params[1]; // TODO: support Ctrl
 				buffer_delete_char(b, 0);
