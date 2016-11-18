@@ -251,6 +251,29 @@ void buffer_set_selection(struct buffer* b, int i, int j, int len) {
 	}
 }
 
+// buffer_set_position_string sets the selection by parsing a string in the
+// "line:column" format.
+void buffer_set_position_string(struct buffer* b, char* s) {
+	char* end;
+	int line = (int) strtoul(s, &end, 10) - 1;
+	if (line < 0) {
+		line = 0;
+	}
+
+	int col = 0;
+	if (end[0] != 0) {
+		col = (int) strtoul(&end[1], &end, 10) - 1;
+	}
+	buffer_set_selection_line(b, line);
+	if (col > b->sel->line->len) {
+		col = b->sel->line->len;
+	} else if (col < 0) {
+		col = 0;
+	}
+	b->sel->ch = col;
+	b->sel->len = 0;
+}
+
 // buffer_move_selection moves the current selection. i is the line delta and j
 // is the column delta.
 void buffer_move_selection(struct buffer* b, int i, int j) {
