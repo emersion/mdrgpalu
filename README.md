@@ -29,6 +29,7 @@ Arrow | Move selection
 <kbd>Ctrl</kbd> + <kbd>←</kbd>/<kbd>→</kbd> | Jump to previous/next word
 <kbd>Ctrl</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> | Move line
 <kbd>Ctrl</kbd> + <kbd>G</kbd> | Go to line:column
+<kbd>Ctrl</kbd> + <kbd>L</kbd> | Select line
 
 ## License
 

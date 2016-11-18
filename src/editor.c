@@ -226,7 +226,7 @@ int editor_main(int argc, char** argv) {
 					}
 					break;
 				}
-				case 7:; // Ctrl+G
+				case 7: { // Ctrl+G
 					char* s = editor_prompt(e, "Go to line:");
 					if (s == NULL) {
 						break;
@@ -234,6 +234,12 @@ int editor_main(int argc, char** argv) {
 					buffer_set_position_string(b, s);
 					free(s);
 					break;
+				}
+				case 12: { // Ctrl+L
+					b->sel->ch = 0;
+					selection_set_len(b->sel, b->sel->line->len + 1);
+					break;
+				}
 				case 17: // Ctrl+Q
 				case 23: // Ctrl+W
 					return 0;
