@@ -53,7 +53,7 @@ struct sequence* sequence_parse() {
 				if (paramslen * sizeof(int) > sizeof(s->params)) {
 					return NULL;
 				}
-				s->params[paramslen] = atoi(n);
+				s->params[paramslen] = (int) strtoul(n, NULL, 10);
 				paramslen++;
 
 				i = 0;

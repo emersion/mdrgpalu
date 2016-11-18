@@ -259,12 +259,12 @@ void buffer_set_position_string(struct buffer* b, char* s) {
 	if (line < 0) {
 		line = 0;
 	}
+	buffer_set_selection_line(b, line);
 
 	int col = 0;
 	if (end[0] != 0) {
 		col = (int) strtoul(&end[1], &end, 10) - 1;
 	}
-	buffer_set_selection_line(b, line);
 	if (col > b->sel->line->len) {
 		col = b->sel->line->len;
 	} else if (col < 0) {

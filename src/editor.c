@@ -223,6 +223,7 @@ int editor_main(int argc, char** argv) {
 						break;
 					}
 					buffer_set_position_string(b, s);
+					free(s);
 					break;
 				case 17: // Ctrl+Q
 				case 23: // Ctrl+W
