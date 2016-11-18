@@ -2,7 +2,7 @@
 // Returns EOF on error or the number of bytes appended to b on success.
 int buffer_read_from(struct buffer* b, FILE* f) {
 	if (b->sel->len > 0) {
-		// TODO: delete selection
+		buffer_delete_selection(b);
 	}
 
 	struct line* l = b->sel->line;
