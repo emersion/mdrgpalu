@@ -206,7 +206,8 @@ int line_write_range_to(struct line* l, int at, int len, FILE* f) {
 		}
 	}
 
-	if (at + len > l->len) {
+	if (at + len > l->len && l->next != NULL) {
+		// Write a trailing \n only if there's another line after
 		fputc('\n', f);
 		return ferror(f);
 	}
