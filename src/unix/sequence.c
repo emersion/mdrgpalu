@@ -13,6 +13,9 @@
 #define CODE_CURSOR_HIDE "?25l"
 #define CODE_CURSOR_SHOW "?25h"
 
+#define CODE_ALTSCREEN_ENABLE "?47h"
+#define CODE_ALTSCREEN_DISABLE "?47l"
+
 #define MODIFIER_SHIFT      2
 #define MODIFIER_ALT        3
 #define MODIFIER_ALT_SHIFT  4

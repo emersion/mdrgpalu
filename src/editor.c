@@ -168,6 +168,12 @@ int editor_main(int argc, char** argv) {
 					if (modifiers == MODIFIER_CTRL) {
 						b->sel->line = b->last;
 						b->sel->ch = b->sel->line->len;
+					} else if (modifiers == MODIFIER_SHIFT) {
+						int ch = b->sel->ch;
+						if (ch > b->sel->line->len) {
+							ch = b->sel->line->len;
+						}
+						b->sel->len = b->sel->line->len - ch;
 					} else {
 						b->sel->ch = b->sel->line->len;
 					}
@@ -179,6 +185,13 @@ int editor_main(int argc, char** argv) {
 					if (modifiers == MODIFIER_CTRL) {
 						b->sel->line = b->first;
 						b->sel->ch = 0;
+					} else if (modifiers == MODIFIER_SHIFT) {
+						int len = b->sel->ch;
+						if (len > b->sel->line->len) {
+							len = b->sel->line->len;
+						}
+						b->sel->ch = 0;
+						b->sel->len = len;
 					} else {
 						b->sel->ch = 0;
 					}
