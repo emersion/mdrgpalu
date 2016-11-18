@@ -10,6 +10,7 @@ debug:
 clean:
 	rm -rf mdrgpalu src/*.o
 install: mdrgpalu
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	install -m 0755 mdrgpalu $(DESTDIR)$(PREFIX)/bin
 
 .PHONY: clean all debug install
