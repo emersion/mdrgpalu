@@ -9,6 +9,8 @@ make
 ./mdrgpalu
 ```
 
+Arch users can [install mdrgpalu from the AUR](https://aur.archlinux.org/packages/mdrgpalu-git/).
+
 ## Key bindings
 
 Key bindings aim to be simple, stupid.
