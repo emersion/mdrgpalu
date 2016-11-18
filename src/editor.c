@@ -114,79 +114,81 @@ int editor_main(int argc, char** argv) {
 			}
 
 			switch (s->code) {
-			case CODE_CUU:
-			case CODE_CUD:
-			case CODE_CUF:
-			case CODE_CUB:; // Arrow
-				int delta = s->params[0];
-				if (delta == 0) {
-					delta = 1;
-				}
-				int modifiers = s->params[1];
-
-				int i = 0, j = 0;
-				switch (s->code) {
 				case CODE_CUU:
-					i = -delta;
-					break;
 				case CODE_CUD:
-					i = delta;
-					break;
 				case CODE_CUF:
-					j = delta;
-					break;
-				case CODE_CUB:
-					j = -delta;
-					break;
-				}
+				case CODE_CUB: { // Arrow
+					int delta = s->params[0];
+					if (delta == 0) {
+						delta = 1;
+					}
+					int modifiers = s->params[1];
 
-				if (modifiers == MODIFIER_CTRL_SHIFT) {
-					if (j != 0) {
-						buffer_extend_jump_selection(b, j);
+					int i = 0, j = 0;
+					switch (s->code) {
+					case CODE_CUU:
+						i = -delta;
+						break;
+					case CODE_CUD:
+						i = delta;
+						break;
+					case CODE_CUF:
+						j = delta;
+						break;
+					case CODE_CUB:
+						j = -delta;
+						break;
 					}
-				} else if (modifiers == MODIFIER_CTRL) {
-					if (j != 0) {
-						buffer_jump_selection(b, j);
-					} else if (i != 0) {
-						struct line* other = line_walk_line(b->sel->line, i);
-						buffer_swap_lines(b, b->sel->line, other);
-					}
-				} else if (modifiers == MODIFIER_SHIFT) {
-					buffer_extend_selection(b, i, j);
-				} else {
-					if (b->sel->len > 0) {
-						buffer_shrink_selection(b, i + j);
+
+					if (modifiers == MODIFIER_CTRL_SHIFT) {
+						if (j != 0) {
+							buffer_extend_jump_selection(b, j);
+						}
+					} else if (modifiers == MODIFIER_CTRL) {
+						if (j != 0) {
+							buffer_jump_selection(b, j);
+						} else if (i != 0) {
+							struct line* other = line_walk_line(b->sel->line, i);
+							buffer_swap_lines(b, b->sel->line, other);
+						}
+					} else if (modifiers == MODIFIER_SHIFT) {
+						buffer_extend_selection(b, i, j);
 					} else {
-						buffer_move_selection(b, i, j);
+						if (b->sel->len > 0) {
+							buffer_shrink_selection(b, i + j);
+						} else {
+							buffer_move_selection(b, i, j);
+						}
 					}
+					break;
 				}
-				break;
-			case CODE_CPL: { // End
-				// TODO: s->params[0] support
-				int modifiers = s->params[1];
-				if (modifiers == MODIFIER_CTRL) {
-					b->sel->line = b->last;
-					b->sel->ch = b->sel->line->len;
-				} else {
-					b->sel->ch = b->sel->line->len;
+				case CODE_CPL: { // End
+					// TODO: s->params[0] support
+					int modifiers = s->params[1];
+					if (modifiers == MODIFIER_CTRL) {
+						b->sel->line = b->last;
+						b->sel->ch = b->sel->line->len;
+					} else {
+						b->sel->ch = b->sel->line->len;
+					}
+					break;
 				}
-				break;
-			}
-			case CODE_CUP: { // Home
-				// TODO: s->params[0] support
-				int modifiers = s->params[1];
-				if (modifiers == MODIFIER_CTRL) {
-					b->sel->line = b->first;
-					b->sel->ch = 0;
-				} else {
-					b->sel->ch = 0;
+				case CODE_CUP: { // Home
+					// TODO: s->params[0] support
+					int modifiers = s->params[1];
+					if (modifiers == MODIFIER_CTRL) {
+						b->sel->line = b->first;
+						b->sel->ch = 0;
+					} else {
+						b->sel->ch = 0;
+					}
+					break;
 				}
-				break;
-			}
-			case CODE_DECDC:
-				//int modifier = s->params[1]; // TODO: support Ctrl
-				buffer_delete_char(b, 0);
-				break;
+				case CODE_DECDC: {
+					//int modifier = s->params[1]; // TODO: support Ctrl
+					buffer_delete_char(b, 0);
+					break;
+				}
 			}
 
 			sequence_free(s);
