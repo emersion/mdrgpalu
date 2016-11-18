@@ -21,7 +21,9 @@
 // TODO: create windows counterparts for these
 #include "unix/format.c"
 #include "unix/sequence.c"
+#include "unix/clipboard_internal.c"
 #include "unix/clipboard_xclip.c"
+#include "unix/clipboard.c"
 #include "unix/buffer.c"
 
 #include "editor.c"
@@ -31,6 +33,7 @@ int main(int argc, char** argv) {
 	term_setup();
 	print_escape(CODE_ALTSCREEN_ENABLE);
 	print_escape(CODE_CURSOR_HIDE);
+	clipboard_init();
 	int exitcode = editor_main(argc, argv);
 	term_close();
 	print_escape(CODE_CURSOR_SHOW);

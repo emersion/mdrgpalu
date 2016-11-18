@@ -1,16 +1,13 @@
-char* clipboard_buffer = NULL;
-size_t clipboard_len = 0;
+FILE* (*clipboard_open)(char* mode);
+int (*clipboard_close)(FILE* s);
 
-FILE* clipboard_open(char* mode) {
-	if (mode[0] == 'r') {
-		return fmemopen(clipboard_buffer, clipboard_len, mode);
+void clipboard_init() {
+	char* display = getenv("DISPLAY");
+	if (display != NULL) { // Use xclip
+		clipboard_open = clipboard_xclip_open;
+		clipboard_close = clipboard_xclip_close;
 	} else {
-		free(clipboard_buffer);
-		clipboard_len = 0;
-		return open_memstream(&clipboard_buffer, &clipboard_len);
+		clipboard_open = clipboard_internal_open;
+		clipboard_close = clipboard_internal_close;
 	}
-}
-
-int clipboard_close(FILE* s) {
-	return fclose(s);
 }

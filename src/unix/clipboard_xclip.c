@@ -1,4 +1,4 @@
-FILE* clipboard_open(char* mode) {
+FILE* clipboard_xclip_open(char* mode) {
 	char* cmd;
 	if (mode[0] == 'r') {
 		cmd = "xclip -selection clipboard -o";
@@ -9,6 +9,6 @@ FILE* clipboard_open(char* mode) {
 	return popen(cmd, mode);
 }
 
-int clipboard_close(FILE* p) {
+int clipboard_xclip_close(FILE* p) {
 	return pclose(p);
 }
