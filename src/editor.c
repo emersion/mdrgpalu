@@ -40,6 +40,7 @@ int editor_open(struct editor* e, char* filename) {
 char* editor_prompt(struct editor* e, char* prompt) {
 	buffer_print(e->buf, NULL);
 	print_format(FORMAT_DIM, prompt);
+	printf(" ");
 
 	print_escape(CODE_CURSOR_SHOW);
 
@@ -218,7 +219,7 @@ int editor_main(int argc, char** argv) {
 					break;
 				}
 				case 7:; // Ctrl+G
-					char* s = editor_prompt(e, "Go to line: ");
+					char* s = editor_prompt(e, "Go to line:");
 					if (s == NULL) {
 						break;
 					}
@@ -229,6 +230,9 @@ int editor_main(int argc, char** argv) {
 				case 23: // Ctrl+W
 					return 0;
 				case 19: // Ctrl+S
+					if (e->filename == NULL) {
+						e->filename = editor_prompt(e, "Save as:");
+					}
 					if (e->filename != NULL) {
 						FILE* f = fopen(e->filename, "w+");
 						if (f == NULL) {
