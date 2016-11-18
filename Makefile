@@ -9,7 +9,7 @@ debug:
 	$(CC) $(DBGFLAGS) -o mdrgpalu src/mdrgpalu.c
 clean:
 	rm -rf mdrgpalu src/*.o
-install:
+install: mdrgpalu
 	install -m 0755 mdrgpalu $(DESTDIR)$(PREFIX)/bin
 
 .PHONY: clean all debug install
