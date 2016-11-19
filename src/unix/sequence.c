@@ -19,11 +19,25 @@
 #define CODE_MODIFYOTHERKEYS_ENABLE ">4;2m"
 #define CODE_MODIFYOTHERKEYS_DISABLE ">4;0m"
 
-#define MODIFIER_SHIFT      2
-#define MODIFIER_ALT        3
-#define MODIFIER_ALT_SHIFT  4
-#define MODIFIER_CTRL       5
-#define MODIFIER_CTRL_SHIFT 6
+#define ANSI_MODIFIER_SHIFT      2
+#define ANSI_MODIFIER_ALT        3
+#define ANSI_MODIFIER_ALT_SHIFT  4
+#define ANSI_MODIFIER_CTRL       5
+#define ANSI_MODIFIER_CTRL_SHIFT 6
+
+int parse_modifiers(int input) {
+	int output = 0;
+	if (input == ANSI_MODIFIER_SHIFT || input == ANSI_MODIFIER_ALT_SHIFT || input == ANSI_MODIFIER_CTRL_SHIFT) {
+		output |= MODIFIER_SHIFT;
+	}
+	if (input == ANSI_MODIFIER_ALT || input == ANSI_MODIFIER_ALT_SHIFT) {
+		output |= MODIFIER_ALT;
+	}
+	if (input == ANSI_MODIFIER_CTRL || input == ANSI_MODIFIER_CTRL_SHIFT) {
+		output |= MODIFIER_CTRL;
+	}
+	return output;
+}
 
 struct sequence {
 	char code;

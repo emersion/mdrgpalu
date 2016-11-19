@@ -8,6 +8,7 @@
 #include "selection.c"
 #include "buffer.c"
 #include "io.c"
+#include "event.c"
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 	#include <sys/termios.h>
@@ -25,6 +26,7 @@
 #include "unix/clipboard_xclip.c"
 #include "unix/clipboard.c"
 #include "unix/buffer.c"
+#include "unix/event.c"
 
 #include "editor.c"
 

@@ -95,63 +95,53 @@ int editor_main(int argc, char** argv) {
 	buffer_print(b, s);
 	status_print(s);
 
-	char c;
-	int prev = -1;
+	struct event* evt;
 	char* statustext = NULL;
 	while (1) {
-		c = fgetc(stdin);
-		if (feof(stdin)) {
-			return 0;
-		} else if (ferror(stdin)) {
-			return 1;
+		evt = event_read(stdin);
+		if (evt == NULL) {
+			if (feof(stdin)) {
+				return 0;
+			} else {
+				return 1;
+			}
 		}
 
-		if (prev == '\033' && c == '[') { // Escape sequence
-			struct sequence* s = sequence_parse();
-			if (s == NULL) {
-				printf("Cannot parse escape sequence\n");
-				continue;
-			}
-
-			switch (s->code) {
-				case CODE_CUU:
-				case CODE_CUD:
-				case CODE_CUF:
-				case CODE_CUB: { // Arrow
-					int delta = s->params[0];
-					if (delta == 0) {
-						delta = 1;
-					}
-					int modifiers = s->params[1];
-
+		if (evt->key) {
+			switch (evt->key) {
+				case KEY_ARROW_UP:
+				case KEY_ARROW_DOWN:
+				case KEY_ARROW_RIGHT:
+				case KEY_ARROW_LEFT: { // Arrow
+					int delta = 1;
 					int i = 0, j = 0;
-					switch (s->code) {
-					case CODE_CUU:
+					switch (evt->key) {
+					case KEY_ARROW_UP:
 						i = -delta;
 						break;
-					case CODE_CUD:
+					case KEY_ARROW_DOWN:
 						i = delta;
 						break;
-					case CODE_CUF:
+					case KEY_ARROW_RIGHT:
 						j = delta;
 						break;
-					case CODE_CUB:
+					case KEY_ARROW_LEFT:
 						j = -delta;
 						break;
 					}
 
-					if (modifiers == MODIFIER_CTRL_SHIFT) {
+					if (evt->modifiers == (MODIFIER_CTRL | MODIFIER_SHIFT)) {
 						if (j != 0) {
 							buffer_extend_jump_selection(b, j);
 						}
-					} else if (modifiers == MODIFIER_CTRL) {
+					} else if (evt->modifiers == MODIFIER_CTRL) {
 						if (j != 0) {
 							buffer_jump_selection(b, j);
 						} else if (i != 0) {
 							struct line* other = line_walk_line(b->sel->line, i);
 							buffer_swap_lines(b, b->sel->line, other);
 						}
-					} else if (modifiers == MODIFIER_SHIFT) {
+					} else if (evt->modifiers == MODIFIER_SHIFT) {
 						buffer_extend_selection(b, i, j);
 					} else {
 						if (b->sel->len > 0) {
@@ -162,13 +152,11 @@ int editor_main(int argc, char** argv) {
 					}
 					break;
 				}
-				case CODE_CPL: { // End
-					// TODO: s->params[0] support
-					int modifiers = s->params[1];
-					if (modifiers == MODIFIER_CTRL) {
+				case KEY_END: {
+					if (evt->modifiers == MODIFIER_CTRL) {
 						b->sel->line = b->last;
 						b->sel->ch = b->sel->line->len;
-					} else if (modifiers == MODIFIER_SHIFT) {
+					} else if (evt->modifiers == MODIFIER_SHIFT) {
 						int ch = b->sel->ch;
 						if (ch > b->sel->line->len) {
 							ch = b->sel->line->len;
@@ -179,13 +167,11 @@ int editor_main(int argc, char** argv) {
 					}
 					break;
 				}
-				case CODE_CUP: { // Home
-					// TODO: s->params[0] support
-					int modifiers = s->params[1];
-					if (modifiers == MODIFIER_CTRL) {
+				case KEY_HOME: { // Home
+					if (evt->modifiers == MODIFIER_CTRL) {
 						b->sel->line = b->first;
 						b->sel->ch = 0;
-					} else if (modifiers == MODIFIER_SHIFT) {
+					} else if (evt->modifiers == MODIFIER_SHIFT) {
 						int len = b->sel->ch;
 						if (len > b->sel->line->len) {
 							len = b->sel->line->len;
@@ -197,98 +183,102 @@ int editor_main(int argc, char** argv) {
 					}
 					break;
 				}
-				case CODE_DECDC: {
-					//int modifier = s->params[1]; // TODO: support Ctrl
+				case KEY_DELETE: {
+					// TODO: support Ctrl
 					buffer_delete_char(b, 0);
 					break;
 				}
-			}
-
-			sequence_free(s);
-		} else if (c == '\033') { // Esc
-			prev = c;
-			continue;
-		} else if (c == '\t' || c == '\n' || c >= ' ') {
-			buffer_insert_char(b, c);
-		} else {
-			switch (c) {
-				case 1: // Ctrl+A
-					buffer_set_selection(b, 0, 0, buffer_len(b));
-					break;
-				case 3: // Ctrl+C
-				case 24: { // Ctrl+X
-					FILE* f = clipboard_open("w");
-					if (f == NULL) {
-						return 1;
-					}
-					int err;
-					if (b->sel->len == 0) {
-						err = line_write_to(b->sel->line, f);
-					} else {
-						err = buffer_write_selection_to(b, f);
-					}
-					clipboard_close(f);
-					if (err) {
-						return err;
-					}
-
-					if (c == 24) { // Cut
-						if (b->sel->len == 0) {
-							buffer_delete_line(b, b->sel->line);
-						} else {
-							buffer_delete_selection(b);
-						}
-					}
+				case KEY_BACKSPACE: {
+					buffer_delete_char(b, -1);
 					break;
 				}
-				case 7: { // Ctrl+G
-					char* s = editor_prompt(e, "Go to line:");
-					if (s == NULL) {
+			}
+		} else if (evt->modifiers) {
+			if (evt->modifiers == MODIFIER_CTRL) {
+				switch (evt->ch) {
+					case 'A': {
+						buffer_set_selection(b, 0, 0, buffer_len(b));
 						break;
 					}
-					buffer_set_position_string(b, s);
-					free(s);
-					break;
-				}
-				case 12: { // Ctrl+L
-					b->sel->ch = 0;
-					selection_set_len(b->sel, b->sel->line->len + 1);
-					break;
-				}
-				case 17: // Ctrl+Q
-				case 23: // Ctrl+W
-					return 0;
-				case 19: // Ctrl+S
-					if (e->filename == NULL) {
-						e->filename = editor_prompt(e, "Save as:");
-					}
-					if (e->filename != NULL) {
-						FILE* f = fopen(e->filename, "w+");
+					case 'C':
+					case 'X': {
+						FILE* f = clipboard_open("w");
 						if (f == NULL) {
 							return 1;
 						}
-						int err = buffer_write_to(b, f);
-						fclose(f);
+						int err;
+						if (b->sel->len == 0) {
+							err = line_write_to(b->sel->line, f);
+						} else {
+							err = buffer_write_selection_to(b, f);
+						}
+						clipboard_close(f);
 						if (err) {
 							return err;
 						}
-						statustext = strdup("File saved.");
+
+						if (evt->ch == 'X') {
+							if (b->sel->len == 0) {
+								buffer_delete_line(b, b->sel->line);
+							} else {
+								buffer_delete_selection(b);
+							}
+						}
+						break;
 					}
-					break;
-				case 22: { // Ctrl+V
-					FILE* f = clipboard_open("r");
-					if (f == NULL) {
-						return 1;
+					case 'G': {
+						char* s = editor_prompt(e, "Go to line:");
+						if (s == NULL) {
+							break;
+						}
+						buffer_set_position_string(b, s);
+						free(s);
+						break;
 					}
-					buffer_read_from(b, f);
-					int err = ferror(f);
-					clipboard_close(f);
-					if (err) {
-						return err;
+					case 'L': {
+						b->sel->ch = 0;
+						selection_set_len(b->sel, b->sel->line->len + 1);
+						break;
 					}
-					break;
+					case 'Q':
+					case 'W': {
+						return 0;
+					}
+					case 'S': {
+						if (e->filename == NULL) {
+							e->filename = editor_prompt(e, "Save as:");
+						}
+						if (e->filename != NULL) {
+							FILE* f = fopen(e->filename, "w+");
+							if (f == NULL) {
+								return 1;
+							}
+							int err = buffer_write_to(b, f);
+							fclose(f);
+							if (err) {
+								return err;
+							}
+							statustext = strdup("File saved.");
+						}
+						break;
+					}
+					case 'V': {
+						FILE* f = clipboard_open("r");
+						if (f == NULL) {
+							return 1;
+						}
+						buffer_read_from(b, f);
+						int err = ferror(f);
+						clipboard_close(f);
+						if (err) {
+							return err;
+						}
+						break;
+					}
 				}
 			}
+		} else {
+			buffer_insert_char(b, evt->ch);
 		}
 
 		buffer_print(b, s);
@@ -299,7 +289,5 @@ int editor_main(int argc, char** argv) {
 		} else {
 			status_print(s);
 		}
-
-		prev = c;
 	}
 }
