@@ -239,6 +239,10 @@ void line_insert_char(struct line* l, int at, char c) {
 // line_delete_range deletes a range of characters from l. The range starts at
 // index at and ends len bytes after.
 void line_delete_range(struct line* l, int at, int len) {
+	if (at + len > l->len) {
+		len = l->len - at;
+	}
+
 	memmove(&l->chars[at], &l->chars[at+len], l->len-at-len);
 	l->len -= len;
 	// TODO: realloc to free memory

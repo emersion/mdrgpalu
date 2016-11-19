@@ -31,12 +31,12 @@
 int main(int argc, char** argv) {
 	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering
 	term_setup();
-	print_escape(CODE_ALTSCREEN_ENABLE);
-	print_escape(CODE_CURSOR_HIDE);
+	//print_escape(CODE_ALTSCREEN_ENABLE);
+	//print_escape(CODE_CURSOR_HIDE);
 	clipboard_init();
 	int exitcode = editor_main(argc, argv);
 	term_close();
-	print_escape(CODE_CURSOR_SHOW);
-	print_escape(CODE_ALTSCREEN_DISABLE);
+	//print_escape(CODE_CURSOR_SHOW);
+	//print_escape(CODE_ALTSCREEN_DISABLE);
 	return exitcode;
 }

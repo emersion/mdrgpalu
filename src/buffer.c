@@ -150,21 +150,30 @@ void buffer_delete_selection(struct buffer* b) {
 	while (len > 0 && l != NULL) {
 		int n = len;
 		int delete_line = 0;
-		if (n > l->len) {
-			n = l->len;
+		if (n > l->len - from) {
+			n = l->len - from + 1;
 			if (from == 0) {
 				delete_line = 1;
 			}
 		}
 
+		// Store next line here, because we'll maybe delete l and won't be able to
+		// access l->next anymore
+		struct line* next = l->next;
+
 		if (delete_line) {
 			buffer_delete_line(b, l);
 		} else {
 			line_delete_range(l, from, n);
+			if (l != b->sel->line) {
+				// Merge last line with first one if they're different
+				line_join(b->sel->line, l);
+				buffer_delete_line(b, l);
+			}
 		}
 
 		len -= n;
-		l = l->next;
+		l = next;
 		from = 0;
 	}
 
