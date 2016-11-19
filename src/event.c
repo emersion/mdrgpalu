@@ -6,6 +6,7 @@
 #define KEY_HOME 6
 #define KEY_DELETE 7
 #define KEY_BACKSPACE 8
+#define KEY_ESC 9
 
 #define MODIFIER_SHIFT 1<<1
 #define MODIFIER_ALT 1<<2

@@ -51,6 +51,12 @@ struct event* event_read(FILE* s) {
 			e->key = key;
 			e->modifiers = modifiers;
 			return e;
+		} else if (prev == '\033') {
+			ungetc(c, s);
+
+			e = event_new();
+			e->key = KEY_ESC;
+			return e;
 		} else if (c != '\033') { // Not the begining of an escape sequence
 			if (c == '\r') {
 				return NULL;
