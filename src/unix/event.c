@@ -52,6 +52,10 @@ struct event* event_read(FILE* s) {
 			e->modifiers = modifiers;
 			return e;
 		} else if (c != '\033') { // Not the begining of an escape sequence
+			if (c == '\r') {
+				return NULL;
+			}
+
 			e = event_new();
 			if (c == 127) {
 				e->key = KEY_BACKSPACE;

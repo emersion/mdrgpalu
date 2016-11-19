@@ -102,8 +102,10 @@ int editor_main(int argc, char** argv) {
 		if (evt == NULL) {
 			if (feof(stdin)) {
 				return 0;
-			} else {
+			} else if (ferror(stdin)) {
 				return 1;
+			} else {
+				continue;
 			}
 		}
 
@@ -112,7 +114,7 @@ int editor_main(int argc, char** argv) {
 				case KEY_ARROW_UP:
 				case KEY_ARROW_DOWN:
 				case KEY_ARROW_RIGHT:
-				case KEY_ARROW_LEFT: { // Arrow
+				case KEY_ARROW_LEFT: {
 					int delta = 1;
 					int i = 0, j = 0;
 					switch (evt->key) {
@@ -167,7 +169,7 @@ int editor_main(int argc, char** argv) {
 					}
 					break;
 				}
-				case KEY_HOME: { // Home
+				case KEY_HOME: {
 					if (evt->modifiers == MODIFIER_CTRL) {
 						b->sel->line = b->first;
 						b->sel->ch = 0;
