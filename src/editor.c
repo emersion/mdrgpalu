@@ -48,18 +48,20 @@ char* editor_prompt(struct editor* e, char* prompt) {
 	int cap = 32;
 	char* res = (char*) malloc(cap);
 	while (1) {
-		char c = fgetc(stdin);
-		// TODO: error handling
-
-		// TODO: support Backspace
-		if (c == '\r') {
-			continue;
-		} else if (c == '\n') {
-			c = 0; // Insert trailing \0
-		} else if (c == '\033') { // Esc
+		struct event* evt = event_read(stdin);
+		if (evt == NULL || evt->key == KEY_ESC) {
 			free(res);
 			res = NULL;
 			break;
+		}
+		if (!evt->ch) {
+			continue;
+		}
+
+		// TODO: support Backspace
+		char c = evt->ch;
+		if (evt->ch == '\n') {
+			c = 0; // Insert trailing \0
 		} else {
 			printf("%c", c);
 		}

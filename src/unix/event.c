@@ -52,6 +52,7 @@ struct event* event_read(FILE* s) {
 			e->modifiers = modifiers;
 			return e;
 		} else if (prev == '\033') {
+			// TODO: detect Esc key if no more data is available
 			ungetc(c, s);
 
 			e = event_new();
