@@ -110,8 +110,6 @@ int editor_main(int argc, char** argv) {
 		if (evt == NULL) {
 			if (feof(stdin)) {
 				return 0;
-			} else if (ferror(stdin)) {
-				return 1;
 			} else {
 				continue;
 			}
@@ -193,13 +191,18 @@ int editor_main(int argc, char** argv) {
 					}
 					break;
 				}
-				case KEY_DELETE: {
-					// TODO: support Ctrl
-					buffer_delete_char(b, 0);
-					break;
-				}
+				case KEY_DELETE:
 				case KEY_BACKSPACE: {
-					buffer_delete_char(b, -1);
+					// TODO: support Ctrl
+					if (b->sel->len > 0) {
+						buffer_delete_selection(b);
+					} else {
+						int delta = 0;
+						if (evt->key == KEY_BACKSPACE) {
+							delta = -1;
+						}
+						buffer_delete_char(b, delta);
+					}
 					break;
 				}
 			}

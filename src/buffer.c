@@ -182,10 +182,8 @@ void buffer_delete_selection(struct buffer* b) {
 
 // buffer_insert_char inserts a character at the current cursor's position.
 void buffer_insert_char(struct buffer* b, char c) {
-	int deleted_selection = 0;
 	if (b->sel->len > 0) {
 		buffer_delete_selection(b);
-		deleted_selection = 1;
 	}
 
 	// Handle control chars
@@ -194,11 +192,6 @@ void buffer_insert_char(struct buffer* b, char c) {
 		return;
 	case '\n':
 		buffer_insert_line(b);
-		return;
-	case 127:; // Backspace
-		if (!deleted_selection) {
-			buffer_delete_char(b, -1);
-		}
 		return;
 	}
 

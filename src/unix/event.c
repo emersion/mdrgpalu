@@ -50,7 +50,7 @@ struct event* event_read(FILE* s) {
 			e->key = key;
 			e->modifiers = modifiers;
 			return e;
-		} else if (prev == '\033') {
+		} else if (prev == '\033') { // Esc
 			// TODO: detect Esc key if no more data is available
 			ungetc(c, s);
 
@@ -63,7 +63,7 @@ struct event* event_read(FILE* s) {
 			}
 
 			e = event_new();
-			if (c == 127) {
+			if (c == 127) { // Backspace
 				e->key = KEY_BACKSPACE;
 			} else if (c == '\t' || c == '\n' || c >= ' ') {
 				e->ch = c;

@@ -1,4 +1,9 @@
 struct termios term_original;
+struct winsize term_size;
+
+void term_load_size() {
+	ioctl(fileno(stdin), TIOCGWINSZ, &term_size);
+}
 
 void term_setup() {
 	struct termios t;
@@ -10,6 +15,9 @@ void term_setup() {
 	t.c_cc[VMIN] = 1;
 	t.c_cc[VTIME] = 0;
 	tcsetattr(fileno(stdin), TCSANOW, &t);
+
+	term_load_size();
+	signal(SIGWINCH, term_load_size);
 
 	print_escape(CODE_ALTSCREEN_ENABLE);
 	print_escape(CODE_MODIFYOTHERKEYS_ENABLE);
@@ -31,13 +39,9 @@ void term_cursor_toggle(int show) {
 }
 
 int term_width() {
-	struct winsize ws;
-	ioctl(fileno(stdout), TIOCGWINSZ, &ws);
-	return (int) ws.ws_row;
+	return (int) term_size.ws_col;
 }
 
 int term_height() {
-	struct winsize ws;
-	ioctl(fileno(stdout), TIOCGWINSZ, &ws);
-	return (int) ws.ws_col;
+	return (int) term_size.ws_row;
 }
