@@ -29,3 +29,15 @@ void term_cursor_toggle(int show) {
 		print_escape(CODE_CURSOR_HIDE);
 	}
 }
+
+int term_width() {
+	struct winsize ws;
+	ioctl(fileno(stdout), TIOCGWINSZ, &ws);
+	return (int) ws.ws_row;
+}
+
+int term_height() {
+	struct winsize ws;
+	ioctl(fileno(stdout), TIOCGWINSZ, &ws);
+	return (int) ws.ws_col;
+}

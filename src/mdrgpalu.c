@@ -7,6 +7,7 @@
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 	#define POSIX
 	#include <sys/termios.h>
+	#include <sys/ioctl.h>
 #elif _WIN32
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
