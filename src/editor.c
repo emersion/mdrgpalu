@@ -110,6 +110,8 @@ int editor_main(int argc, char** argv) {
 		if (evt == NULL) {
 			if (feof(stdin)) {
 				return 0;
+			} else if (ferror(stdin)) {
+				return 1;
 			} else {
 				continue;
 			}

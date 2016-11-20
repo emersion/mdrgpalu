@@ -2,7 +2,7 @@ struct termios term_original;
 struct winsize term_size;
 
 void term_load_size() {
-	ioctl(fileno(stdin), TIOCGWINSZ, &term_size);
+	ioctl(fileno(stdout), TIOCGWINSZ, &term_size);
 }
 
 void term_setup() {
