@@ -5,6 +5,7 @@
 #include <inttypes.h>
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+	#define POSIX
 	#include <sys/termios.h>
 #elif _WIN32
 	#define WIN32_LEAN_AND_MEAN
@@ -26,7 +27,7 @@
 #include "unix/buffer.c"
 #include "unix/event.c"
 
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#ifdef POSIX
 	#include "unix/term.c"
 #elif _WIN32
 	#include "windows/term.c"
