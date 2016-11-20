@@ -17,7 +17,6 @@ struct event* event_read(FILE* s) {
 			}
 
 			int modifiers = parse_modifiers(s->params[1]);
-
 			int key = 0;
 			switch (s->code) {
 			case CODE_CUU:

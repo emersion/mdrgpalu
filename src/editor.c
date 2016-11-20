@@ -54,11 +54,17 @@ char* editor_prompt(struct editor* e, char* prompt) {
 			res = NULL;
 			break;
 		}
+		if (evt->key == KEY_BACKSPACE) {
+			if (len > 0) {
+				printf("\b \b");
+				len--;
+			}
+			continue;
+		}
 		if (!evt->ch) {
 			continue;
 		}
 
-		// TODO: support Backspace
 		char c = evt->ch;
 		if (evt->ch == '\n') {
 			c = 0; // Insert trailing \0

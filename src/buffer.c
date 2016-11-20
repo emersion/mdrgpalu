@@ -195,7 +195,7 @@ void buffer_insert_char(struct buffer* b, char c) {
 	case '\n':
 		buffer_insert_line(b);
 		return;
-	case 127:; // backspace
+	case 127:; // Backspace
 		if (!deleted_selection) {
 			buffer_delete_char(b, -1);
 		}
