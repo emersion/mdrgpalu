@@ -4,20 +4,18 @@
 #include <errno.h>
 #include <inttypes.h>
 
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+	#include <sys/termios.h>
+#elif _WIN32
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+#endif
+
 #include "line.c"
 #include "selection.c"
 #include "buffer.c"
 #include "io.c"
 #include "event.c"
-
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
-	#include <sys/termios.h>
-	#include "unix/term.c"
-#elif _WIN32
-	#define WIN32_LEAN_AND_MEAN
-	#include <windows.h>
-	#include "windows/term.c"
-#endif
 
 // TODO: create windows counterparts for these
 #include "unix/format.c"
@@ -28,19 +26,21 @@
 #include "unix/buffer.c"
 #include "unix/event.c"
 
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+	#include "unix/term.c"
+#elif _WIN32
+	#include "windows/term.c"
+#endif
+
 #include "editor.c"
 
 int main(int argc, char** argv) {
-	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering
+	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering for stdin
 	term_setup();
-	print_escape(CODE_ALTSCREEN_ENABLE);
-	print_escape(CODE_MODIFYOTHERKEYS_ENABLE);
-	print_escape(CODE_CURSOR_HIDE);
+	term_cursor_toggle(0);
 	clipboard_init();
 	int exitcode = editor_main(argc, argv);
+	term_cursor_toggle(1);
 	term_close();
-	print_escape(CODE_CURSOR_SHOW);
-	print_escape(CODE_MODIFYOTHERKEYS_DISABLE);
-	print_escape(CODE_ALTSCREEN_DISABLE);
 	return exitcode;
 }

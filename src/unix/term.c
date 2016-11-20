@@ -10,8 +10,22 @@ void term_setup() {
 	t.c_cc[VMIN] = 1;
 	t.c_cc[VTIME] = 0;
 	tcsetattr(fileno(stdin), TCSANOW, &t);
+
+	print_escape(CODE_ALTSCREEN_ENABLE);
+	print_escape(CODE_MODIFYOTHERKEYS_ENABLE);
 }
 
 void term_close() {
 	tcsetattr(fileno(stdin), TCSANOW, &term_original);
+
+	print_escape(CODE_MODIFYOTHERKEYS_DISABLE);
+	print_escape(CODE_ALTSCREEN_DISABLE);
+}
+
+void term_cursor_toggle(int show) {
+	if (show) {
+		print_escape(CODE_CURSOR_SHOW);
+	} else {
+		print_escape(CODE_CURSOR_HIDE);
+	}
 }

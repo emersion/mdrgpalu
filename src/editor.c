@@ -42,7 +42,7 @@ char* editor_prompt(struct editor* e, char* prompt) {
 	print_format(FORMAT_DIM, prompt);
 	printf(" ");
 
-	print_escape(CODE_CURSOR_SHOW);
+	term_cursor_toggle(1);
 
 	int len = 0;
 	int cap = 32;
@@ -78,7 +78,7 @@ char* editor_prompt(struct editor* e, char* prompt) {
 		}
 	}
 
-	print_escape(CODE_CURSOR_HIDE);
+	term_cursor_toggle(0);
 	return res;
 }
 
