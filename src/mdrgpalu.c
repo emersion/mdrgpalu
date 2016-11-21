@@ -19,6 +19,7 @@
 #include "buffer.c"
 #include "io.c"
 #include "event.c"
+#include "tree.c"
 
 // TODO: create windows counterparts for these
 #include "unix/format.c"
