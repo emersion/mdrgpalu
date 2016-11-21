@@ -30,3 +30,7 @@ struct event* event_new() {
 void event_free(struct event* evt) {
 	free(evt);
 }
+
+int event_equal(struct event* evt, struct event* other) {
+	return (evt->ch == other->ch && evt->key == other->key && evt->modifiers == other->modifiers);
+}

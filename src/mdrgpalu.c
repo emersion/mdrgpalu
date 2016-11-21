@@ -36,6 +36,7 @@
 #endif
 
 #include "editor.c"
+#include "command.c"
 
 int main(int argc, char** argv) {
 	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering for stdin
