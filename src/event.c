@@ -20,9 +20,13 @@ struct event {
 };
 
 struct event* event_new() {
-	struct event* e = (struct event*) malloc(sizeof(struct event));
-	e->ch = 0;
-	e->key = 0;
-	e->modifiers = 0;
-	return e;
+	struct event* evt = (struct event*) malloc(sizeof(struct event));
+	evt->ch = 0;
+	evt->key = 0;
+	evt->modifiers = 0;
+	return evt;
+}
+
+void event_free(struct event* evt) {
+	free(evt);
 }

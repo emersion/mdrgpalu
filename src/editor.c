@@ -304,5 +304,7 @@ int editor_main(int argc, char** argv) {
 		} else {
 			status_print(s);
 		}
+
+		event_free(evt);
 	}
 }
