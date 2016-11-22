@@ -1,7 +1,6 @@
 // A trie node. See https://en.wikipedia.org/wiki/Trie
-// Note: does not yet support storing properly two strings if one is the prefix
-// of the other (e.g. "magic" and "magically").
-// TODO: add support to it by adding \0 nodes at end of strings.
+// Note: to support storing properly a string multiple times, keeping the number
+// of strings that uses each node is necessary.
 struct trie_node {
 	// The next sibling node.
 	struct trie_node* next;
@@ -9,20 +8,23 @@ struct trie_node {
 	struct trie_node* first;
 	// The node's character.
 	char ch;
+	// The number of strings using this node.
+	unsigned int n;
 };
 
 // trie_node_new allocates a new trie node.
 struct trie_node* trie_node_new() {
-	struct trie_node* n = (struct trie_node*) malloc(sizeof(struct trie_node));
-	n->next = NULL;
-	n->first = NULL;
-	n->ch = 0;
-	return n;
+	struct trie_node* node = (struct trie_node*) malloc(sizeof(struct trie_node));
+	node->next = NULL;
+	node->first = NULL;
+	node->ch = 0;
+	node->n = 0;
+	return node;
 }
 
 // trie_node_free deallocates a trie node.
-void trie_node_free(struct trie_node* n) {
-	free(n);
+void trie_node_free(struct trie_node* node) {
+	free(node);
 }
 
 // trie_node_match extracts the node that begins with the string s of len
@@ -33,16 +35,16 @@ struct trie_node* trie_node_match(struct trie_node* first, char* s, int len) {
 	}
 
 	// Iterate through siblings until we reach s[0]
-	struct trie_node* n = first;
-	while (n != NULL && n->ch < s[0]) {
-		n = n->next;
+	struct trie_node* node = first;
+	while (node != NULL && node->ch < s[0]) {
+		node = node->next;
 	}
 
-	if (n == NULL || n->ch != s[0]) {
+	if (node == NULL || node->ch != s[0]) {
 		// Either we reached the end, either s[0] is not in the tree
 		return NULL;
 	}
-	return trie_node_match(n->first, &s[1], len-1);
+	return trie_node_match(node->first, &s[1], len-1);
 }
 
 // trie_node_insert inserts the string s of len characters in the tree. It
@@ -52,62 +54,71 @@ struct trie_node* trie_node_insert(struct trie_node* first, char* s, int len) {
 		return first;
 	}
 
-	// Create a new node for s[0]
-	struct trie_node* new = trie_node_new();
-	new->ch = s[0];
-
-	if (first == NULL || first->ch > new->ch) {
-		// Insert the new node at the begining
+	if (first == NULL || first->ch > s[0]) {
+		// Insert a new node for s[0] at the begining
+		struct trie_node* new = trie_node_new();
+		new->ch = s[0];
+		new->n = 1;
 		new->first = trie_node_insert(NULL, &s[1], len-1);
 		new->next = first;
 		return new;
 	}
 
 	// Find where the new node will be inserted
-	struct trie_node* n = first;
-	while (n->ch < new->ch && n->next != NULL) {
-		n = n->next;
+	struct trie_node* node = first;
+	while (node->ch < s[0] && node->next != NULL) {
+		node = node->next;
 	}
 
-	// Insert the new node right after n
-	if (n->ch == new->ch) {
-		n->first = trie_node_insert(n->first, &s[1], len-1);
+	if (node->ch == s[0]) {
+		// A node for s[0] already exists
+		node->n++;
+		node->first = trie_node_insert(node->first, &s[1], len-1);
 	} else {
+		// Insert the new node right after node
+		struct trie_node* new = trie_node_new();
+		new->ch = s[0];
+		new->n = 1;
 		new->first = trie_node_insert(NULL, &s[1], len-1);
 
-		new->next = n->next;
-		n->next = new;
+		new->next = node->next;
+		node->next = new;
 	}
 	return first;
 }
 
-// trie_node_delete removes the string s of len characters from the tree. It
+// trie_node_remove removes the string s of len characters from the tree. It
 // returns the new tree.
-struct trie_node* trie_node_delete(struct trie_node* first, char* s, int len) {
+struct trie_node* trie_node_remove(struct trie_node* first, char* s, int len) {
 	if (len == 0 || first == NULL) {
 		return first;
 	}
 
-	first = trie_node_delete(first, &s[1], len-1);
-
-	// Iterate through siblings until we reach s[0]
-	struct trie_node* n = first;
-	struct trie_node* prev = NULL;
-	while (n != NULL && n->ch < s[0]) {
-		prev = n;
-		n = n->next;
+	// Remove s[1:] from the subtree
+	if (first->first != NULL) {
+		first->first = trie_node_remove(first->first, &s[1], len-1);
 	}
 
-	if (n == NULL || n->ch != s[0]) {
+	// Iterate through siblings until we reach s[0]
+	struct trie_node* node = first;
+	struct trie_node* prev = NULL;
+	while (node != NULL && node->ch < s[0]) {
+		prev = node;
+		node = node->next;
+	}
+
+	if (node == NULL || node->ch != s[0]) {
 		// s[0] is not in the tree, nothing to do
 		return first;
 	}
-	if (n->first == NULL) {
-		// s[0] has no child, remove it from the tree
+
+	node->n--;
+	if (node->n <= 0) {
+		// node is not used anymore, remove it from the tree
 		if (prev == NULL) {
 			return NULL;
 		} else {
-			prev->next = n->next;
+			prev->next = node->next;
 		}
 	}
 	return first;
@@ -120,9 +131,9 @@ void trie_node_print(struct trie_node* first) {
 		return;
 	}
 
-	for (struct trie_node* n = first; n != NULL; n = n->next) {
-		printf("(%c ", n->ch);
-		trie_node_print(n->first);
+	for (struct trie_node* node = first; node != NULL; node = node->next) {
+		printf("(%c:%d ", node->ch, node->n);
+		trie_node_print(node->first);
 		printf(")");
 	}
 }
