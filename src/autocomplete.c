@@ -1,4 +1,7 @@
 // A trie node. See https://en.wikipedia.org/wiki/Trie
+// Note: does not yet support storing properly two strings if one is the prefix
+// of the other (e.g. "magic" and "magically").
+// TODO: add support to it by adding \0 nodes at end of strings.
 struct trie_node {
 	// The next sibling node.
 	struct trie_node* next;
@@ -25,7 +28,7 @@ void trie_node_free(struct trie_node* n) {
 // trie_node_match extracts the node that begins with the string s of len
 // characters. Returns NULL if no such node is found.
 struct trie_node* trie_node_match(struct trie_node* first, char* s, int len) {
-	if (len == 0) {
+	if (len == 0 || first == NULL) {
 		return first;
 	}
 
@@ -38,10 +41,6 @@ struct trie_node* trie_node_match(struct trie_node* first, char* s, int len) {
 	if (n == NULL || n->ch != s[0]) {
 		// Either we reached the end, either s[0] is not in the tree
 		return NULL;
-	}
-	if (n->first == NULL) {
-		// No more childs
-		return n;
 	}
 	return trie_node_match(n->first, &s[1], len-1);
 }
@@ -78,6 +77,38 @@ struct trie_node* trie_node_insert(struct trie_node* first, char* s, int len) {
 
 		new->next = n->next;
 		n->next = new;
+	}
+	return first;
+}
+
+// trie_node_delete removes the string s of len characters from the tree. It
+// returns the new tree.
+struct trie_node* trie_node_delete(struct trie_node* first, char* s, int len) {
+	if (len == 0 || first == NULL) {
+		return first;
+	}
+
+	first = trie_node_delete(first, &s[1], len-1);
+
+	// Iterate through siblings until we reach s[0]
+	struct trie_node* n = first;
+	struct trie_node* prev = NULL;
+	while (n != NULL && n->ch < s[0]) {
+		prev = n;
+		n = n->next;
+	}
+
+	if (n == NULL || n->ch != s[0]) {
+		// s[0] is not in the tree, nothing to do
+		return first;
+	}
+	if (n->first == NULL) {
+		// s[0] has no child, remove it from the tree
+		if (prev == NULL) {
+			return NULL;
+		} else {
+			prev->next = n->next;
+		}
 	}
 	return first;
 }
