@@ -19,12 +19,10 @@ void editor_free(struct editor* e) {
 int editor_open(struct editor* e, char* filename) {
 	FILE* f = fopen(filename, "r");
 	if (f == NULL) {
-		if (errno == ENOENT) {
-			return 0;
-		}
 		return 1;
 	}
 
+	buffer_reset(e->buf);
 	buffer_read_from(e->buf, f);
 	int err = ferror(f);
 	fclose(f);
@@ -33,7 +31,9 @@ int editor_open(struct editor* e, char* filename) {
 	}
 
 	buffer_set_selection(e->buf, 0, 0, 0);
-	e->filename = filename;
+
+	free(e->filename);
+	e->filename = strdup(filename);
 	return 0;
 }
 
@@ -94,7 +94,7 @@ int editor_main(int argc, char** argv) {
 
 	if (argc == 2) {
 		int err = editor_open(e, argv[1]);
-		if (err) {
+		if (err && errno != ENOENT) {
 			return err;
 		}
 	}
@@ -253,6 +253,19 @@ int editor_main(int argc, char** argv) {
 					case 'L': {
 						b->sel->ch = 0;
 						selection_set_len(b->sel, b->sel->line->len + 1);
+						break;
+					}
+					case 'O': {
+						char* filename = editor_prompt(e, "Open:");
+						int err = editor_open(e, filename);
+						free(filename);
+						if (err) {
+							if (errno == ENOENT) {
+								statustext = strdup("File not found.");
+							} else {
+								return err;
+							}
+						}
 						break;
 					}
 					case 'Q':
