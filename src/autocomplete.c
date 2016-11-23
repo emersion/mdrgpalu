@@ -47,6 +47,28 @@ struct trie_node* trie_node_match(struct trie_node* first, char* s, int len) {
 	return trie_node_match(node->first, &s[1], len-1);
 }
 
+// trie_node_len returns the number of strings in the tree.
+int trie_node_len(struct trie_node* first) {
+	int n = 0;
+	for (struct trie_node* node = first; node != NULL; node = node->next) {
+		n += node->n;
+	}
+	return n;
+}
+
+// trie_node_list lists the most used strings from the tree and stores the first
+// cap of them in list. Extracted strings will have a length of strlen.
+int trie_node_list(struct trie_node* first, char* list[], int cap, int stroffset, int strlen) {
+	int len = 0;
+	for (struct trie_node* node = first; node != NULL; node = node->next) {
+		for (int i = 0; i < node->n; i++) {
+			list[len + i][stroffset] = node->ch;
+		}
+		// TODO
+	}
+	return len;
+}
+
 // trie_node_insert inserts the string s of len characters in the tree. It
 // returns the new tree.
 struct trie_node* trie_node_insert(struct trie_node* first, char* s, int len) {
