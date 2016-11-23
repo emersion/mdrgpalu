@@ -39,6 +39,22 @@
 #include "editor.c"
 
 int main(int argc, char** argv) {
+	struct trie_node* root = NULL;
+	root = trie_node_insert(root, "sava", 4);
+	root = trie_node_insert(root, "mdr", 3);
+	root = trie_node_insert(root, "savamdr", 7);
+	root = trie_node_insert(root, "mdsaas", 6);
+	char** list = malloc(10 * sizeof(char*));
+	for (int i = 0; i < 10; i++) {
+		list[i] = NULL;
+	}
+	int n = trie_node_list(root, list, 10, 30);
+	printf("%d\n", n);
+	for (int i = 0; i < n; i++) {
+		printf("%s\n", list[i]);
+	}
+	return 0;
+
 	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering for stdin
 	term_setup();
 	term_cursor_toggle(0);

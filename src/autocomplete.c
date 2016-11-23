@@ -56,17 +56,32 @@ int trie_node_len(struct trie_node* first) {
 	return n;
 }
 
-// trie_node_list lists the most used strings from the tree and stores the first
-// cap of them in list. Extracted strings will have a length of strlen.
-int trie_node_list(struct trie_node* first, char* list[], int cap, int stroffset, int strlen) {
+static int _trie_node_list(struct trie_node* first, char** list, int offset, int cap, int stroffset, int strcap) {
 	int len = 0;
 	for (struct trie_node* node = first; node != NULL; node = node->next) {
-		for (int i = 0; i < node->n; i++) {
-			list[len + i][stroffset] = node->ch;
+		for (unsigned int i = 0; i < node->n; i++) {
+			if (list[offset+i] == NULL) {
+				list[offset+i] = (char*) malloc(strcap * sizeof(char));
+			}
+			list[offset+i][stroffset] = node->ch;
+			if (node->first == NULL) {
+				list[offset+i][stroffset+1] = '\0';
+			}
 		}
-		// TODO
+		if (node->first != NULL) {
+			_trie_node_list(node->first, &list[offset], offset, cap, stroffset+1, strcap);
+		}
+
+		len += node->n;
+		offset += node->n;
 	}
 	return len;
+}
+
+// trie_node_list lists the most used strings from the tree and stores the first
+// cap of them in list. Extracted strings will have a capacity of strcap.
+int trie_node_list(struct trie_node* first, char** list, int cap, int strcap) {
+	return _trie_node_list(first, list, 0, cap, 0, strcap);
 }
 
 // trie_node_insert inserts the string s of len characters in the tree. It
