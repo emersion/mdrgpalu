@@ -40,7 +40,7 @@ int editor_open(struct editor* e, char* filename) {
 char* editor_prompt(struct editor* e, char* prompt) {
 	buffer_print(e->buf, NULL);
 	print_format(FORMAT_DIM, prompt);
-	printf(" ");
+	printf(": ");
 
 	term_cursor_toggle(1);
 
@@ -86,6 +86,11 @@ char* editor_prompt(struct editor* e, char* prompt) {
 
 	term_cursor_toggle(0);
 	return res;
+}
+
+char* editor_prompt_filename(struct editor* e, char* prompt) {
+	// TODO: autocomplete filename
+	return editor_prompt(e, prompt);
 }
 
 int editor_main(int argc, char** argv) {
@@ -242,7 +247,7 @@ int editor_main(int argc, char** argv) {
 						break;
 					}
 					case 'G': {
-						char* s = editor_prompt(e, "Go to line:");
+						char* s = editor_prompt(e, "Go to line");
 						if (s == NULL) {
 							break;
 						}
@@ -256,7 +261,10 @@ int editor_main(int argc, char** argv) {
 						break;
 					}
 					case 'O': {
-						char* filename = editor_prompt(e, "Open:");
+						char* filename = editor_prompt_filename(e, "Open file");
+						if (filename == NULL) {
+							break;
+						}
 						int err = editor_open(e, filename);
 						free(filename);
 						if (err) {
@@ -274,7 +282,7 @@ int editor_main(int argc, char** argv) {
 					}
 					case 'S': {
 						if (e->filename == NULL) {
-							e->filename = editor_prompt(e, "Save as:");
+							e->filename = editor_prompt_filename(e, "Save as");
 						}
 						if (e->filename != NULL) {
 							FILE* f = fopen(e->filename, "w+");
