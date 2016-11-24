@@ -50,6 +50,7 @@ int main(int argc, char** argv) {
 	root = trie_node_insert(root, "savamdr", 7);
 	root = trie_node_insert(root, "savamdr", 7);
 	root = trie_node_insert(root, "mdsaas", 6);
+	root = trie_node_remove(root, "savamdr", 7);
 	struct trie_list* list = trie_node_list(root);
 	for (struct trie_list* item = list; item != NULL; item = item->next) {
 		printf("%s %d\n", item->str, item->n);

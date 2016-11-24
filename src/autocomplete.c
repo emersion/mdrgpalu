@@ -64,6 +64,7 @@ struct trie_list {
 	int n;
 };
 
+// trie_list_new allocates a new trie list.
 static struct trie_list* trie_list_new() {
 	struct trie_list* list = (struct trie_list*) malloc(sizeof(struct trie_list));
 	list->next = NULL;
@@ -72,6 +73,7 @@ static struct trie_list* trie_list_new() {
 	return list;
 }
 
+// trie_list_free deallocates a trie list.
 void trie_list_free(struct trie_list* list) {
 	struct trie_list* item = list;
 	while (item != NULL) {
@@ -82,6 +84,7 @@ void trie_list_free(struct trie_list* list) {
 	}
 }
 
+// trie_list_merge merges other into list.
 static void trie_list_merge(struct trie_list** list, struct trie_list* other) {
 	struct trie_list* item = *list;
 	struct trie_list* new = other;
@@ -105,8 +108,9 @@ static void trie_list_merge(struct trie_list** list, struct trie_list* other) {
 	}
 }
 
-// _trie_node_list is a recursive helper function for trie_node_list. first,
-// list and cap are the same as trie_node_list.
+// _trie_node_list is a recursive helper function for trie_node_list.
+// It returns a list of strings contained in first, leaving stroffset-1 chars
+// unused at the begining of each string.
 // The tree will be browsed from bottom to top because we want to remove
 // duplicates. Thus, strings will be filled from right to left.
 // duplen will be set to the number of strings in the tree, including
@@ -148,8 +152,8 @@ static struct trie_list* _trie_node_list(struct trie_node* first, int stroffset,
 	return list;
 }
 
-// trie_node_list lists the most used strings from the tree and stores the first
-// cap of them in list. Duplicate strings are removed.
+// trie_node_list lists the most used strings from the tree. Duplicate strings
+// are removed.
 struct trie_list* trie_node_list(struct trie_node* first) {
 	int duplen; // We don't care about this value here
 	return _trie_node_list(first, 0, &duplen);
@@ -202,11 +206,6 @@ struct trie_node* trie_node_remove(struct trie_node* first, char* s, int len) {
 		return first;
 	}
 
-	// Remove s[1:] from the subtree
-	if (first->first != NULL) {
-		first->first = trie_node_remove(first->first, &s[1], len-1);
-	}
-
 	// Iterate through siblings until we reach s[0]
 	struct trie_node* node = first;
 	struct trie_node* prev = NULL;
@@ -220,13 +219,18 @@ struct trie_node* trie_node_remove(struct trie_node* first, char* s, int len) {
 		return first;
 	}
 
+	// Remove s[1:] from the subtree
+	node->first = trie_node_remove(node->first, &s[1], len-1);
+
 	node->n--;
 	if (node->n <= 0) {
 		// node is not used anymore, remove it from the tree
 		if (prev == NULL) {
+			trie_node_free(node);
 			return NULL;
 		} else {
 			prev->next = node->next;
+			trie_node_free(node);
 		}
 	}
 	return first;
