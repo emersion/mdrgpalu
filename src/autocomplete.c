@@ -57,60 +57,102 @@ int trie_node_len(struct trie_node* first) {
 	return n;
 }
 
+// A trie_list is a chained list of strings, sorted by n in descending order.
+struct trie_list {
+	struct trie_list* next;
+	char* str;
+	int n;
+};
+
+static struct trie_list* trie_list_new() {
+	struct trie_list* list = (struct trie_list*) malloc(sizeof(struct trie_list));
+	list->next = NULL;
+	list->str = NULL;
+	list->n = 0;
+	return list;
+}
+
+void trie_list_free(struct trie_list* list) {
+	struct trie_list* item = list;
+	while (item != NULL) {
+		struct trie_list* next = item->next;
+		free(item->str);
+		free(item);
+		item = next;
+	}
+}
+
+static void trie_list_merge(struct trie_list** list, struct trie_list* other) {
+	struct trie_list* item = *list;
+	struct trie_list* new = other;
+	struct trie_list* next = NULL;
+	while (new != NULL) {
+		next = new->next;
+
+		if (*list == NULL || (*list)->n <= new->n) {
+			new->next = *list;
+			*list = new;
+			item = new;
+		} else {
+			while (item->next != NULL && item->next->n > new->n) {
+				item = item->next;
+			}
+			new->next = item->next;
+			item->next = new;
+		}
+
+		new = next;
+	}
+}
+
 // _trie_node_list is a recursive helper function for trie_node_list. first,
 // list and cap are the same as trie_node_list.
 // The tree will be browsed from bottom to top because we want to remove
 // duplicates. Thus, strings will be filled from right to left.
 // duplen will be set to the number of strings in the tree, including
 // duplicates.
-static int _trie_node_list(struct trie_node* first, char** list, int cap, int stroffset, int* duplen) {
-	// TODO: sort strings in list
-
+static struct trie_list* _trie_node_list(struct trie_node* first, int stroffset, int* duplen) {
 	*duplen = 0;
 
 	if (first == NULL) {
 		// This is a NULL node, nothing to do
-		return 0;
-	}
-	if (cap == 0) {
-		// list is full
-		return 0;
+		return NULL;
 	}
 
 	// Iterate through root nodes
-	int len = 0;
-	int offset = 0;
+	struct trie_list* list = NULL;
 	for (struct trie_node* node = first; node != NULL; node = node->next) {
 		// Add strings for children
 		int dupchildren;
-		int n = _trie_node_list(node->first, &list[offset], cap-offset, stroffset+1, &dupchildren);
+		struct trie_list* children = _trie_node_list(node->first, stroffset+1, &dupchildren);
 
 		if (dupchildren < node->n) {
 			// Some strings end at this node
 			// Initialize a new string
-			char* s = (char*) malloc((stroffset+2) * sizeof(char));
-			s[stroffset+1] = '\0';
-			list[offset+n] = s;
-			n++;
+			struct trie_list* item = trie_list_new();
+			item->str = (char*) malloc((stroffset+2) * sizeof(char));
+			item->str[stroffset+1] = '\0';
+			item->n = node->n - dupchildren;
+			trie_list_merge(&children, item);
 		}
 
 		// Set this node's char for each children
-		for (int i = 0; i < n; i++) {
-			list[offset+i][stroffset] = node->ch;
+		for (struct trie_list* item = children; item != NULL; item = item->next) {
+			item->str[stroffset] = node->ch;
 		}
 
-		len += n;
-		offset += n;
+		trie_list_merge(&list, children);
 		*duplen += node->n;
 	}
-	return len;
+
+	return list;
 }
 
 // trie_node_list lists the most used strings from the tree and stores the first
 // cap of them in list. Duplicate strings are removed.
-int trie_node_list(struct trie_node* first, char** list, int cap) {
+struct trie_list* trie_node_list(struct trie_node* first) {
 	int duplen; // We don't care about this value here
-	return _trie_node_list(first, list, cap, 0, &duplen);
+	return _trie_node_list(first, 0, &duplen);
 }
 
 // trie_node_insert inserts the string s of len characters in the tree. It

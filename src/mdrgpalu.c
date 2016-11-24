@@ -43,14 +43,18 @@ int main(int argc, char** argv) {
 	root = trie_node_insert(root, "sava", 4);
 	root = trie_node_insert(root, "sava", 4);
 	root = trie_node_insert(root, "mdr", 3);
+	root = trie_node_insert(root, "mdr", 3);
+	root = trie_node_insert(root, "mdr", 3);
+	root = trie_node_insert(root, "mdr", 3);
+	root = trie_node_insert(root, "savamdr", 7);
+	root = trie_node_insert(root, "savamdr", 7);
 	root = trie_node_insert(root, "savamdr", 7);
 	root = trie_node_insert(root, "mdsaas", 6);
-	char** list = malloc(10 * sizeof(char*));
-	int n = trie_node_list(root, list, 10);
-	printf("%d\n", n);
-	for (int i = 0; i < n; i++) {
-		printf("%s\n", list[i]);
+	struct trie_list* list = trie_node_list(root);
+	for (struct trie_list* item = list; item != NULL; item = item->next) {
+		printf("%s %d\n", item->str, item->n);
 	}
+	trie_list_free(list);
 	return 0;
 
 	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering for stdin
