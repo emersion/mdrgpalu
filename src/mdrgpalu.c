@@ -46,11 +46,7 @@ int main(int argc, char** argv) {
 	root = trie_node_insert(root, "savamdr", 7);
 	root = trie_node_insert(root, "mdsaas", 6);
 	char** list = malloc(10 * sizeof(char*));
-	for (int i = 0; i < 10; i++) {
-		list[i] = (char*) malloc(30 * sizeof(char));
-		list[i][29] = '\0';
-	}
-	int n = trie_node_list(root, list, 10, 30);
+	int n = trie_node_list(root, list, 10);
 	printf("%d\n", n);
 	for (int i = 0; i < n; i++) {
 		printf("%s\n", list[i]);
