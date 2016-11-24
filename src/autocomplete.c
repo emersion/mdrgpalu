@@ -160,24 +160,25 @@ struct trie_list* trie_node_list(struct trie_node* first) {
 }
 
 // trie_node_insert inserts the string s of len characters in the tree. It
-// returns the new tree.
-struct trie_node* trie_node_insert(struct trie_node* first, char* s, int len) {
+// returns the leaf.
+struct trie_node* trie_node_insert(struct trie_node** tree, char* s, int len) {
 	if (len == 0) {
-		return first;
+		return *tree;
 	}
 
-	if (first == NULL || first->ch > s[0]) {
+	if (*tree == NULL || (*tree)->ch > s[0]) {
 		// Insert a new node for s[0] at the begining
 		struct trie_node* new = trie_node_new();
 		new->ch = s[0];
 		new->n = 1;
-		new->first = trie_node_insert(NULL, &s[1], len-1);
-		new->next = first;
-		return new;
+		struct trie_node* leaf = trie_node_insert(&new->first, &s[1], len-1);
+		new->next = *tree;
+		*tree = new;
+		return leaf;
 	}
 
 	// Find where the new node will be inserted
-	struct trie_node* node = first;
+	struct trie_node* node = *tree;
 	while (node->ch < s[0] && node->next != NULL) {
 		node = node->next;
 	}
@@ -185,29 +186,27 @@ struct trie_node* trie_node_insert(struct trie_node* first, char* s, int len) {
 	if (node->ch == s[0]) {
 		// A node for s[0] already exists
 		node->n++;
-		node->first = trie_node_insert(node->first, &s[1], len-1);
+		return trie_node_insert(&node->first, &s[1], len-1);
 	} else {
 		// Insert the new node right after node
 		struct trie_node* new = trie_node_new();
 		new->ch = s[0];
 		new->n = 1;
-		new->first = trie_node_insert(NULL, &s[1], len-1);
-
+		struct trie_node* leaf = trie_node_insert(&new->first, &s[1], len-1);
 		new->next = node->next;
 		node->next = new;
+		return leaf;
 	}
-	return first;
 }
 
-// trie_node_remove removes the string s of len characters from the tree. It
-// returns the new tree.
-struct trie_node* trie_node_remove(struct trie_node* first, char* s, int len) {
-	if (len == 0 || first == NULL) {
-		return first;
+// trie_node_remove removes the string s of len characters from the tree.
+void trie_node_remove(struct trie_node** tree, char* s, int len) {
+	if (len == 0 || *tree == NULL) {
+		return;
 	}
 
 	// Iterate through siblings until we reach s[0]
-	struct trie_node* node = first;
+	struct trie_node* node = *tree;
 	struct trie_node* prev = NULL;
 	while (node != NULL && node->ch < s[0]) {
 		prev = node;
@@ -216,24 +215,23 @@ struct trie_node* trie_node_remove(struct trie_node* first, char* s, int len) {
 
 	if (node == NULL || node->ch != s[0]) {
 		// s[0] is not in the tree, nothing to do
-		return first;
+		return;
 	}
 
 	// Remove s[1:] from the subtree
-	node->first = trie_node_remove(node->first, &s[1], len-1);
+	trie_node_remove(&node->first, &s[1], len-1);
 
 	node->n--;
 	if (node->n <= 0) {
 		// node is not used anymore, remove it from the tree
 		if (prev == NULL) {
 			trie_node_free(node);
-			return NULL;
+			*tree = NULL;
 		} else {
 			prev->next = node->next;
 			trie_node_free(node);
 		}
 	}
-	return first;
 }
 
 // trie_node_print prints the tree, useful when debugging.
