@@ -34,12 +34,23 @@ void term_clear() {
 	print_escape(CODE_CLEAR);
 }
 
+void term_flush() {
+	fflush(stdout);
+}
+
 void term_cursor_toggle(int show) {
 	if (show) {
 		print_escape(CODE_CURSOR_SHOW);
 	} else {
 		print_escape(CODE_CURSOR_HIDE);
 	}
+}
+
+void term_cursor_move(int x, int y) {
+	if (x < 0 || y < 0) {
+		return;
+	}
+	printf("%s%d;%d%c", CSI, x+1, y+1, CODE_CUP);
 }
 
 int term_width() {

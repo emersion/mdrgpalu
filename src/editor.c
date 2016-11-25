@@ -328,6 +328,7 @@ int editor_main(int argc, char** argv) {
 		} else {
 			status_print(s);
 		}
+		term_flush();
 
 		event_free(evt);
 	}

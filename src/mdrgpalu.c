@@ -22,7 +22,6 @@
 #include "term.h"
 
 // TODO: create windows counterparts for these
-#include "unix/format.c"
 #include "unix/sequence.c"
 #include "unix/clipboard_internal.c"
 #include "unix/clipboard_xclip.c"
