@@ -1,10 +1,10 @@
 void status_print(struct status* s) {
-	char t[128];
-	int n = snprintf((char*) &t, sizeof(t), "%d:%d", s->curline+1, s->curcol+1);
-	if (s->sellen > 0 && (uint) n < sizeof(t)) {
-		n += snprintf((char*) &t[n], sizeof(t)-n, " (%d)", s->sellen);
+	print_format(FORMAT_DIM);
+	printf("%d:%d", s->curline+1, s->curcol+1);
+	if (s->sellen > 0) {
+		printf(" (%d)", s->sellen);
 	}
-	print_format(FORMAT_DIM, (char*) &t);
+	print_format(FORMAT_RESET);
 }
 
 void buffer_print(struct buffer* b, struct status* s) {
@@ -35,7 +35,7 @@ void buffer_print(struct buffer* b, struct status* s) {
 				c = l->chars[j];
 			}
 			if (sellen >= 0 && j == selch) {
-				print_escape(FORMAT_REVERSE);
+				print_format(FORMAT_REVERSE);
 				curchar = j;
 				selch = -1;
 				if (j == l->len) {
@@ -46,7 +46,7 @@ void buffer_print(struct buffer* b, struct status* s) {
 			if (selch == -1 && sellen > 0) {
 				sellen--;
 				if (sellen <= 0) {
-					print_escape(FORMAT_RESET);
+					print_format(FORMAT_RESET);
 				}
 			}
 		}

@@ -31,7 +31,7 @@ void term_close() {
 }
 
 void term_clear() {
-	print_escape(FORMAT_CLEAR);
+	print_escape(CODE_CLEAR);
 }
 
 void term_cursor_toggle(int show) {

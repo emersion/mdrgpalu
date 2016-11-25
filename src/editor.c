@@ -39,8 +39,9 @@ int editor_open(struct editor* e, char* filename) {
 
 char* editor_prompt(struct editor* e, char* prompt) {
 	buffer_print(e->buf, NULL);
-	print_format(FORMAT_DIM, prompt);
-	printf(": ");
+	print_format(FORMAT_DIM);
+	printf("%s: ", prompt);
+	print_format(FORMAT_RESET);
 
 	term_cursor_toggle(1);
 
@@ -319,7 +320,9 @@ int editor_main(int argc, char** argv) {
 
 		buffer_print(b, s);
 		if (statustext != NULL) {
-			print_format(FORMAT_DIM, statustext);
+			print_format(FORMAT_DIM);
+			printf("%s", statustext);
+			print_format(FORMAT_RESET);
 			free(statustext);
 			statustext = NULL;
 		} else {
