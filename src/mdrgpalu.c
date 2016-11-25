@@ -14,6 +14,7 @@
 	#include <windows.h>
 #endif
 
+#include "utf8.c"
 #include "line.c"
 #include "selection.c"
 #include "buffer.c"

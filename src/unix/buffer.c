@@ -24,7 +24,7 @@ void buffer_print(struct buffer* b, struct status* s) {
 			}
 		}
 
-		char c;
+		wchar_t c;
 		for (int j = 0; j <= l->len; j++) {
 			if (j == l->len) {
 				c = '\n';
@@ -39,7 +39,7 @@ void buffer_print(struct buffer* b, struct status* s) {
 					printf(" ");
 				}
 			}
-			printf("%c", c);
+			utf8_write_to(c, stdout);
 			if (selch == -1 && sellen > 0) {
 				sellen--;
 				if (sellen <= 0) {
