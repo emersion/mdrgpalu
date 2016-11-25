@@ -13,7 +13,7 @@
 #define MODIFIER_CTRL 1<<3
 
 struct event {
-	char ch;
+	char32_t ch;
 
 	int key;
 	int modifiers;

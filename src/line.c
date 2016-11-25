@@ -3,7 +3,7 @@ struct line {
 	struct line* prev; // The previous line
 	struct line* next; // The next line
 
-	char* chars; // An array of characters contained in this line, excluding the trailing \n
+	char32_t* chars; // An array of characters contained in this line, excluding the trailing \n
 	int len; // The length of chars
 	int cap; // The capacity of chars
 };
@@ -149,17 +149,19 @@ void line_realloc(struct line* l) {
 		}
 		l->cap += more;
 
-		l->chars = (char*) realloc(l->chars, l->cap);
+		l->chars = (char32_t*) realloc(l->chars, l->cap * sizeof(char32_t));
 	}
 }
 
-// line_read_from reads a single line from f and adds it to l, at the specified
+// line_read_from reads a single line from s and adds it to l, at the specified
 // position. Returns the number of bytes appended to the line.
-int line_read_from(struct line* l, int at, FILE* f) {
-	int n = 0;
+int line_read_from(struct line* l, int at, FILE* s) {
+	int N = 0;
+	char32_t c;
 	while (1) {
-		int c = fgetc(f);
-		if (c == EOF) {
+		int n = utf8_read_from(&c, s);
+		N += n;
+		if (ferror(s)) {
 			break;
 		}
 		if (c == '\r') {
@@ -174,22 +176,22 @@ int line_read_from(struct line* l, int at, FILE* f) {
 		}
 		if (at < l->len) {
 			// TODO: optimize this
-			memmove(&l->chars[at+1], &l->chars[at], l->len-at);
+			memmove(&l->chars[at+1], &l->chars[at], (l->len-at)*sizeof(char32_t));
 		}
 
-		l->chars[at] = (char) c;
+		l->chars[at] = c;
 		at++;
 		n++;
 		l->len++;
 	}
 
-	return n;
+	return N;
 }
 
-// line_write_range_to writes a range of characters from l to f. The range
+// line_write_range_to writes a range of characters from l to s. The range
 // starts at index at and ends len bytes after. Returns a non-zero value on
 // error.
-int line_write_range_to(struct line* l, int at, int len, FILE* f) {
+int line_write_range_to(struct line* l, int at, int len, FILE* s) {
 	if (len < 0) {
 		len = l->len+1;
 	}
@@ -199,8 +201,10 @@ int line_write_range_to(struct line* l, int at, int len, FILE* f) {
 		if (n > l->len) {
 			n = l->len;
 		}
-		fwrite(&l->chars[at], sizeof(char), n, f);
-		int err = ferror(f);
+		for (int i = 0; i < n; i++) {
+			utf8_write_to(l->chars[at+i], s);
+		}
+		int err = ferror(s);
 		if (err) {
 			return err;
 		}
@@ -208,20 +212,20 @@ int line_write_range_to(struct line* l, int at, int len, FILE* f) {
 
 	if (at + len > l->len && l->next != NULL) {
 		// Write a trailing \n only if there's another line after
-		fputc('\n', f);
-		return ferror(f);
+		fputc('\n', s);
+		return ferror(s);
 	}
 	return 0;
 }
 
-// line_write_to writes l's content to f. Returns a non-zero value on error.
-int line_write_to(struct line* l, FILE* f) {
-	return line_write_range_to(l, 0, -1, f);
+// line_write_to writes l's content to s. Returns a non-zero value on error.
+int line_write_to(struct line* l, FILE* s) {
+	return line_write_range_to(l, 0, -1, s);
 }
 
 // line_insert_char inserts c at the position at. It moves characters after at
 // if necessary.
-void line_insert_char(struct line* l, int at, char c) {
+void line_insert_char(struct line* l, int at, char32_t c) {
 	if (at > l->len) {
 		at = l->len;
 	}
@@ -229,7 +233,7 @@ void line_insert_char(struct line* l, int at, char c) {
 	line_realloc(l);
 
 	if (at < l->len) {
-		memmove(&l->chars[at+1], &l->chars[at], l->len-at);
+		memmove(&l->chars[at+1], &l->chars[at], (l->len-at)*sizeof(char32_t));
 	}
 
 	l->chars[at] = c;
@@ -243,14 +247,14 @@ void line_delete_range(struct line* l, int at, int len) {
 		len = l->len - at;
 	}
 
-	memmove(&l->chars[at], &l->chars[at+len], l->len-at-len);
+	memmove(&l->chars[at], &l->chars[at+len], (l->len-at-len)*sizeof(char32_t));
 	l->len -= len;
 	// TODO: realloc to free memory
 }
 
 // line_delete_char deletes a the character at index at from l and returns its
 // value.
-int line_delete_char(struct line* l, int at) {
+char32_t line_delete_char(struct line* l, int at) {
 	if (l->len == 0) {
 		return -1;
 	}
@@ -261,7 +265,7 @@ int line_delete_char(struct line* l, int at) {
 		at = l->len-1;
 	}
 
-	char c = l->chars[at];
+	char32_t c = l->chars[at];
 	line_delete_range(l, at, 1);
 	return c;
 }
@@ -289,8 +293,8 @@ struct line* line_split(struct line* l, int at) {
 			l->chars = NULL;
 		} else {
 			next->len = l->len - at;
-			next->chars = (char*) malloc(next->len);
-			memcpy(next->chars, &l->chars[at], next->len);
+			next->chars = (char32_t*) malloc(next->len * sizeof(char32_t));
+			memcpy(next->chars, &l->chars[at], next->len * sizeof(char32_t));
 			l->len = at;
 		}
 	}
@@ -305,9 +309,9 @@ void line_join(struct line* l, struct line* other) {
 	if (other->len > 0) {
 		if (l->cap < len) {
 			l->cap = len;
-			l->chars = (char*) realloc(l->chars, l->cap);
+			l->chars = (char32_t*) realloc(l->chars, l->cap * sizeof(char32_t));
 		}
-		memcpy(&l->chars[l->len], other->chars, other->len);
+		memcpy(&l->chars[l->len], other->chars, other->len * sizeof(char32_t));
 	}
 	l->len = len;
 }
@@ -328,7 +332,7 @@ int line_jump(struct line* l, int at, int dir) {
 	int inword = 0;
 	int d = 0;
 	for (d += dir; at + d >= 0 && at + d <= l->len; d += dir) {
-		char c = l->chars[at + d];
+		char32_t c = l->chars[at + d];
 		if (c == ' ' || c == '\t') { // Whitespace char
 			if (inword) {
 				break;

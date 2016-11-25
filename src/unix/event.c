@@ -1,9 +1,9 @@
 struct event* event_read(FILE* s) {
 	struct event* e;
-	char c;
-	char prev = -1;
+	char32_t c;
+	char32_t prev = 0;
 	while (1) {
-		c = fgetc(s);
+		utf8_read_from(&c, s);
 		if (feof(s)) {
 			return NULL;
 		} else if (ferror(stdin)) {
@@ -52,7 +52,7 @@ struct event* event_read(FILE* s) {
 			return e;
 		} else if (prev == '\033') { // Esc
 			// TODO: detect Esc key if no more data is available
-			ungetc(c, s);
+			//ungetc(c, s);
 
 			e = event_new();
 			e->key = KEY_ESC;
