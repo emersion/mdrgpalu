@@ -30,3 +30,5 @@ struct event* event_new() {
 void event_free(struct event* evt) {
 	free(evt);
 }
+
+struct event* event_read(FILE* s);

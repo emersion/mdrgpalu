@@ -1,9 +1,3 @@
-struct status {
-	int curline;
-	int curcol;
-	int sellen;
-};
-
 void status_print(struct status* s) {
 	char t[128];
 	int n = snprintf((char*) &t, sizeof(t), "%d:%d", s->curline+1, s->curcol+1);
@@ -15,7 +9,7 @@ void status_print(struct status* s) {
 
 void buffer_print(struct buffer* b, struct status* s) {
 	printf("\n");
-	print_escape(FORMAT_CLEAR); // clear
+	term_clear();
 
 	int i = 0;
 	int curline = 0, curchar = 0;

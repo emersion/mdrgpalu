@@ -1,7 +1,7 @@
 struct termios term_original;
 struct winsize term_size;
 
-void term_load_size() {
+static void term_load_size() {
 	ioctl(fileno(stdout), TIOCGWINSZ, &term_size);
 }
 
@@ -28,6 +28,10 @@ void term_close() {
 
 	print_escape(CODE_MODIFYOTHERKEYS_DISABLE);
 	print_escape(CODE_ALTSCREEN_DISABLE);
+}
+
+void term_clear() {
+	print_escape(FORMAT_CLEAR);
 }
 
 void term_cursor_toggle(int show) {
