@@ -49,7 +49,7 @@ char* editor_prompt(struct editor* e, char* prompt) {
 
 	int len = 0;
 	int cap = 32;
-	char* res = (char*) malloc(cap);
+	char* res = (char*) malloc(cap * sizeof(char));
 	while (1) {
 		struct event* evt = event_read(stdin);
 		if (evt == NULL || evt->key == KEY_ESC) {
@@ -68,20 +68,19 @@ char* editor_prompt(struct editor* e, char* prompt) {
 			continue;
 		}
 
-		char c = evt->ch;
-		if (evt->ch == '\n') {
+		wchar_t c = evt->ch;
+		if (c == '\n') {
 			c = 0; // Insert trailing \0
 		} else {
-			printf("%c", c);
+			utf8_write_to(c, stdout);
 		}
 
-		if (len + 1 > cap) {
+		if (len + UTF8_MAX_LEN > cap) {
 			cap += 32;
-			res = (char*) realloc(res, cap);
+			res = (char*) realloc(res, cap * sizeof(char));
 		}
 
-		res[len] = c;
-		len++;
+		len += utf8_format(&res[len], c);
 		if (c == 0) {
 			break;
 		}

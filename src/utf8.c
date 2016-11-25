@@ -3,6 +3,8 @@
 #define UTF8_CONTINUATION_BYTE 0
 #define UTF8_SINGLE_BYTE 1
 
+#define UTF8_MAX_LEN 6
+
 static const unsigned char utf8_mask[6] = {
 	0x7F,
 	0x1F,
@@ -67,7 +69,7 @@ char utf8_format(char* str, wchar_t codepoint) {
 }
 
 int utf8_write_to(wchar_t codepoint, FILE* s) {
-	char str[6];
+	char str[UTF8_MAX_LEN];
 	char len = utf8_format((char*) &str, codepoint);
 	int n = fwrite(&str, sizeof(char), len, s);
 	if (n != len) {
