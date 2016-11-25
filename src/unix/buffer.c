@@ -8,9 +8,6 @@ void status_print(struct status* s) {
 }
 
 void buffer_print(struct buffer* b, struct status* s) {
-	printf("\n");
-	term_clear();
-
 	int i = 0;
 	int curline = 0, curchar = 0;
 	int selch = -1, sellen = -1;

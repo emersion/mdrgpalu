@@ -50,7 +50,7 @@ void term_cursor_move(int x, int y) {
 	if (x < 0 || y < 0) {
 		return;
 	}
-	printf("%s%d;%d%c", CSI, x+1, y+1, CODE_CUP);
+	printf("%s%d;%d%c", CSI, y+1, x+1, CODE_CUP);
 }
 
 int term_width() {

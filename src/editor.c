@@ -109,6 +109,13 @@ int editor_main(int argc, char** argv) {
 	buffer_print(b, s);
 	status_print(s);
 
+	term_clear();
+	term_cursor_move(0, 0);
+	buffer_print(b, s);
+	term_cursor_move(0, term_height()-1);
+	status_print(s);
+	term_flush();
+
 	struct event* evt;
 	char* statustext = NULL;
 	while (1) {
@@ -318,7 +325,10 @@ int editor_main(int argc, char** argv) {
 			buffer_insert_char(b, evt->ch);
 		}
 
+		term_clear();
+		term_cursor_move(0, 0);
 		buffer_print(b, s);
+		term_cursor_move(0, term_height()-1);
 		if (statustext != NULL) {
 			print_format(FORMAT_DIM);
 			printf("%s", statustext);
