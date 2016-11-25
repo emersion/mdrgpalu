@@ -1,5 +1,8 @@
 #define UTF8_REPLACEMENT_CODEPOINT 0xFFFD
 
+#define UTF8_CONTINUATION_BYTE 0
+#define UTF8_SINGLE_BYTE 1
+
 static const unsigned char utf8_mask[6] = {
 	0x7F,
 	0x1F,
@@ -11,10 +14,10 @@ static const unsigned char utf8_mask[6] = {
 
 char utf8_len(unsigned char c) {
 	if ((c & (1 << 7)) == 0) {
-		return 1; // Non-unicode, single char
+		return UTF8_SINGLE_BYTE;
 	}
 	if ((c & (1 << 6)) == 0) {
-		return 0; // Unknown
+		return UTF8_CONTINUATION_BYTE;
 	}
 	if ((c & (1 << 5)) == 0) {
 		return 2;
@@ -28,10 +31,7 @@ char utf8_len(unsigned char c) {
 	if ((c & (1 << 2)) == 0) {
 		return 5;
 	}
-	if ((c & (1 << 1)) == 0) {
-		return 6;
-	}
-	return -1;
+	return 6;
 }
 
 char utf8_format(char* str, wchar_t codepoint) {
@@ -84,10 +84,15 @@ int utf8_read_from(wchar_t* codepoint, FILE* s) {
 	*codepoint = (wchar_t) c;
 
 	char len = utf8_len(c);
+	if (len == UTF8_CONTINUATION_BYTE) {
+		*codepoint = UTF8_REPLACEMENT_CODEPOINT;
+		return 1;
+	}
+
 	*codepoint &= utf8_mask[len-1];
 	for (int i = 1; i < len; i++) {
 		c = fgetc(s);
-		if (c == EOF || utf8_len(c) != 0) {
+		if (c == EOF || utf8_len(c) != UTF8_CONTINUATION_BYTE) {
 			*codepoint = UTF8_REPLACEMENT_CODEPOINT;
 			if (c == EOF) {
 				return EOF;
