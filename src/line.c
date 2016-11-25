@@ -154,16 +154,17 @@ void line_realloc(struct line* l) {
 }
 
 // line_read_from reads a single line from s and adds it to l, at the specified
-// position. Returns the number of bytes appended to the line.
+// position. Returns the number of bytes read.
 int line_read_from(struct line* l, int at, FILE* s) {
 	int N = 0;
 	char32_t c;
 	while (1) {
 		int n = utf8_read_from(&c, s);
-		N += n;
-		if (ferror(s)) {
+		if (n == EOF) {
 			break;
 		}
+
+		N += n;
 		if (c == '\r') {
 			continue;
 		}
@@ -181,7 +182,6 @@ int line_read_from(struct line* l, int at, FILE* s) {
 
 		l->chars[at] = c;
 		at++;
-		n++;
 		l->len++;
 	}
 
@@ -202,18 +202,19 @@ int line_write_range_to(struct line* l, int at, int len, FILE* s) {
 			n = l->len;
 		}
 		for (int i = 0; i < n; i++) {
-			utf8_write_to(l->chars[at+i], s);
-		}
-		int err = ferror(s);
-		if (err) {
-			return err;
+			int err = utf8_write_to(l->chars[at+i], s);
+			if (err) {
+				return err;
+			}
 		}
 	}
 
 	if (at + len > l->len && l->next != NULL) {
 		// Write a trailing \n only if there's another line after
-		fputc('\n', s);
-		return ferror(s);
+		int c = fputc('\n', s);
+		if (c == EOF) {
+			return 1;
+		}
 	}
 	return 0;
 }

@@ -68,15 +68,18 @@ char utf8_format(char* str, char32_t codepoint) {
 
 int utf8_write_to(char32_t codepoint, FILE* s) {
 	char str[6];
-	char n = utf8_format((char*) &str, codepoint);
-	fwrite(&str, sizeof(char), n, s);
-	return ferror(s);
+	char len = utf8_format((char*) &str, codepoint);
+	int n = fwrite(&str, sizeof(char), len, s);
+	if (n != len) {
+		return 1;
+	}
+	return 0;
 }
 
-char utf8_read_from(char32_t* codepoint, FILE* s) {
-	unsigned char c = fgetc(s);
-	if (ferror(s)) {
-		return 0;
+int utf8_read_from(char32_t* codepoint, FILE* s) {
+	int c = fgetc(s);
+	if (c == EOF) {
+		return EOF;
 	}
 	*codepoint = (char32_t) c;
 
@@ -84,11 +87,11 @@ char utf8_read_from(char32_t* codepoint, FILE* s) {
 	*codepoint &= utf8_mask[len-1];
 	for (int i = 1; i < len; i++) {
 		c = fgetc(s);
-		if (ferror(s)) {
-			return 0;
-		}
-		if (utf8_len(c) != 0) {
+		if (c == EOF || utf8_len(c) != 0) {
 			*codepoint = UTF8_REPLACEMENT_CODEPOINT;
+			if (c == EOF) {
+				return EOF;
+			}
 			return i;
 		}
 

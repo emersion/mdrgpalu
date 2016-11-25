@@ -1,12 +1,10 @@
 struct event* event_read(FILE* s) {
-	struct event* e;
-	char32_t c;
+	struct event* e = NULL;
+	char32_t c = 0;
 	char32_t prev = 0;
 	while (1) {
-		utf8_read_from(&c, s);
-		if (feof(s)) {
-			return NULL;
-		} else if (ferror(stdin)) {
+		int n = utf8_read_from(&c, s);
+		if (n == EOF) {
 			return NULL;
 		}
 
