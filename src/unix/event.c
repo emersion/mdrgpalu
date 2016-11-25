@@ -1,7 +1,7 @@
 struct event* event_read(FILE* s) {
 	struct event* e = NULL;
-	char32_t c = 0;
-	char32_t prev = 0;
+	wchar_t c = 0;
+	wchar_t prev = 0;
 	while (1) {
 		int n = utf8_read_from(&c, s);
 		if (n == EOF) {

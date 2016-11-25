@@ -4,7 +4,6 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <signal.h>
-#include <uchar.h>
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 	#define POSIX

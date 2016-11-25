@@ -24,7 +24,7 @@ void buffer_print(struct buffer* b, struct status* s) {
 			}
 		}
 
-		char32_t c;
+		wchar_t c;
 		for (int j = 0; j <= l->len; j++) {
 			if (j == l->len) {
 				c = '\n';

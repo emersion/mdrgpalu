@@ -96,12 +96,12 @@ void buffer_delete_line(struct buffer* b, struct line* l) {
 
 // buffer_delete_char removes a character at the current cursor's position if
 // dir == 0 or the previous if dir = -1. It returns the deleted char.
-char32_t buffer_delete_char(struct buffer* b, int dir) {
+wchar_t buffer_delete_char(struct buffer* b, int dir) {
 	int at = b->sel->ch + dir;
 
 	if (at >= 0 && at < b->sel->line->len) {
 		// Delete a character in this line
-		char32_t c = line_delete_char(b->sel->line, at);
+		wchar_t c = line_delete_char(b->sel->line, at);
 
 		if (at > b->sel->line->len) {
 			at = b->sel->line->len;
@@ -181,7 +181,7 @@ void buffer_delete_selection(struct buffer* b) {
 }
 
 // buffer_insert_char inserts a character at the current cursor's position.
-void buffer_insert_char(struct buffer* b, char32_t c) {
+void buffer_insert_char(struct buffer* b, wchar_t c) {
 	if (b->sel->len > 0) {
 		buffer_delete_selection(b);
 	}

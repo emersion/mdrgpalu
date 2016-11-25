@@ -34,7 +34,7 @@ char utf8_len(unsigned char c) {
 	return -1;
 }
 
-char utf8_format(char* str, char32_t codepoint) {
+char utf8_format(char* str, wchar_t codepoint) {
 	char len = 0;
 	int first;
 	if (codepoint < 0x80) {
@@ -66,7 +66,7 @@ char utf8_format(char* str, char32_t codepoint) {
 	return len;
 }
 
-int utf8_write_to(char32_t codepoint, FILE* s) {
+int utf8_write_to(wchar_t codepoint, FILE* s) {
 	char str[6];
 	char len = utf8_format((char*) &str, codepoint);
 	int n = fwrite(&str, sizeof(char), len, s);
@@ -76,12 +76,12 @@ int utf8_write_to(char32_t codepoint, FILE* s) {
 	return 0;
 }
 
-int utf8_read_from(char32_t* codepoint, FILE* s) {
+int utf8_read_from(wchar_t* codepoint, FILE* s) {
 	int c = fgetc(s);
 	if (c == EOF) {
 		return EOF;
 	}
-	*codepoint = (char32_t) c;
+	*codepoint = (wchar_t) c;
 
 	char len = utf8_len(c);
 	*codepoint &= utf8_mask[len-1];
