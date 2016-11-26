@@ -123,7 +123,7 @@ int editor_main(int argc, char** argv) {
 		}
 
 		if (evt->key || evt->modifiers) {
-			struct command* cmd = command_match((struct command**) &commands, sizeof(commands)/sizeof(commands[0]), evt);
+			struct command* cmd = command_match(commands, sizeof(commands)/sizeof(commands[0]), evt);
 			if (cmd != NULL) {
 				cmd->exec(e, evt);
 			}
@@ -132,6 +132,10 @@ int editor_main(int argc, char** argv) {
 		}
 
 		event_free(evt);
+
+		if (e->exitcode >= 0) {
+			return e->exitcode;
+		}
 
 		buffer_print(b, s);
 		if (e->status != NULL) {

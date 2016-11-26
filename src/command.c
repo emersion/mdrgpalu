@@ -21,10 +21,10 @@ void command_free(struct command* cmd) {
 	free(cmd);
 }
 
-struct command* command_match(struct command** commands, int len, struct event* evt) {
+struct command* command_match(struct command commands[], int len, struct event* evt) {
 	for (int i = 0; i < len; i++) {
-		if (event_equal((*commands)[i].evt, evt)) {
-			return &(*commands)[i];
+		if (event_equal(evt, commands[i].evt)) {
+			return &commands[i];
 		}
 	}
 	return NULL;
@@ -218,7 +218,7 @@ struct command commands[] = {
 	{ .title = "Move to begining of word", .evt = &(struct event) { .key = KEY_ARROW_LEFT, .modifiers = MODIFIER_CTRL }, .exec = command_move },
 	{ .title = "Move to end of word", .evt = &(struct event) { .key = KEY_ARROW_RIGHT, .modifiers = MODIFIER_CTRL }, .exec = command_move },
 	{ .title = "Move line up", .evt = &(struct event) { .key = KEY_ARROW_UP, .modifiers = MODIFIER_CTRL }, .exec = command_move },
-	{ .title = "Move line down", .evt = &(struct event) { .key = KEY_ARROW_UP, .modifiers = MODIFIER_CTRL }, .exec = command_move },
+	{ .title = "Move line down", .evt = &(struct event) { .key = KEY_ARROW_DOWN, .modifiers = MODIFIER_CTRL }, .exec = command_move },
 	{ .title = "Select left", .evt = &(struct event) { .key = KEY_ARROW_LEFT, .modifiers = MODIFIER_SHIFT }, .exec = command_move },
 	{ .title = "Select right", .evt = &(struct event) { .key = KEY_ARROW_RIGHT, .modifiers = MODIFIER_SHIFT }, .exec = command_move },
 	{ .title = "Select to begining of word", .evt = &(struct event) { .key = KEY_ARROW_LEFT, .modifiers = MODIFIER_SHIFT | MODIFIER_CTRL }, .exec = command_move },
