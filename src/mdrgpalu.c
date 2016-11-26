@@ -35,8 +35,9 @@
 	#include "windows/term.c"
 #endif
 
-#include "editor.c"
+#include "editor.h"
 #include "command.c"
+#include "editor.c"
 
 int main(int argc, char** argv) {
 	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering for stdin
