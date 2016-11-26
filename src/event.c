@@ -13,7 +13,7 @@
 #define MODIFIER_CTRL 1<<3
 
 struct event {
-	char ch;
+	wchar_t ch;
 
 	int key;
 	int modifiers;
@@ -34,3 +34,5 @@ void event_free(struct event* evt) {
 int event_equal(struct event* evt, struct event* other) {
 	return (evt->ch == other->ch && evt->key == other->key && evt->modifiers == other->modifiers);
 }
+
+struct event* event_read(FILE* s);

@@ -1,5 +1,8 @@
 // See http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 // See https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
+
+#define CSI "\033["
+
 #define CODE_CUU 'A' // Cursor Up
 #define CODE_CUD 'B' // Cursor Down
 #define CODE_CUF 'C' // Cursor Forward
@@ -9,6 +12,8 @@
 #define CODE_CHA 'G' // Cursor Character Absolute
 #define CODE_CUP 'H' // Cursor Position
 #define CODE_DECDC '~' // Delete Column
+
+#define CODE_CLEAR "2J"
 
 #define CODE_CURSOR_HIDE "?25l"
 #define CODE_CURSOR_SHOW "?25h"
@@ -24,6 +29,21 @@
 #define ANSI_MODIFIER_ALT_SHIFT  4
 #define ANSI_MODIFIER_CTRL       5
 #define ANSI_MODIFIER_CTRL_SHIFT 6
+
+#define FORMAT_RESET 0
+#define FORMAT_BOLD 1
+#define FORMAT_DIM 2
+#define FORMAT_ITALIC 3
+#define FORMAT_UNDERLINE 4
+#define FORMAT_REVERSE 7
+
+void print_escape(char* seq) {
+	printf("%s%s", CSI, seq);
+}
+
+void print_format(char format) {
+	printf("%s%dm", CSI, format);
+}
 
 int parse_modifiers(int input) {
 	int output = 0;

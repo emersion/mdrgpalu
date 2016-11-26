@@ -14,14 +14,15 @@
 	#include <windows.h>
 #endif
 
+#include "utf8.c"
 #include "line.c"
 #include "selection.c"
 #include "buffer.c"
 #include "io.c"
 #include "event.c"
+#include "term.h"
 
 // TODO: create windows counterparts for these
-#include "unix/format.c"
 #include "unix/sequence.c"
 #include "unix/clipboard_internal.c"
 #include "unix/clipboard_xclip.c"
@@ -45,6 +46,7 @@ int main(int argc, char** argv) {
 	term_cursor_toggle(0);
 	clipboard_init();
 	int exitcode = editor_main(argc, argv);
+	term_clear();
 	term_cursor_toggle(1);
 	term_close();
 	return exitcode;
