@@ -88,6 +88,11 @@ char* editor_prompt(struct editor* e, char* prompt) {
 	return res;
 }
 
+char* editor_prompt_filename(struct editor* e, char* prompt) {
+	// TODO: autocomplete filename
+	return editor_prompt(e, prompt);
+}
+
 void editor_set_status(struct editor* e, char* status) {
 	free(e->status);
 	e->status = strdup(status);
@@ -95,11 +100,6 @@ void editor_set_status(struct editor* e, char* status) {
 
 void editor_quit(struct editor* e) {
 	e->exitcode = 0;
-}
-
-char* editor_prompt_filename(struct editor* e, char* prompt) {
-	// TODO: autocomplete filename
-	return editor_prompt(e, prompt);
 }
 
 int editor_main(int argc, char** argv) {
