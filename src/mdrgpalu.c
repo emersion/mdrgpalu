@@ -36,6 +36,8 @@
 	#include "windows/term.c"
 #endif
 
+#include "editor.h"
+#include "command.c"
 #include "editor.c"
 
 int main(int argc, char** argv) {
