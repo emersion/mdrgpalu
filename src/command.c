@@ -156,7 +156,7 @@ void command_cut_copy(struct editor* e, struct event* evt) {
 }
 
 void command_go_to_line(struct editor* e, struct event* evt) {
-	char* s = editor_prompt(e, "Go to line:");
+	char* s = editor_prompt(e, "Go to line");
 	if (s == NULL) {
 		return;
 	}
@@ -174,9 +174,26 @@ void command_quit(struct editor* e, struct event* evt) {
 	editor_quit(e);
 }
 
+void command_open(struct editor* e, struct event* evt) {
+	char* filename = editor_prompt_filename(e, "Open file");
+	if (filename == NULL) {
+		return;
+	}
+
+	int err = editor_open(e, filename);
+	free(filename);
+	if (err) {
+		if (errno == ENOENT) {
+			editor_set_status(e, "File not found");
+		} else {
+			editor_set_status(e, "Cannot open file");
+		}
+	}
+}
+
 void command_save(struct editor* e, struct event* evt) {
 	if (e->filename == NULL) {
-		e->filename = editor_prompt(e, "Save as:");
+		e->filename = editor_prompt(e, "Save as");
 	}
 	if (e->filename != NULL) {
 		FILE* f = fopen(e->filename, "w+");
@@ -240,8 +257,9 @@ struct command commands[] = {
 	{ .title = "Copy", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'C' }, .exec = command_cut_copy },
 	{ .title = "Go to line", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'G' }, .exec = command_go_to_line },
 	{ .title = "Select line", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'L' }, .exec = command_select_line },
+	{ .title = "Open file", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'O' }, .exec = command_open },
 	{ .title = "Quit", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'Q' }, .exec = command_quit },
-	{ .title = "Save", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'S' }, .exec = command_save },
+	{ .title = "Save file", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'S' }, .exec = command_save },
 	{ .title = "Paste", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'V' }, .exec = command_paste },
 	{ .title = "Close", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'W' }, .exec = command_quit },
 	{ .title = "Cut", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'X' }, .exec = command_cut_copy },
