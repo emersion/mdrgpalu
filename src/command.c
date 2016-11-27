@@ -193,7 +193,7 @@ void command_open(struct editor* e, struct event* evt) {
 
 void command_save(struct editor* e, struct event* evt) {
 	if (e->filename == NULL) {
-		e->filename = editor_prompt(e, "Save as");
+		e->filename = editor_prompt_filename(e, "Save as");
 	}
 	if (e->filename != NULL) {
 		FILE* f = fopen(e->filename, "w+");
