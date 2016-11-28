@@ -20,9 +20,17 @@ void editor_print(struct editor* e) {
 }
 
 static void editor_autocomplete(struct editor* e, int offset, int* prevlen, struct trie_list* list) {
+	// Erase previous suggestions
+	for (int i = 0; i < *prevlen; i++) {
+		term_cursor_move(offset, term_height() - 1 - (i+1));
+		printf("%-50s", "");
+	}
+
+	// Redraw buffer
 	term_cursor_move(0, 0);
 	buffer_print(e->buf, NULL);
 
+	// Print new suggestions
 	int i = 0;
 	for (struct trie_list* item = list; item != NULL; item = item->next) {
 		term_cursor_move(offset, term_height() - 1 - (i+1));
@@ -30,15 +38,8 @@ static void editor_autocomplete(struct editor* e, int offset, int* prevlen, stru
 		print_background(COLOR_BLUE);
 		printf("%-50s", item->str);
 		print_format(FORMAT_RESET);
-
 		i++;
 	}
-
-	for (; i < *prevlen; i++) {
-		term_cursor_move(offset, term_height() - 1 - (i+1));
-		printf("%-50s", "");
-	}
-
 	*prevlen = i+1;
 }
 
