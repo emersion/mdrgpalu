@@ -156,7 +156,7 @@ void command_cut_copy(struct editor* e, struct event* evt) {
 }
 
 void command_go_to_line(struct editor* e, struct event* evt) {
-	char* s = editor_prompt(e, "Go to line");
+	char* s = editor_prompt(e, "Go to line", NULL);
 	if (s == NULL) {
 		return;
 	}
@@ -227,6 +227,22 @@ void command_paste(struct editor* e, struct event* evt) {
 	}
 }
 
+struct trie_list* command_autocomplete(char* val) {
+	if (strlen(val) > 0) {
+		return NULL;
+	}
+
+	struct trie_list* list = (struct trie_list*) malloc(sizeof(struct trie_list));
+	list->next = NULL;
+	list->str = "sava";
+	list->n = 0;
+	return list;
+}
+
+void command_palette(struct editor* e, struct event* evt) {
+	editor_prompt(e, NULL, &command_autocomplete);
+}
+
 struct command commands[] = {
 	{ .title = "Move left", .evt = &(struct event) { .key = KEY_ARROW_LEFT }, .exec = command_move },
 	{ .title = "Move right", .evt = &(struct event) { .key = KEY_ARROW_RIGHT }, .exec = command_move },
@@ -258,6 +274,7 @@ struct command commands[] = {
 	{ .title = "Go to line", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'G' }, .exec = command_go_to_line },
 	{ .title = "Select line", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'L' }, .exec = command_select_line },
 	{ .title = "Open file", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'O' }, .exec = command_open },
+	{ .title = "Command palette", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'P' }, .exec = command_palette },
 	{ .title = "Quit", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'Q' }, .exec = command_quit },
 	{ .title = "Save file", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'S' }, .exec = command_save },
 	{ .title = "Paste", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'V' }, .exec = command_paste },

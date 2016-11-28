@@ -38,12 +38,32 @@
 #define FORMAT_UNDERLINE 4
 #define FORMAT_REVERSE 7
 
+#define FORMAT_FOREGROUND 30
+#define FORMAT_BACKGROUND 40
+
+#define COLOR_BLACK 0
+#define COLOR_RED 1
+#define COLOR_GREEN 2
+#define COLOR_YELLOW 3
+#define COLOR_BLUE 4
+#define COLOR_MAGENTA 5
+#define COLOR_CYAN 6
+#define COLOR_WHITE 7
+
 void print_escape(char* seq) {
 	printf("%s%s", CSI, seq);
 }
 
 void print_format(char format) {
 	printf("%s%dm", CSI, format);
+}
+
+void print_foreground(char color) {
+	print_format(FORMAT_FOREGROUND + color);
+}
+
+void print_background(char color) {
+	print_format(FORMAT_BACKGROUND + color);
 }
 
 int parse_modifiers(int input) {

@@ -1,17 +1,3 @@
-// A trie node. See https://en.wikipedia.org/wiki/Trie
-// Note: to support storing properly a string multiple times, keeping the number
-// of strings that uses each node is necessary.
-struct trie_node {
-	// The next sibling node.
-	struct trie_node* next;
-	// The first child node.
-	struct trie_node* first;
-	// The node's character.
-	char ch;
-	// The number of strings using this node.
-	int n;
-};
-
 // trie_node_new allocates a new trie node.
 struct trie_node* trie_node_new() {
 	struct trie_node* node = (struct trie_node*) malloc(sizeof(struct trie_node));
@@ -56,13 +42,6 @@ int trie_node_len(struct trie_node* first) {
 	}
 	return n;
 }
-
-// A trie_list is a chained list of strings, sorted by n in descending order.
-struct trie_list {
-	struct trie_list* next;
-	char* str;
-	int n;
-};
 
 // trie_list_new allocates a new trie list.
 static struct trie_list* trie_list_new() {

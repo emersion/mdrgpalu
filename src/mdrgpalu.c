@@ -16,6 +16,7 @@
 
 #include "status.h"
 #include "term.h"
+#include "autocomplete.h"
 #include "editor.h"
 
 #include "utf8.c"
@@ -46,7 +47,7 @@
 #include "editor.c"
 
 int main(int argc, char** argv) {
-	struct trie_node* root = NULL;
+	/*struct trie_node* root = NULL;
 	trie_node_insert(&root, "sava", 4);
 	trie_node_insert(&root, "sava", 4);
 	trie_node_insert(&root, "mdr", 3);
@@ -63,7 +64,7 @@ int main(int argc, char** argv) {
 		printf("%s %d\n", item->str, item->n);
 	}
 	trie_list_free(list);
-	return 0;
+	return 0;*/
 
 	setvbuf(stdin, NULL, _IONBF, 0); // Turn off buffering for stdin
 	term_setup();
