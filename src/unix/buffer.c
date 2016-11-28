@@ -1,12 +1,3 @@
-void status_print(struct status* s) {
-	print_format(FORMAT_DIM);
-	printf("%d:%d", s->curline+1, s->curcol+1);
-	if (s->sellen > 0) {
-		printf(" (%d)", s->sellen);
-	}
-	print_format(FORMAT_RESET);
-}
-
 void buffer_print(struct buffer* b, struct status* s) {
 	int i = 0;
 	int curline = 0, curchar = 0;

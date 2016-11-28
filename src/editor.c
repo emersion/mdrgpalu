@@ -39,6 +39,7 @@ char* editor_prompt(struct editor* e, char* prompt) {
 	term_cursor_move(0, 0);
 	buffer_print(e->buf, NULL);
 	term_cursor_move(0, term_height()-1);
+	term_clear_line();
 	print_format(FORMAT_DIM);
 	printf("%s: ", prompt);
 	print_format(FORMAT_RESET);
@@ -113,13 +114,7 @@ int editor_main(int argc, char** argv) {
 		}
 	}
 
-	struct status* s = (struct status*) malloc(sizeof(struct status));
-	term_clear();
-	term_cursor_move(0, 0);
-	buffer_print(b, s);
-	term_cursor_move(0, term_height()-1);
-	status_print(s);
-	term_flush();
+	editor_print(e);
 
 	while (1) {
 		struct event* evt = event_read(stdin);
@@ -148,17 +143,6 @@ int editor_main(int argc, char** argv) {
 			return e->exitcode;
 		}
 
-		term_clear();
-		term_cursor_move(0, 0);
-		buffer_print(b, s);
-		term_cursor_move(0, term_height()-1);
-		if (e->status != NULL) {
-			print_format(FORMAT_DIM);
-			printf("%s", e->status);
-			editor_set_status(e, NULL);
-		} else {
-			status_print(s);
-		}
-		term_flush();
+		editor_print(e);
 	}
 }

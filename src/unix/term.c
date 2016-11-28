@@ -30,8 +30,12 @@ void term_close() {
 	print_escape(CODE_ALTSCREEN_DISABLE);
 }
 
-void term_clear() {
-	print_escape(CODE_CLEAR);
+void term_clear_screen() {
+	print_escape(CODE_ED);
+}
+
+void term_clear_line() {
+	print_escape(CODE_EL);
 }
 
 void term_flush() {

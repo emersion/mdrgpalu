@@ -339,12 +339,4 @@ void buffer_swap_lines(struct buffer* b, struct line* l1, struct line* l2) {
 	line_swap(l1, l2);
 }
 
-struct status {
-	int curline;
-	int curcol;
-	int sellen;
-};
-
-void status_print(struct status* s);
-
 void buffer_print(struct buffer* b, struct status* s);

@@ -13,7 +13,8 @@
 #define CODE_CUP 'H' // Cursor Position
 #define CODE_DECDC '~' // Delete Column
 
-#define CODE_CLEAR "2J"
+#define CODE_ED "2J" // Erase display
+#define CODE_EL "2K" // Erase line
 
 #define CODE_CURSOR_HIDE "?25l"
 #define CODE_CURSOR_SHOW "?25h"

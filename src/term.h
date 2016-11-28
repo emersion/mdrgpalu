@@ -4,8 +4,11 @@ void term_setup();
 // term_close reconfigures the terminal as it was before term_setup.
 void term_close();
 
-// term_clear clears the terminal's screen.
-void term_clear();
+// term_clear_screen clears the terminal's screen.
+void term_clear_screen();
+
+// term_clear_line clears the terminal's current line.
+void term_clear_line();
 
 // term_flush ensures that the terminal's screen is in sync.
 void term_flush();
