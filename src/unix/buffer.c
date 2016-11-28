@@ -1,22 +1,4 @@
-struct status {
-	int curline;
-	int curcol;
-	int sellen;
-};
-
-void status_print(struct status* s) {
-	char t[128];
-	int n = snprintf((char*) &t, sizeof(t), "%d:%d", s->curline+1, s->curcol+1);
-	if (s->sellen > 0 && (uint) n < sizeof(t)) {
-		n += snprintf((char*) &t[n], sizeof(t)-n, " (%d)", s->sellen);
-	}
-	print_format(FORMAT_DIM, (char*) &t);
-}
-
 void buffer_print(struct buffer* b, struct status* s) {
-	printf("\n");
-	print_escape(FORMAT_CLEAR); // clear
-
 	int i = 0;
 	int curline = 0, curchar = 0;
 	int selch = -1, sellen = -1;
@@ -33,7 +15,7 @@ void buffer_print(struct buffer* b, struct status* s) {
 			}
 		}
 
-		char c;
+		wchar_t c;
 		for (int j = 0; j <= l->len; j++) {
 			if (j == l->len) {
 				c = '\n';
@@ -41,18 +23,18 @@ void buffer_print(struct buffer* b, struct status* s) {
 				c = l->chars[j];
 			}
 			if (sellen >= 0 && j == selch) {
-				print_escape(FORMAT_REVERSE);
+				print_format(FORMAT_REVERSE);
 				curchar = j;
 				selch = -1;
 				if (j == l->len) {
 					printf(" ");
 				}
 			}
-			printf("%c", c);
+			utf8_write_to(c, stdout);
 			if (selch == -1 && sellen > 0) {
 				sellen--;
 				if (sellen <= 0) {
-					print_escape(FORMAT_RESET);
+					print_format(FORMAT_RESET);
 				}
 			}
 		}

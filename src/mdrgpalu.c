@@ -14,6 +14,11 @@
 	#include <windows.h>
 #endif
 
+#include "status.h"
+#include "term.h"
+#include "editor.h"
+
+#include "utf8.c"
 #include "line.c"
 #include "selection.c"
 #include "buffer.c"
@@ -22,12 +27,13 @@
 #include "autocomplete.c"
 
 // TODO: create windows counterparts for these
-#include "unix/format.c"
 #include "unix/sequence.c"
 #include "unix/clipboard_internal.c"
 #include "unix/clipboard_xclip.c"
 #include "unix/clipboard.c"
+#include "unix/status.c"
 #include "unix/buffer.c"
+#include "unix/editor.c"
 #include "unix/event.c"
 
 #ifdef POSIX
@@ -36,6 +42,7 @@
 	#include "windows/term.c"
 #endif
 
+#include "command.c"
 #include "editor.c"
 
 int main(int argc, char** argv) {
@@ -63,6 +70,7 @@ int main(int argc, char** argv) {
 	term_cursor_toggle(0);
 	clipboard_init();
 	int exitcode = editor_main(argc, argv);
+	term_clear_screen();
 	term_cursor_toggle(1);
 	term_close();
 	return exitcode;
