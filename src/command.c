@@ -1,26 +1,3 @@
-struct command {
-	struct command* next;
-
-	char* title;
-	struct event* evt;
-	void (*exec)(struct editor* e, struct event* evt);
-};
-
-struct command* command_new() {
-	struct command* cmd = (struct command*) malloc(sizeof(struct command));
-	cmd->next = NULL;
-	cmd->title = NULL;
-	cmd->evt = NULL;
-	cmd->exec = NULL;
-	return cmd;
-}
-
-void command_free(struct command* cmd) {
-	free(cmd->title);
-	event_free(cmd->evt);
-	free(cmd);
-}
-
 struct command* command_match(struct command commands[], int len, struct event* evt) {
 	for (int i = 0; i < len; i++) {
 		if (event_equal(evt, commands[i].evt)) {
@@ -29,6 +6,59 @@ struct command* command_match(struct command commands[], int len, struct event* 
 	}
 	return NULL;
 }
+
+void command_move(struct editor* e, struct event* evt);
+void command_move_home(struct editor* e, struct event* evt);
+void command_move_end(struct editor* e, struct event* evt);
+void command_delete(struct editor* e, struct event* evt);
+void command_select_all(struct editor* e, struct event* evt);
+void command_cut_copy(struct editor* e, struct event* evt);
+void command_go_to_line(struct editor* e, struct event* evt);
+void command_select_line(struct editor* e, struct event* evt);
+void command_quit(struct editor* e, struct event* evt);
+void command_open(struct editor* e, struct event* evt);
+void command_save(struct editor* e, struct event* evt);
+void command_paste(struct editor* e, struct event* evt);
+void command_palette(struct editor* e, struct event* evt);
+
+struct command commands[] = {
+	{ .title = "Move left", .evt = &(struct event) { .key = KEY_ARROW_LEFT }, .exec = command_move },
+	{ .title = "Move right", .evt = &(struct event) { .key = KEY_ARROW_RIGHT }, .exec = command_move },
+	{ .title = "Move up", .evt = &(struct event) { .key = KEY_ARROW_UP }, .exec = command_move },
+	{ .title = "Move down", .evt = &(struct event) { .key = KEY_ARROW_DOWN }, .exec = command_move },
+	{ .title = "Move to begining of word", .evt = &(struct event) { .key = KEY_ARROW_LEFT, .modifiers = MODIFIER_CTRL }, .exec = command_move },
+	{ .title = "Move to end of word", .evt = &(struct event) { .key = KEY_ARROW_RIGHT, .modifiers = MODIFIER_CTRL }, .exec = command_move },
+	{ .title = "Move line up", .evt = &(struct event) { .key = KEY_ARROW_UP, .modifiers = MODIFIER_CTRL }, .exec = command_move },
+	{ .title = "Move line down", .evt = &(struct event) { .key = KEY_ARROW_DOWN, .modifiers = MODIFIER_CTRL }, .exec = command_move },
+	{ .title = "Select left", .evt = &(struct event) { .key = KEY_ARROW_LEFT, .modifiers = MODIFIER_SHIFT }, .exec = command_move },
+	{ .title = "Select right", .evt = &(struct event) { .key = KEY_ARROW_RIGHT, .modifiers = MODIFIER_SHIFT }, .exec = command_move },
+	{ .title = "Select to begining of word", .evt = &(struct event) { .key = KEY_ARROW_LEFT, .modifiers = MODIFIER_SHIFT | MODIFIER_CTRL }, .exec = command_move },
+	{ .title = "Select to end of word", .evt = &(struct event) { .key = KEY_ARROW_RIGHT, .modifiers = MODIFIER_SHIFT | MODIFIER_CTRL }, .exec = command_move },
+	{ .title = "Move to begining of line", .evt = &(struct event) { .key = KEY_HOME }, .exec = command_move_home },
+	{ .title = "Move to end of line", .evt = &(struct event) { .key = KEY_END }, .exec = command_move_end },
+	{ .title = "Select to begining of line", .evt = &(struct event) { .key = KEY_HOME, .modifiers = MODIFIER_SHIFT }, .exec = command_move_home },
+	{ .title = "Select to end of line", .evt = &(struct event) { .key = KEY_END, .modifiers = MODIFIER_SHIFT }, .exec = command_move_end },
+	{ .title = "Move to begining of file", .evt = &(struct event) { .key = KEY_HOME, .modifiers = MODIFIER_CTRL }, .exec = command_move_home },
+	{ .title = "Move to end of file", .evt = &(struct event) { .key = KEY_END, .modifiers = MODIFIER_CTRL }, .exec = command_move_end },
+	//{ .title = "Select to begining of file", .evt = &(struct event) { .key = KEY_HOME, .modifiers = MODIFIER_SHIFT | MODIFIER_CTRL }, .exec = command_move_home },
+	//{ .title = "Select to end of file", .evt = &(struct event) { .key = KEY_END, .modifiers = MODIFIER_SHIFT | MODIFIER_CTRL }, .exec = command_move_end },
+	{ .title = "Backspace", .evt = &(struct event) { .key = KEY_BACKSPACE }, .exec = command_delete },
+	{ .title = "Delete", .evt = &(struct event) { .key = KEY_DELETE }, .exec = command_delete },
+	//{ .title = "Delete to begining of word", .evt = &(struct event) { .key = KEY_BACKSPACE, .modifiers = MODIFIER_CTRL }, .exec = command_delete },
+	//{ .title = "Delete to end of word", .evt = &(struct event) { .key = KEY_DELETE, .modifiers = MODIFIER_CTRL }, .exec = command_delete },
+
+	{ .title = "Select all", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'A' }, .exec = command_select_all },
+	{ .title = "Copy", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'C' }, .exec = command_cut_copy },
+	{ .title = "Go to line", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'G' }, .exec = command_go_to_line },
+	{ .title = "Select line", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'L' }, .exec = command_select_line },
+	{ .title = "Open file", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'O' }, .exec = command_open },
+	{ .title = "Command palette", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'P' }, .exec = command_palette },
+	{ .title = "Quit", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'Q' }, .exec = command_quit },
+	{ .title = "Save file", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'S' }, .exec = command_save },
+	{ .title = "Paste", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'V' }, .exec = command_paste },
+	{ .title = "Close", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'W' }, .exec = command_quit },
+	{ .title = "Cut", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'X' }, .exec = command_cut_copy },
+};
 
 void command_move(struct editor* e, struct event* evt) {
 	struct buffer* b = e->buf;
@@ -227,57 +257,31 @@ void command_paste(struct editor* e, struct event* evt) {
 	}
 }
 
-struct trie_list* command_autocomplete(char* val) {
-	if (strlen(val) > 0) {
-		return NULL;
-	}
+struct trie_node* commands_tree = NULL;
 
-	struct trie_list* list = (struct trie_list*) malloc(sizeof(struct trie_list));
-	list->next = NULL;
-	list->str = "sava";
-	list->n = 0;
-	return list;
+static struct trie_list* command_palette_autocomplete(char* val) {
+	struct trie_node* node = trie_node_match(commands_tree, val, strlen(val));
+	return trie_node_list(node);
 }
 
 void command_palette(struct editor* e, struct event* evt) {
-	editor_prompt(e, NULL, &command_autocomplete);
+	if (commands_tree == NULL) {
+		for (unsigned int i = 0; i < sizeof(commands)/sizeof(commands[0]); i++) {
+			char* s = commands[i].title;
+			struct trie_node* node = trie_node_insert(&commands_tree, s, strlen(s));
+			node->val = &commands[i];
+		}
+	}
+
+	char* res = editor_prompt(e, NULL, &command_palette_autocomplete);
+	if (res == NULL) {
+		return;
+	}
+
+	struct trie_node* node = trie_node_match(commands_tree, res, strlen(res));
+	free(res);
+	if (node != NULL) {
+		struct command* cmd = (struct command*) node->val;
+		cmd->exec(e, cmd->evt);
+	}
 }
-
-struct command commands[] = {
-	{ .title = "Move left", .evt = &(struct event) { .key = KEY_ARROW_LEFT }, .exec = command_move },
-	{ .title = "Move right", .evt = &(struct event) { .key = KEY_ARROW_RIGHT }, .exec = command_move },
-	{ .title = "Move up", .evt = &(struct event) { .key = KEY_ARROW_UP }, .exec = command_move },
-	{ .title = "Move down", .evt = &(struct event) { .key = KEY_ARROW_DOWN }, .exec = command_move },
-	{ .title = "Move to begining of word", .evt = &(struct event) { .key = KEY_ARROW_LEFT, .modifiers = MODIFIER_CTRL }, .exec = command_move },
-	{ .title = "Move to end of word", .evt = &(struct event) { .key = KEY_ARROW_RIGHT, .modifiers = MODIFIER_CTRL }, .exec = command_move },
-	{ .title = "Move line up", .evt = &(struct event) { .key = KEY_ARROW_UP, .modifiers = MODIFIER_CTRL }, .exec = command_move },
-	{ .title = "Move line down", .evt = &(struct event) { .key = KEY_ARROW_DOWN, .modifiers = MODIFIER_CTRL }, .exec = command_move },
-	{ .title = "Select left", .evt = &(struct event) { .key = KEY_ARROW_LEFT, .modifiers = MODIFIER_SHIFT }, .exec = command_move },
-	{ .title = "Select right", .evt = &(struct event) { .key = KEY_ARROW_RIGHT, .modifiers = MODIFIER_SHIFT }, .exec = command_move },
-	{ .title = "Select to begining of word", .evt = &(struct event) { .key = KEY_ARROW_LEFT, .modifiers = MODIFIER_SHIFT | MODIFIER_CTRL }, .exec = command_move },
-	{ .title = "Select to end of word", .evt = &(struct event) { .key = KEY_ARROW_RIGHT, .modifiers = MODIFIER_SHIFT | MODIFIER_CTRL }, .exec = command_move },
-	{ .title = "Move to begining of line", .evt = &(struct event) { .key = KEY_HOME }, .exec = command_move_home },
-	{ .title = "Move to end of line", .evt = &(struct event) { .key = KEY_END }, .exec = command_move_end },
-	{ .title = "Select to begining of line", .evt = &(struct event) { .key = KEY_HOME, .modifiers = MODIFIER_SHIFT }, .exec = command_move_home },
-	{ .title = "Select to end of line", .evt = &(struct event) { .key = KEY_END, .modifiers = MODIFIER_SHIFT }, .exec = command_move_end },
-	{ .title = "Move to begining of file", .evt = &(struct event) { .key = KEY_HOME, .modifiers = MODIFIER_CTRL }, .exec = command_move_home },
-	{ .title = "Move to end of file", .evt = &(struct event) { .key = KEY_END, .modifiers = MODIFIER_CTRL }, .exec = command_move_end },
-	//{ .title = "Select to begining of file", .evt = &(struct event) { .key = KEY_HOME, .modifiers = MODIFIER_SHIFT | MODIFIER_CTRL }, .exec = command_move_home },
-	//{ .title = "Select to end of file", .evt = &(struct event) { .key = KEY_END, .modifiers = MODIFIER_SHIFT | MODIFIER_CTRL }, .exec = command_move_end },
-	{ .title = "Backspace", .evt = &(struct event) { .key = KEY_BACKSPACE }, .exec = command_delete },
-	{ .title = "Delete", .evt = &(struct event) { .key = KEY_DELETE }, .exec = command_delete },
-	//{ .title = "Delete to begining of word", .evt = &(struct event) { .key = KEY_BACKSPACE, .modifiers = MODIFIER_CTRL }, .exec = command_delete },
-	//{ .title = "Delete to end of word", .evt = &(struct event) { .key = KEY_DELETE, .modifiers = MODIFIER_CTRL }, .exec = command_delete },
-
-	{ .title = "Select all", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'A' }, .exec = command_select_all },
-	{ .title = "Copy", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'C' }, .exec = command_cut_copy },
-	{ .title = "Go to line", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'G' }, .exec = command_go_to_line },
-	{ .title = "Select line", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'L' }, .exec = command_select_line },
-	{ .title = "Open file", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'O' }, .exec = command_open },
-	{ .title = "Command palette", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'P' }, .exec = command_palette },
-	{ .title = "Quit", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'Q' }, .exec = command_quit },
-	{ .title = "Save file", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'S' }, .exec = command_save },
-	{ .title = "Paste", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'V' }, .exec = command_paste },
-	{ .title = "Close", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'W' }, .exec = command_quit },
-	{ .title = "Cut", .evt = &(struct event) { .modifiers = MODIFIER_CTRL, .ch = 'X' }, .exec = command_cut_copy },
-};

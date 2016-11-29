@@ -3,6 +3,7 @@
 #include <string.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <ctype.h>
 #include <signal.h>
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
@@ -18,6 +19,7 @@
 #include "term.h"
 #include "autocomplete.h"
 #include "editor.h"
+#include "command.h"
 
 #include "utf8.c"
 #include "line.c"
