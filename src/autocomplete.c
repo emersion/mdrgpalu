@@ -168,9 +168,9 @@ struct trie_node* trie_node_insert(struct trie_node** tree, char* s, int len) {
 
 	struct trie_node* leaf = NULL;
 	if (*node != NULL && (*node)->ch == ch) {
-			// A node for ch already exists
-			(*node)->n++;
-			leaf = trie_node_insert(&(*node)->first, &s[1], len-1);
+		// A node for ch already exists
+		(*node)->n++;
+		leaf = trie_node_insert(&(*node)->first, &s[1], len-1);
 	} else {
 		// Insert a new node for ch
 		struct trie_node* new = trie_node_new();
