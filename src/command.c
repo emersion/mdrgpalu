@@ -259,9 +259,22 @@ void command_paste(struct editor* e, struct event* evt) {
 
 struct trie_node* commands_tree = NULL;
 
-static struct trie_list* command_palette_autocomplete(char* val) {
+int command_palette_autocomplete(char* val, char** results, int cap) {
 	struct trie_node* node = trie_node_match(commands_tree, val, strlen(val));
-	return trie_node_list(node);
+	struct trie_list* list = trie_node_list(node);
+
+	struct trie_list* item = list;
+	int i = 0;
+	while (item != NULL && i < cap) {
+		struct command* cmd = (struct command*) item->val;
+		results[i] = cmd->title;
+
+		item = item->next;
+		i++;
+	}
+
+	trie_list_free(list);
+	return i;
 }
 
 void command_palette(struct editor* e, struct event* evt) {

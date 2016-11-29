@@ -19,7 +19,7 @@ void term_setup() {
 	term_load_size();
 	signal(SIGWINCH, term_load_size);
 
-	print_escape(CODE_ALTSCREEN_ENABLE);
+	//print_escape(CODE_ALTSCREEN_ENABLE);
 	print_escape(CODE_MODIFYOTHERKEYS_ENABLE);
 }
 

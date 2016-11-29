@@ -157,6 +157,7 @@ static struct trie_list* _trie_node_list(struct trie_node* first, int stroffset,
 			item->str = (char*) malloc((stroffset+2) * sizeof(char));
 			item->str[stroffset+1] = '\0';
 			item->n = node->n - dupchildren;
+			item->val = node->val;
 			trie_list_merge(&children, item);
 		}
 

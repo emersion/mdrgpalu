@@ -19,11 +19,12 @@ void editor_print(struct editor* e) {
 	free(s);
 }
 
-static void editor_autocomplete(struct editor* e, int offset, int* prevlen, struct trie_list* list) {
+static void editor_autocomplete(struct editor* e, int offset, char** list, int len) {
 	int h = term_height();
+	term_cursor_toggle(0);
 
 	// Erase previous suggestions
-	for (int i = 0; i < *prevlen; i++) {
+	for (int i = len; i < h - 1; i++) {
 		term_cursor_move(0, h - 1 - (i+1));
 		term_clear_line();
 	}
@@ -33,23 +34,22 @@ static void editor_autocomplete(struct editor* e, int offset, int* prevlen, stru
 	buffer_print(e->buf, NULL);
 
 	// Print new suggestions
-	int i = 0;
-	for (struct trie_list* item = list; item != NULL; item = item->next) {
+	for (int i = 0; i < len; i++) {
 		term_cursor_move(offset, h - 1 - (i+1));
 		print_foreground(COLOR_WHITE);
 		print_background(COLOR_BLUE);
-		printf("%-50s", item->str);
+		printf("%-50s", list[i]);
 		print_format(FORMAT_RESET);
-		i++;
 
-		if (h - 1 < i + 1) {
+		if (i >= h - 1) {
 			break;
 		}
 	}
-	*prevlen = i+1;
+
+	term_cursor_toggle(1);
 }
 
-char* editor_prompt(struct editor* e, char* prompt, struct trie_list* (*autocomplete)(char* val)) {
+char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* val, char** results, int cap)) {
 	term_cursor_move(0, term_height() - 1);
 	term_clear_line();
 	print_format(FORMAT_DIM);
@@ -59,11 +59,12 @@ char* editor_prompt(struct editor* e, char* prompt, struct trie_list* (*autocomp
 	}
 	print_format(FORMAT_RESET);
 
-	struct trie_list* list = NULL;
-	int prevlistlen = 0;
+	int accap = term_height() - 1;
+	int aclen = 0;
+	char** aclist = (char**) malloc(accap * sizeof(char*));
 	if (autocomplete != NULL) {
-		list = autocomplete("");
-		editor_autocomplete(e, offset, &prevlistlen, list);
+		aclen = autocomplete("", aclist, accap);
+		editor_autocomplete(e, offset, aclist, aclen);
 	}
 
 	term_cursor_toggle(1);
@@ -105,8 +106,8 @@ char* editor_prompt(struct editor* e, char* prompt, struct trie_list* (*autocomp
 		}
 
 		if (autocomplete != NULL) {
-			list = autocomplete(res);
-			editor_autocomplete(e, offset + strlen(res), &prevlistlen, list);
+			aclen = autocomplete(res, aclist, accap);
+			editor_autocomplete(e, offset, aclist, aclen);
 		}
 	}
 
