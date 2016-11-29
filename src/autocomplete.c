@@ -5,10 +5,11 @@ struct trie_node* trie_node_new() {
 	node->first = NULL;
 	node->ch = 0;
 	node->n = 0;
+	node->val = NULL;
 	return node;
 }
 
-// trie_node_free deallocates a trie node.
+// trie_node_free deallocates a trie node. val is not deallocated.
 void trie_node_free(struct trie_node* node) {
 	free(node);
 }
@@ -20,14 +21,16 @@ struct trie_node* trie_node_match(struct trie_node* first, char* s, int len) {
 		return first;
 	}
 
-	// Iterate through siblings until we reach s[0]
+	char ch = tolower(s[0]);
+
+	// Iterate through siblings until we reach ch
 	struct trie_node* node = first;
-	while (node != NULL && node->ch < s[0]) {
+	while (node != NULL && node->ch < ch) {
 		node = node->next;
 	}
 
-	if (node == NULL || node->ch != s[0]) {
-		// Either we reached the end, either s[0] is not in the tree
+	if (node == NULL || node->ch != ch) {
+		// Either we reached the end, either ch is not in the tree
 		return NULL;
 	}
 	return trie_node_match(node->first, &s[1], len-1);
@@ -49,10 +52,11 @@ static struct trie_list* trie_list_new() {
 	list->next = NULL;
 	list->str = NULL;
 	list->n = 0;
+	list->val = NULL;
 	return list;
 }
 
-// trie_list_free deallocates a trie list.
+// trie_list_free deallocates a trie list. val is not deallocated.
 void trie_list_free(struct trie_list* list) {
 	struct trie_list* item = list;
 	while (item != NULL) {
@@ -61,6 +65,15 @@ void trie_list_free(struct trie_list* list) {
 		free(item);
 		item = next;
 	}
+}
+
+// trie_list_len computes list's length.
+int trie_list_len(struct trie_list* list) {
+	int len = 0;
+	for (struct trie_list* item = list; item != NULL; item = item->next) {
+		len++;
+	}
+	return len;
 }
 
 // trie_list_merge merges other into list.
@@ -145,36 +158,33 @@ struct trie_node* trie_node_insert(struct trie_node** tree, char* s, int len) {
 		return *tree;
 	}
 
-	if (*tree == NULL || (*tree)->ch > s[0]) {
-		// Insert a new node for s[0] at the begining
-		struct trie_node* new = trie_node_new();
-		new->ch = s[0];
-		new->n = 1;
-		struct trie_node* leaf = trie_node_insert(&new->first, &s[1], len-1);
-		new->next = *tree;
-		*tree = new;
-		return leaf;
-	}
+	char ch = tolower(s[0]);
 
 	// Find where the new node will be inserted
-	struct trie_node* node = *tree;
-	while (node->ch < s[0] && node->next != NULL) {
-		node = node->next;
+	struct trie_node** node = tree;
+	while (*node != NULL && (*node)->ch < ch) {
+		node = &(*node)->next;
 	}
 
-	if (node->ch == s[0]) {
-		// A node for s[0] already exists
-		node->n++;
-		return trie_node_insert(&node->first, &s[1], len-1);
+	struct trie_node* leaf = NULL;
+	if (*node != NULL && (*node)->ch == ch) {
+			// A node for ch already exists
+			(*node)->n++;
+			leaf = trie_node_insert(&(*node)->first, &s[1], len-1);
 	} else {
-		// Insert the new node right after node
+		// Insert a new node for ch
 		struct trie_node* new = trie_node_new();
-		new->ch = s[0];
+		new->ch = ch;
 		new->n = 1;
-		struct trie_node* leaf = trie_node_insert(&new->first, &s[1], len-1);
-		new->next = node->next;
-		node->next = new;
+		leaf = trie_node_insert(&new->first, &s[1], len-1);
+		new->next = *node;
+		*node = new;
+	}
+
+	if (leaf != NULL) {
 		return leaf;
+	} else {
+		return *node;
 	}
 }
 
@@ -184,16 +194,18 @@ void trie_node_remove(struct trie_node** tree, char* s, int len) {
 		return;
 	}
 
-	// Iterate through siblings until we reach s[0]
+	char ch = tolower(s[0]);
+
+	// Iterate through siblings until we reach ch
 	struct trie_node* node = *tree;
 	struct trie_node* prev = NULL;
-	while (node != NULL && node->ch < s[0]) {
+	while (node != NULL && node->ch < ch) {
 		prev = node;
 		node = node->next;
 	}
 
-	if (node == NULL || node->ch != s[0]) {
-		// s[0] is not in the tree, nothing to do
+	if (node == NULL || node->ch != ch) {
+		// ch is not in the tree, nothing to do
 		return;
 	}
 

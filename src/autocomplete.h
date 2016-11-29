@@ -10,6 +10,8 @@ struct trie_node {
 	char ch;
 	// The number of strings using this node.
 	int n;
+	// This node's value.
+	void* val;
 };
 
 // A trie_list is a chained list of strings, sorted by n in descending order.
@@ -17,6 +19,7 @@ struct trie_list {
 	struct trie_list* next;
 	char* str;
 	int n;
+	void* val;
 };
 
 struct trie_node* trie_node_new();
@@ -28,3 +31,4 @@ struct trie_node* trie_node_insert(struct trie_node** tree, char* s, int len);
 void trie_node_remove(struct trie_node** tree, char* s, int len);
 
 void trie_list_free(struct trie_list* list);
+int trie_list_len(struct trie_list* list);
