@@ -25,6 +25,7 @@ struct trie_list {
 struct trie_node* trie_node_new();
 void trie_node_free(struct trie_node* node);
 struct trie_node* trie_node_match(struct trie_node* first, char* s, int len);
+void* trie_node_val(struct trie_node* first, char* s, int len);
 int trie_node_len(struct trie_node* first);
 struct trie_list* trie_node_list(struct trie_node* first);
 struct trie_node* trie_node_insert(struct trie_node** tree, char* s, int len);

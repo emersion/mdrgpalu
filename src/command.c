@@ -278,10 +278,9 @@ void command_palette(struct editor* e, struct event* evt) {
 		return;
 	}
 
-	struct trie_node* node = trie_node_match(commands_tree, res, strlen(res));
+	struct command* cmd = (struct command*) trie_node_val(commands_tree, res, strlen(res));
 	free(res);
-	if (node != NULL) {
-		struct command* cmd = (struct command*) node->val;
+	if (cmd != NULL) {
 		cmd->exec(e, cmd->evt);
 	}
 }

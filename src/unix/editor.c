@@ -24,8 +24,8 @@ static void editor_autocomplete(struct editor* e, int offset, int* prevlen, stru
 
 	// Erase previous suggestions
 	for (int i = 0; i < *prevlen; i++) {
-		term_cursor_move(offset, h - 1 - (i+1));
-		printf("%-50s", "");
+		term_cursor_move(0, h - 1 - (i+1));
+		term_clear_line();
 	}
 
 	// Redraw buffer
@@ -106,7 +106,7 @@ char* editor_prompt(struct editor* e, char* prompt, struct trie_list* (*autocomp
 
 		if (autocomplete != NULL) {
 			list = autocomplete(res);
-			editor_autocomplete(e, offset, &prevlistlen, list);
+			editor_autocomplete(e, offset + strlen(res), &prevlistlen, list);
 		}
 	}
 

@@ -36,6 +36,34 @@ struct trie_node* trie_node_match(struct trie_node* first, char* s, int len) {
 	return trie_node_match(node->first, &s[1], len-1);
 }
 
+static void* _trie_node_val(struct trie_node* first, char* s, int len, void* val) {
+	if (len == 0) {
+		return val;
+	}
+	if (first == NULL) {
+		return NULL;
+	}
+
+	char ch = tolower(s[0]);
+
+	// Iterate through siblings until we reach ch
+	struct trie_node* node = first;
+	while (node != NULL && node->ch < ch) {
+		node = node->next;
+	}
+
+	if (node == NULL || node->ch != ch) {
+		// Either we reached the end, either ch is not in the tree
+		return NULL;
+	}
+	return _trie_node_val(node->first, &s[1], len-1, node->val);
+}
+
+// trie_node_val returns the value associated with the string s in the tree.
+void* trie_node_val(struct trie_node* first, char* s, int len) {
+	return _trie_node_val(first, s, len, NULL);
+}
+
 // trie_node_len returns the number of strings in the tree. It counts
 // duplicates.
 int trie_node_len(struct trie_node* first) {
