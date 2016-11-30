@@ -35,68 +35,17 @@ int editor_open(struct editor* e, char* filename) {
 	return 0;
 }
 
-char* editor_prompt(struct editor* e, char* prompt) {
-	term_cursor_move(0, 0);
-	buffer_print(e->buf, NULL);
-	term_cursor_move(0, term_height()-1);
-	term_clear_line();
-	print_format(FORMAT_DIM);
-	printf("%s: ", prompt);
-	print_format(FORMAT_RESET);
-
-	term_cursor_toggle(1);
-
-	int len = 0;
-	int cap = 32;
-	char* res = (char*) malloc(cap * sizeof(char));
-	while (1) {
-		struct event* evt = event_read(stdin);
-		if (evt == NULL || evt->key == KEY_ESC) {
-			free(res);
-			res = NULL;
-			break;
-		}
-		if (evt->key == KEY_BACKSPACE) {
-			if (len > 0) {
-				printf("\b \b");
-				len--;
-			}
-			continue;
-		}
-		if (!evt->ch) {
-			continue;
-		}
-
-		wchar_t c = evt->ch;
-		if (c == '\n') {
-			c = 0; // Insert trailing \0
-		} else {
-			utf8_write_to(c, stdout);
-		}
-
-		if (len + UTF8_MAX_LEN > cap) {
-			cap += 32;
-			res = (char*) realloc(res, cap * sizeof(char));
-		}
-
-		len += utf8_format(&res[len], c);
-		if (c == 0) {
-			break;
-		}
-	}
-
-	term_cursor_toggle(0);
-	return res;
-}
-
 char* editor_prompt_filename(struct editor* e, char* prompt) {
 	// TODO: autocomplete filename
-	return editor_prompt(e, prompt);
+	return editor_prompt(e, prompt, NULL);
 }
 
 void editor_set_status(struct editor* e, char* status) {
 	free(e->status);
-	e->status = strdup(status);
+	if (status != NULL) {
+		status = strdup(status);
+	}
+	e->status = status;
 }
 
 void editor_quit(struct editor* e) {

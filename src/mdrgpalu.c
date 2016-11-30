@@ -3,6 +3,7 @@
 #include <string.h>
 #include <errno.h>
 #include <inttypes.h>
+#include <ctype.h>
 #include <signal.h>
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
@@ -16,7 +17,9 @@
 
 #include "status.h"
 #include "term.h"
+#include "autocomplete.h"
 #include "editor.h"
+#include "command.h"
 
 #include "utf8.c"
 #include "line.c"
@@ -24,6 +27,7 @@
 #include "buffer.c"
 #include "io.c"
 #include "event.c"
+#include "autocomplete.c"
 
 // TODO: create windows counterparts for these
 #include "unix/sequence.c"
