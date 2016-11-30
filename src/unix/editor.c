@@ -1,3 +1,5 @@
+#define EDITOR_AUTOCOMPLETE_COLOR 236
+
 void editor_print(struct editor* e) {
 	struct status* s = (struct status*) malloc(sizeof(struct status));
 	s->filename = e->filename;
@@ -19,7 +21,7 @@ void editor_print(struct editor* e) {
 	free(s);
 }
 
-static void editor_autocomplete(struct editor* e, int offset, char** list, int len) {
+static void editor_autocomplete(struct editor* e, int offset, char** list, int len, int sel) {
 	int h = term_height();
 	term_cursor_toggle(0);
 
@@ -36,8 +38,13 @@ static void editor_autocomplete(struct editor* e, int offset, char** list, int l
 	// Print new suggestions
 	for (int i = 0; i < len; i++) {
 		term_cursor_move(offset, h - 1 - (i+1));
-		print_foreground(COLOR_WHITE);
-		print_background(COLOR_BLUE);
+		if (i == sel) {
+			print_foreground(EDITOR_AUTOCOMPLETE_COLOR);
+			print_background(COLOR_WHITE);
+		} else {
+			print_foreground(COLOR_WHITE);
+			print_background(EDITOR_AUTOCOMPLETE_COLOR);
+		}
 		printf("%-50s", list[i]);
 		print_format(FORMAT_RESET);
 
@@ -61,10 +68,13 @@ char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* va
 
 	int accap = term_height() - 1;
 	int aclen = 0;
-	char** aclist = (char**) malloc(accap * sizeof(char*));
+	int acsel = -1;
+	char** aclist = NULL;
 	if (autocomplete != NULL) {
+		aclist = (char**) malloc(accap * sizeof(char*));
+		acsel = 0;
 		aclen = autocomplete("", aclist, accap);
-		editor_autocomplete(e, offset, aclist, aclen);
+		editor_autocomplete(e, offset, aclist, aclen, acsel);
 	}
 
 	term_cursor_toggle(1);
@@ -82,12 +92,22 @@ char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* va
 			break;
 		}
 
+		int changed = 0;
 		if (evt->key == KEY_BACKSPACE) {
 			if (len > 0) {
 				printf("\b \b");
 				len--;
 			}
 			res[len] = '\0';
+			changed = 1;
+		} else if (evt->key == KEY_ARROW_UP) {
+			if (autocomplete != NULL && acsel < aclen - 1) {
+				acsel++;
+			}
+		} else if (evt->key == KEY_ARROW_DOWN) {
+			if (autocomplete != NULL && acsel > 0) {
+				acsel--;
+			}
 		} else if (!evt->key && !evt->modifiers) {
 			wchar_t c = evt->ch;
 			if (c == '\n') {
@@ -103,14 +123,24 @@ char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* va
 
 			len += utf8_format(&res[len], c);
 			res[len] = '\0';
+			changed = 1;
 		}
 
 		if (autocomplete != NULL) {
-			aclen = autocomplete(res, aclist, accap);
-			editor_autocomplete(e, offset, aclist, aclen);
+			if (changed) {
+				acsel = 0;
+				aclen = autocomplete(res, aclist, accap);
+			}
+			editor_autocomplete(e, offset, aclist, aclen, acsel);
 		}
 	}
 
 	term_cursor_toggle(0);
+
+	if (res != NULL && acsel >= 0 && acsel < aclen) {
+		free(res);
+		res = strdup(aclist[acsel]);
+		free(aclist);
+	}
 	return res;
 }

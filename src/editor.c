@@ -42,7 +42,10 @@ char* editor_prompt_filename(struct editor* e, char* prompt) {
 
 void editor_set_status(struct editor* e, char* status) {
 	free(e->status);
-	e->status = strdup(status);
+	if (status != NULL) {
+		status = strdup(status);
+	}
+	e->status = status;
 }
 
 void editor_quit(struct editor* e) {

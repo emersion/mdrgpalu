@@ -31,6 +31,7 @@
 #define ANSI_MODIFIER_CTRL       5
 #define ANSI_MODIFIER_CTRL_SHIFT 6
 
+// Text formats
 #define FORMAT_RESET 0
 #define FORMAT_BOLD 1
 #define FORMAT_DIM 2
@@ -41,6 +42,7 @@
 #define FORMAT_FOREGROUND 30
 #define FORMAT_BACKGROUND 40
 
+// Colors
 #define COLOR_BLACK 0
 #define COLOR_RED 1
 #define COLOR_GREEN 2
@@ -50,20 +52,34 @@
 #define COLOR_CYAN 6
 #define COLOR_WHITE 7
 
+#define COLOR_EXTENDED 8
+
+// Extended color modes
+#define COLOR_EXTENDED_RGB 2
+#define COLOR_EXTENDED_256 5
+
 void print_escape(char* seq) {
 	printf("%s%s", CSI, seq);
 }
 
-void print_format(char format) {
+void print_format(unsigned char format) {
 	printf("%s%dm", CSI, format);
 }
 
-void print_foreground(char color) {
-	print_format(FORMAT_FOREGROUND + color);
+void print_foreground(unsigned char color) {
+	if (color >= COLOR_EXTENDED) {
+		printf("%s%d;%d;%dm", CSI, FORMAT_FOREGROUND + COLOR_EXTENDED, COLOR_EXTENDED_256, color);
+	} else {
+		print_format(FORMAT_FOREGROUND + color);
+	}
 }
 
-void print_background(char color) {
-	print_format(FORMAT_BACKGROUND + color);
+void print_background(unsigned char color) {
+	if (color >= COLOR_EXTENDED) {
+		printf("%s%d;%d;%dm", CSI, FORMAT_BACKGROUND + COLOR_EXTENDED, COLOR_EXTENDED_256, color);
+	} else {
+		print_format(FORMAT_BACKGROUND + color);
+	}
 }
 
 int parse_modifiers(int input) {
