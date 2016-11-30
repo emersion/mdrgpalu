@@ -34,6 +34,7 @@ Arrow | Move selection
 <kbd>Ctrl</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> | Move line
 <kbd>Ctrl</kbd> + <kbd>G</kbd> | Go to line:column
 <kbd>Ctrl</kbd> + <kbd>L</kbd> | Select line
+<kbd>Ctrl</kbd> + <kbd>P</kbd> | Command palette
 
 ## License
 
