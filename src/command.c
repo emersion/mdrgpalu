@@ -204,8 +204,42 @@ void command_quit(struct editor* e, struct event* evt) {
 	editor_quit(e);
 }
 
+char* open_dirname = NULL;
+struct trie_node* open_tree = NULL;
+
+int command_open_autocomplete(char* val, char** results, int cap) {
+	char* dirname = strdup(val);
+	char* sep = strrchr(dirname, PATH_SEPARATOR);
+	if (sep == NULL) {
+		strcpy(dirname, ".");
+	} else {
+		sep[0] = '\0';
+	}
+
+	DIR* dir = opendir(dirname);
+	free(dirname);
+	if (dir == NULL) {
+		return 0;
+	}
+
+	struct dirent* item;
+	int i = 0;
+	while (1) {
+		item = readdir(dir);
+		if (item == NULL) {
+			break;
+		}
+
+		results[i] = item->d_name;
+		i++;
+	}
+
+	closedir(dir);
+	return i;
+}
+
 void command_open(struct editor* e, struct event* evt) {
-	char* filename = editor_prompt_filename(e, "Open file");
+	char* filename = editor_prompt(e, "Open file", &command_open_autocomplete);
 	if (filename == NULL) {
 		return;
 	}
