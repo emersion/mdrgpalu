@@ -267,7 +267,7 @@ int command_palette_autocomplete(char* val, char** results, int cap) {
 	int i = 0;
 	while (item != NULL && i < cap) {
 		struct command* cmd = (struct command*) item->val;
-		results[i] = cmd->title;
+		results[i] = strdup(cmd->title);
 
 		item = item->next;
 		i++;

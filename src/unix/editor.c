@@ -56,6 +56,12 @@ static void editor_autocomplete(struct editor* e, int offset, char** list, int l
 	term_cursor_toggle(1);
 }
 
+static void autocomplete_free(char** list, int len) {
+	for (int i = 0; i < len; i++) {
+		free(list[i]);
+	}
+}
+
 char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* val, char** results, int cap)) {
 	term_cursor_move(0, term_height() - 1);
 	term_clear_line();
@@ -128,6 +134,7 @@ char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* va
 
 		if (autocomplete != NULL) {
 			if (changed) {
+				autocomplete_free(aclist, aclen);
 				acsel = 0;
 				aclen = autocomplete(res, aclist, accap);
 			}
@@ -137,9 +144,12 @@ char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* va
 
 	term_cursor_toggle(0);
 
-	if (res != NULL && acsel >= 0 && acsel < aclen) {
-		free(res);
-		res = strdup(aclist[acsel]);
+	if (res != NULL) {
+		if (acsel >= 0) {
+			free(res);
+			res = strdup(aclist[acsel]);
+		}
+		autocomplete_free(aclist, aclen);
 		free(aclist);
 	}
 	return res;
