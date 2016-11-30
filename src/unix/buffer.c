@@ -1,3 +1,23 @@
+#define TAB_MODE_TAB 0
+#define TAB_MODE_SPACES 1
+#define TAB_MODE_HOTDOG 2
+
+#define TAB_MODE TAB_MODE_HOTDOG
+
+static void tab_write_to(FILE* s) {
+	switch (TAB_MODE) {
+	case TAB_MODE_TAB:
+		fprintf(s, "\t");
+		break;
+	case TAB_MODE_SPACES:
+		fprintf(s, "    ");
+		break;
+	case TAB_MODE_HOTDOG:
+		utf8_write_to(0x1F32D, s);
+		break;
+	}
+}
+
 void buffer_print(struct buffer* b, struct status* s) {
 	int i = 0;
 	int curline = 0, curchar = 0;
@@ -30,7 +50,11 @@ void buffer_print(struct buffer* b, struct status* s) {
 					printf(" ");
 				}
 			}
-			utf8_write_to(c, stdout);
+			if (c == '\t') {
+				tab_write_to(stdout);
+			} else {
+				utf8_write_to(c, stdout);
+			}
 			if (selch == -1 && sellen > 0) {
 				sellen--;
 				if (sellen <= 0) {
