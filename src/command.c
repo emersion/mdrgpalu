@@ -263,11 +263,21 @@ int command_palette_autocomplete(char* val, char** results, int cap) {
 	struct trie_node* node = trie_node_match(commands_tree, val, strlen(val));
 	struct trie_list* list = trie_node_list(node);
 
+	size_t width = 50;
+
 	struct trie_list* item = list;
 	int i = 0;
 	while (item != NULL && i < cap) {
 		struct command* cmd = (struct command*) item->val;
-		results[i] = strdup(cmd->title);
+
+		char* keystroke = (char*) malloc(width * sizeof(char));
+		size_t keystrokelen = event_string(cmd->evt, keystroke);
+
+		char* s = (char*) malloc(width * sizeof(char));
+		strncpy(s, cmd->title, width);
+		memset(&s[strlen(cmd->title)], ' ', width-strlen(cmd->title));
+		strcpy(&s[width-keystrokelen], keystroke);
+		results[i] = s;
 
 		item = item->next;
 		i++;
