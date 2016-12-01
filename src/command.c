@@ -216,25 +216,82 @@ int command_open_autocomplete(char* val, char** results, int cap) {
 		sep[0] = '\0';
 	}
 
-	DIR* dir = opendir(dirname);
-	free(dirname);
-	if (dir == NULL) {
-		return 0;
-	}
+	// Refresh directory listing if dirname has changed
+	if (open_dirname == NULL || strcmp(open_dirname, dirname) != 0) {
+		free(open_dirname);
+		trie_node_free(open_tree, &free);
 
-	struct dirent* item;
-	int i = 0;
-	while (1) {
-		item = readdir(dir);
-		if (item == NULL) {
-			break;
+		open_dirname = dirname;
+		open_tree = NULL;
+
+		DIR* dir = opendir(dirname);
+		if (dir == NULL) {
+			return 0;
 		}
 
-		results[i] = item->d_name;
-		i++;
+		int dirnamelen = strlen(dirname);
+
+		struct dirent* item;
+		while (1) {
+			item = readdir(dir);
+			if (item == NULL) {
+				break; // I'm outa ur loop
+			}
+			if (strcmp(item->d_name, ".") == 0 || strcmp(item->d_name, "..") == 0) {
+				continue; // Ignore . and ..
+			}
+
+			// Build full filepath from filename
+			int filenamelen = strlen(item->d_name);
+			int filepathlen = dirnamelen + filenamelen + 1;
+			char* filepath = (char*) malloc((filepathlen + 1) * sizeof(char));
+			if (strcmp(dirname, ".") == 0) {
+				filepathlen = filenamelen;
+				strcpy(filepath, item->d_name);
+			} else {
+				strcpy(filepath, dirname);
+				filepath[dirnamelen] = PATH_SEPARATOR;
+				filepath[dirnamelen+1] = '\0';
+				strcat(filepath, item->d_name);
+			}
+
+			// Append trailing / if directory
+			struct stat filestat;
+			int err = stat(filepath, &filestat);
+			if (err) {
+				continue;
+			}
+			if (S_ISDIR(filestat.st_mode)) {
+				filepath[filepathlen] = PATH_SEPARATOR;
+				filepath[filepathlen+1] = '\0';
+			}
+
+			struct trie_node* node = trie_node_insert(&open_tree, item->d_name, strlen(item->d_name));
+			node->val = filepath;
+		}
+
+		closedir(dir);
 	}
 
-	closedir(dir);
+	// List matching filenames using the tree
+	char* filename = "";
+	if (sep != NULL) {
+		filename = &sep[1];
+	}
+	struct trie_node* node = trie_node_match(open_tree, filename, strlen(filename));
+	struct trie_list* list = trie_node_list(node);
+
+	struct trie_list* item = list;
+	int i = 0;
+	while (item != NULL && i < cap) {
+		if (item->val != NULL) {
+			results[i] = strdup((char*) item->val);
+			i++;
+		}
+		item = item->next;
+	}
+
+	trie_list_free(list);
 	return i;
 }
 
