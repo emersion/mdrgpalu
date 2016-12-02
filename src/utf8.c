@@ -3,15 +3,13 @@
 #define UTF8_CONTINUATION_BYTE 0
 #define UTF8_SINGLE_BYTE 1
 
-#define UTF8_MAX_LEN 6
+#define UTF8_MAX_LEN 4
 
-static const unsigned char utf8_mask[6] = {
+static const unsigned char utf8_mask[] = {
 	0x7F,
 	0x1F,
 	0x0F,
-	0x07,
-	0x03,
-	0x01
+	0x07
 };
 
 char utf8_len(unsigned char c) {
@@ -27,13 +25,7 @@ char utf8_len(unsigned char c) {
 	if ((c & (1 << 4)) == 0) {
 		return 3;
 	}
-	if ((c & (1 << 3)) == 0) {
-		return 4;
-	}
-	if ((c & (1 << 2)) == 0) {
-		return 5;
-	}
-	return 6;
+	return 4;
 }
 
 char utf8_format(char* str, wchar_t codepoint) {
@@ -48,15 +40,9 @@ char utf8_format(char* str, wchar_t codepoint) {
 	} else if (codepoint < 0x10000) {
 		first = 0xE0;
 		len = 3;
-	} else if (codepoint < 0x200000) {
+	} else {
 		first = 0xF0;
 		len = 4;
-	} else if (codepoint < 0x4000000) {
-		first = 0xF8;
-		len = 5;
-	} else {
-		first = 0xFC;
-		len = 6;
 	}
 
 	for (int i = len-1; i > 0; i--) {
