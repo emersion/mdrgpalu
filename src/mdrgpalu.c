@@ -5,6 +5,9 @@
 #include <inttypes.h>
 #include <ctype.h>
 #include <signal.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 	#define POSIX
@@ -13,6 +16,12 @@
 #elif _WIN32
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
+#endif
+
+#ifdef _WIN32
+	#define PATH_SEPARATOR '\\'
+#else
+	#define PATH_SEPARATOR '/'
 #endif
 
 #include "status.h"

@@ -161,6 +161,10 @@ int line_read_from(struct line* l, int at, FILE* s) {
 	while (1) {
 		int n = utf8_read_from(&c, s);
 		if (n == EOF) {
+			if (N == 0) {
+				// No bytes read and we reach EOF, return EOF
+				return EOF;
+			}
 			break;
 		}
 

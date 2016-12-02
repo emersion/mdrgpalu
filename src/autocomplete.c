@@ -9,9 +9,23 @@ struct trie_node* trie_node_new() {
 	return node;
 }
 
-// trie_node_free deallocates a trie node. val is not deallocated.
-void trie_node_free(struct trie_node* node) {
-	free(node);
+// trie_node_free deallocates a trie node and all its children. free_val is a
+// function that deallocates val. If free_val is NULL, val is not deallocated.
+void trie_node_free(struct trie_node* first, void (*free_val)(void* val)) {
+	if (first == NULL) {
+		return;
+	}
+
+	struct trie_node* node = first;
+	while (node != NULL) {
+		trie_node_free(node->first, free_val);
+		if (free_val != NULL && node->val != NULL) {
+			free_val(node->val);
+		}
+		struct trie_node* next = node->next;
+		free(node);
+		node = next;
+	}
 }
 
 // trie_node_match extracts the node that begins with the string s of len
@@ -217,10 +231,11 @@ struct trie_node* trie_node_insert(struct trie_node** tree, char* s, int len) {
 	}
 }
 
-// trie_node_remove removes the string s of len characters from the tree.
-void trie_node_remove(struct trie_node** tree, char* s, int len) {
+// trie_node_remove removes the string s of len characters from the tree. It
+// returns the removed leaf without deallocating it.
+struct trie_node* trie_node_remove(struct trie_node** tree, char* s, int len) {
 	if (len == 0 || *tree == NULL) {
-		return;
+		return NULL;
 	}
 
 	char ch = tolower(s[0]);
@@ -235,23 +250,32 @@ void trie_node_remove(struct trie_node** tree, char* s, int len) {
 
 	if (node == NULL || node->ch != ch) {
 		// ch is not in the tree, nothing to do
-		return;
+		return NULL;
 	}
 
 	// Remove s[1:] from the subtree
-	trie_node_remove(&node->first, &s[1], len-1);
+	struct trie_node* removed = trie_node_remove(&node->first, &s[1], len-1);
 
 	node->n--;
 	if (node->n <= 0) {
 		// node is not used anymore, remove it from the tree
 		if (prev == NULL) {
-			trie_node_free(node);
 			*tree = NULL;
 		} else {
 			prev->next = node->next;
-			trie_node_free(node);
+		}
+
+		if (removed == NULL) {
+			node->next = NULL;
+			removed = node;
+		} else {
+			// Deallocate nodes removed between the leaf and the rest of the tree
+			// These nodes have a NULL val, so it's fine
+			free(node);
 		}
 	}
+
+	return removed;
 }
 
 // trie_node_print prints the tree, useful when debugging.
