@@ -1,7 +1,9 @@
 language: c
+sudo: false
 os:
   - linux
   - osx
+dist: trusty
 compiler:
   - clang
   - gcc
