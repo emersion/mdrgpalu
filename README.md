@@ -1,6 +1,7 @@
 # mdrgpalu
 
-[![Build Status](https://travis-ci.org/emersion/mdrgpalu.svg?branch=master)](https://travis-ci.org/emersion/mdrgpalu)
+[![Build Status for Linux and macOS](https://travis-ci.org/emersion/mdrgpalu.svg?branch=master)](https://travis-ci.org/emersion/mdrgpalu)
+[![Build status for Windows](https://ci.appveyor.com/api/projects/status/jrl8ecisepu4u32s?svg=true)](https://ci.appveyor.com/project/emersion/mdrgpalu)
 
 Yet another command-line text editor.
 
