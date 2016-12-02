@@ -1,5 +1,7 @@
 # mdrgpalu
 
+[![Build Status](https://travis-ci.org/emersion/mdrgpalu.svg?branch=master)](https://travis-ci.org/emersion/mdrgpalu)
+
 Yet another command-line text editor.
 
 ## Usage
