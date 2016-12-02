@@ -8,7 +8,7 @@ int buffer_read_from(struct buffer* b, FILE* f) {
 	struct line* l = b->sel->line;
 	int at = b->sel->ch;
 	int N = 0; // Number of bytes read from f
-	while (!feof(f)) {
+	while (1) {
 		if (l == NULL) {
 			// If the first line has be filled, create a new one
 			l = buffer_insert_line(b);
