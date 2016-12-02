@@ -26,7 +26,7 @@
 
 #include "status.h"
 #include "term.h"
-#include "autocomplete.h"
+#include "trie.h"
 #include "editor.h"
 #include "command.h"
 
@@ -36,7 +36,7 @@
 #include "buffer.c"
 #include "io.c"
 #include "event.c"
-#include "autocomplete.c"
+#include "trie.c"
 
 // TODO: create windows counterparts for these
 #include "unix/sequence.c"
