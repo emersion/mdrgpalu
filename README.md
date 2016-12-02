@@ -9,6 +9,7 @@ make
 ./mdrgpalu
 ```
 
+Clipboard support can be added by installing `xclip`.
 Arch users can [install mdrgpalu from the AUR](https://aur.archlinux.org/packages/mdrgpalu-git/).
 
 ## Key bindings

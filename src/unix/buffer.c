@@ -1,9 +1,11 @@
+// Tabulation modes.
 #define TAB_MODE_TAB 0
 #define TAB_MODE_SPACES 1
-#define TAB_MODE_HOTDOG 2
+#define TAB_MODE_HOTDOG 2 // See https://twitter.com/Kuwaddo/status/784790536318312448
 
 #define TAB_MODE TAB_MODE_HOTDOG
 
+// tab_write_to writes a tabulation to the stream s.
 static void tab_write_to(FILE* s) {
 	switch (TAB_MODE) {
 	case TAB_MODE_TAB:

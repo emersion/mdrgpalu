@@ -320,9 +320,10 @@ void buffer_extend_jump_selection(struct buffer* b, int dir) {
 	selection_extend_jump(b->sel, dir);
 }
 
+// buffer_swap_lines swaps two lines l1 and l2 in the buffer.
 void buffer_swap_lines(struct buffer* b, struct line* l1, struct line* l2) {
 	if (l1 == l2) {
-		return;
+		return; // Nothing to do
 	}
 
 	if (b->first == l1) {
@@ -339,4 +340,6 @@ void buffer_swap_lines(struct buffer* b, struct line* l1, struct line* l2) {
 	line_swap(l1, l2);
 }
 
+// buffer_print prints the buffer's content to the standard output. If s is not
+// NULL, it fills it.
 void buffer_print(struct buffer* b, struct status* s);

@@ -1,3 +1,4 @@
+// Values for selection.dir.
 #define SELECTION_DIR_RIGHT 0
 #define SELECTION_DIR_LEFT  1
 

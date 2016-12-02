@@ -1,7 +1,7 @@
 // See http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 // See https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
 
-#define CSI "\033["
+#define CSI "\033[" // Control Sequence Introducer
 
 #define CODE_CUU 'A' // Cursor Up
 #define CODE_CUD 'B' // Cursor Down

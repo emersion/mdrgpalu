@@ -8,7 +8,7 @@ struct event* event_read(FILE* s) {
 			return NULL;
 		}
 
-		if (prev == '\033' && c == '[') { // Escape sequence
+		if (prev == CSI[0] && c == CSI[1]) { // This is a control sequence
 			struct sequence* s = sequence_parse();
 			if (s == NULL) {
 				return NULL;
@@ -48,14 +48,14 @@ struct event* event_read(FILE* s) {
 			e->key = key;
 			e->modifiers = modifiers;
 			return e;
-		} else if (prev == '\033') { // Esc
+		} else if (prev == CSI[0]) { // Esc
 			// TODO: detect Esc key if no more data is available
 			//ungetc(c, s);
 
 			e = event_new();
 			e->key = KEY_ESC;
 			return e;
-		} else if (c != '\033') { // Not the begining of an escape sequence
+		} else if (c != CSI[0]) { // Not the begining of a Control Sequence Introducer
 			if (c == '\r') {
 				return NULL;
 			}

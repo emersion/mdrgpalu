@@ -2,7 +2,7 @@ struct editor* editor_new() {
 	struct editor* e = (struct editor*) malloc(sizeof(struct editor));
 	e->buf = buffer_new();
 	e->filename = NULL;
-	e->saved = 0;
+	e->saved = 1;
 	e->status = NULL;
 	e->exitcode = -1;
 	return e;
@@ -118,9 +118,11 @@ int editor_main(int argc, char** argv) {
 		struct event* evt = event_read(stdin);
 		if (evt == NULL) {
 			if (feof(stdin)) {
-				return 0;
+				e->exitcode = 0;
+				break;
 			} else if (ferror(stdin)) {
-				return 1;
+				e->exitcode = 1;
+				break;
 			} else {
 				continue;
 			}
@@ -139,9 +141,13 @@ int editor_main(int argc, char** argv) {
 		event_free(evt);
 
 		if (e->exitcode >= 0) {
-			return e->exitcode;
+			break;
 		}
 
 		editor_print(e);
 	}
+
+	int exitcode = e->exitcode;
+	editor_free(e);
+	return exitcode;
 }

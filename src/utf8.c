@@ -1,8 +1,12 @@
+// UTF8_REPLACEMENT_CODEPOINT is the UTF-8 codepoint used to represent an
+// invalid character.
 #define UTF8_REPLACEMENT_CODEPOINT 0xFFFD
 
+// UTF8_CONTINUATION_BYTE is returned by utf8_len when the provided char is a
+// continuation byte (ie. we're in the middle of an UTF-8 codepoint).
 #define UTF8_CONTINUATION_BYTE 0
-#define UTF8_SINGLE_BYTE 1
 
+// UTF8_MAX_LEN is the maximum number of bytes used in a UTF-8 codepoint.
 #define UTF8_MAX_LEN 4
 
 static const unsigned char utf8_mask[] = {
@@ -12,9 +16,12 @@ static const unsigned char utf8_mask[] = {
 	0x07
 };
 
+// utf8_len returns the number of bytes used by the codepoint begining with c.
+// If c is part of a codepoint but is not the first byte, it returns
+// UTF8_CONTINUATION_BYTE. If c is not UTF-8-encoded, it returns 1.
 size_t utf8_len(unsigned char c) {
 	if ((c & (1 << 7)) == 0) {
-		return UTF8_SINGLE_BYTE;
+		return 1;
 	}
 	if ((c & (1 << 6)) == 0) {
 		return UTF8_CONTINUATION_BYTE;
@@ -28,6 +35,8 @@ size_t utf8_len(unsigned char c) {
 	return 4;
 }
 
+// utf8_format encodes codepoint to str. It returns the number of bytes written.
+// str must have a lenth of at least UTF8_MAX_LEN bytes.
 size_t utf8_format(char* str, wchar_t codepoint) {
 	size_t len = 0;
 	int first;
@@ -54,6 +63,8 @@ size_t utf8_format(char* str, wchar_t codepoint) {
 	return len;
 }
 
+// utf8_write_to writes codepoint to the stream s. It returns a non-zero value
+// on error.
 int utf8_write_to(wchar_t codepoint, FILE* s) {
 	char str[UTF8_MAX_LEN];
 	size_t len = utf8_format((char*) &str, codepoint);
@@ -64,6 +75,8 @@ int utf8_write_to(wchar_t codepoint, FILE* s) {
 	return 0;
 }
 
+// utf8_read_from reads a single codepoint from the stream s. It returns the
+// number of bytes read, or EOF on error.
 int utf8_read_from(wchar_t* codepoint, FILE* s) {
 	int c = fgetc(s);
 	if (c == EOF) {
