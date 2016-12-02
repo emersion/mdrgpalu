@@ -110,7 +110,7 @@ struct sequence* sequence_parse() {
 	int c;
 	int paramslen = 0;
 	char n[8];
-	int i = 0;
+	unsigned int i = 0;
 	while (1) {
 		c = getchar();
 		if (c < 0) {
@@ -118,7 +118,7 @@ struct sequence* sequence_parse() {
 		}
 
 		if (c >= '0' && c <= '9') {
-			if ((uint) i > sizeof(n)-1) {
+			if (i > sizeof(n)-1) {
 				return NULL;
 			}
 			n[i] = c;
