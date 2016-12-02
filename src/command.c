@@ -90,6 +90,7 @@ void command_move(struct editor* e, struct event* evt) {
 		} else if (i != 0) {
 			struct line* other = line_walk_line(b->sel->line, i);
 			buffer_swap_lines(b, b->sel->line, other);
+			e->saved = 0;
 		}
 	} else if (evt->modifiers == MODIFIER_SHIFT) {
 		buffer_extend_selection(b, i, j);
@@ -149,6 +150,8 @@ void command_delete(struct editor* e, struct event* evt) {
 		}
 		buffer_delete_char(b, delta);
 	}
+
+	e->saved = 0;
 }
 
 void command_select_all(struct editor* e, struct event* evt) {
@@ -182,6 +185,7 @@ void command_cut_copy(struct editor* e, struct event* evt) {
 		} else {
 			buffer_delete_selection(b);
 		}
+		e->saved = 0;
 	}
 }
 
@@ -201,6 +205,16 @@ void command_select_line(struct editor* e, struct event* evt) {
 }
 
 void command_quit(struct editor* e, struct event* evt) {
+	if (!e->saved) {
+		int res = editor_prompt_bool(e, "This file has changes, save changes?");
+		if (res) {
+			int err = editor_save(e);
+			if (err) {
+				return;
+			}
+		}
+	}
+
 	editor_quit(e);
 }
 
@@ -313,25 +327,7 @@ void command_open(struct editor* e, struct event* evt) {
 }
 
 void command_save(struct editor* e, struct event* evt) {
-	if (e->filename == NULL) {
-		e->filename = editor_prompt_filename(e, "Save as");
-	}
-	if (e->filename != NULL) {
-		FILE* f = fopen(e->filename, "w+");
-		if (f == NULL) {
-			editor_set_status(e, "Cannot open file");
-			return;
-		}
-
-		int err = buffer_write_to(e->buf, f);
-		fclose(f);
-		if (err) {
-			editor_set_status(e, "Error while writing file");
-			return;
-		}
-
-		editor_set_status(e, "File saved");
-	}
+	editor_save(e);
 }
 
 void command_paste(struct editor* e, struct event* evt) {
@@ -345,7 +341,10 @@ void command_paste(struct editor* e, struct event* evt) {
 	clipboard_close(f);
 	if (n == EOF) {
 		editor_set_status(e, "Error while reading clipboard");
+		return;
 	}
+
+	e->saved = 0;
 }
 
 struct trie_node* commands_tree = NULL;

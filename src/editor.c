@@ -2,6 +2,7 @@ struct editor* editor_new() {
 	struct editor* e = (struct editor*) malloc(sizeof(struct editor));
 	e->buf = buffer_new();
 	e->filename = NULL;
+	e->saved = 0;
 	e->status = NULL;
 	e->exitcode = -1;
 	return e;
@@ -32,12 +33,60 @@ int editor_open(struct editor* e, char* filename) {
 
 	free(e->filename);
 	e->filename = strdup(filename);
+	e->saved = 1;
+	return 0;
+}
+
+int editor_save(struct editor* e) {
+	if (e->filename == NULL) {
+		e->filename = editor_prompt_filename(e, "Save as");
+		if (e->filename == NULL) {
+			return -1;
+		}
+	}
+
+	FILE* f = fopen(e->filename, "w+");
+	if (f == NULL) {
+		editor_set_status(e, "Cannot open file");
+		return 1;
+	}
+
+	int err = buffer_write_to(e->buf, f);
+	fclose(f);
+	if (err) {
+		editor_set_status(e, "Error while writing file");
+		return 1;
+	}
+
+	editor_set_status(e, "File saved");
+	e->saved = 1;
 	return 0;
 }
 
 char* editor_prompt_filename(struct editor* e, char* prompt) {
 	// TODO: autocomplete filename
 	return editor_prompt(e, prompt, NULL);
+}
+
+int editor_prompt_bool(struct editor* e, char* prompt) {
+	while (1) {
+		char* res = editor_prompt(e, prompt, NULL);
+		if (res == NULL) {
+			continue;
+		}
+
+		int v = -1;
+		if (strcmp(res, "y") == 0) {
+			v = 1;
+		} else if (strcmp(res, "n") == 0) {
+			v = 0;
+		}
+
+		free(res);
+		if (v >= 0) {
+			return v;
+		}
+	}
 }
 
 void editor_set_status(struct editor* e, char* status) {
@@ -84,6 +133,7 @@ int editor_main(int argc, char** argv) {
 			}
 		} else {
 			buffer_insert_char(b, evt->ch);
+			e->saved = 0;
 		}
 
 		event_free(evt);
