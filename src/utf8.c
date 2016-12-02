@@ -12,7 +12,7 @@ static const unsigned char utf8_mask[] = {
 	0x07
 };
 
-char utf8_len(unsigned char c) {
+size_t utf8_len(unsigned char c) {
 	if ((c & (1 << 7)) == 0) {
 		return UTF8_SINGLE_BYTE;
 	}
@@ -28,8 +28,8 @@ char utf8_len(unsigned char c) {
 	return 4;
 }
 
-char utf8_format(char* str, wchar_t codepoint) {
-	char len = 0;
+size_t utf8_format(char* str, wchar_t codepoint) {
+	size_t len = 0;
 	int first;
 	if (codepoint < 0x80) {
 		first = 0;
@@ -56,8 +56,8 @@ char utf8_format(char* str, wchar_t codepoint) {
 
 int utf8_write_to(wchar_t codepoint, FILE* s) {
 	char str[UTF8_MAX_LEN];
-	char len = utf8_format((char*) &str, codepoint);
-	int n = fwrite(&str, sizeof(char), len, s);
+	size_t len = utf8_format((char*) &str, codepoint);
+	size_t n = fwrite(&str, sizeof(char), len, s);
 	if (n != len) {
 		return 1;
 	}
@@ -71,14 +71,14 @@ int utf8_read_from(wchar_t* codepoint, FILE* s) {
 	}
 	*codepoint = (wchar_t) c;
 
-	char len = utf8_len(c);
+	size_t len = utf8_len(c);
 	if (len == UTF8_CONTINUATION_BYTE) {
 		*codepoint = UTF8_REPLACEMENT_CODEPOINT;
 		return 1;
 	}
 
 	*codepoint &= utf8_mask[len-1];
-	for (int i = 1; i < len; i++) {
+	for (size_t i = 1; i < len; i++) {
 		c = fgetc(s);
 		if (c == EOF || utf8_len(c) != UTF8_CONTINUATION_BYTE) {
 			*codepoint = UTF8_REPLACEMENT_CODEPOINT;
