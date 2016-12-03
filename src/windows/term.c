@@ -10,6 +10,8 @@ void term_setup() {
 	term_stdin = GetStdHandle(STD_INPUT_HANDLE);
 	term_stdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
+	term_load_csbi();
+
 	SetConsoleMode(term_stdin, ENABLE_PROCESSED_INPUT);
 }
 
