@@ -12,7 +12,9 @@ make
 ./mdrgpalu
 ```
 
-Clipboard support can be added by installing `xclip`.
+If `xclip` is available, the clipboard will be shared with the system.
+Otherwise, an internal clipboard will be used.
+
 Arch users can [install mdrgpalu from the AUR](https://aur.archlinux.org/packages/mdrgpalu-git/).
 
 ## Key bindings
