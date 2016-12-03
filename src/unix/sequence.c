@@ -2,6 +2,7 @@
 // See https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
 
 #define CSI "\033[" // Control Sequence Introducer
+#define OSC "\033]" // Operating System Command
 
 #define CODE_CUU 'A' // Cursor Up
 #define CODE_CUD 'B' // Cursor Down
@@ -57,6 +58,9 @@
 // Extended color modes
 #define COLOR_EXTENDED_RGB 2
 #define COLOR_EXTENDED_256 5
+
+#define OSC_END '\007'
+#define OSC_SET_TITLE 0
 
 void print_escape(char* seq) {
 	printf("%s%s", CSI, seq);

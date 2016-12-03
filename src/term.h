@@ -25,3 +25,6 @@ int term_width();
 
 // term_height returns the terminal's height.
 int term_height();
+
+// term_set_title sets the terminal's title.
+void term_set_title(char* title);

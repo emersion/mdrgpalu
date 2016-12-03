@@ -1,8 +1,21 @@
 #define EDITOR_AUTOCOMPLETE_COLOR 236
 
+static void editor_print_title(struct editor* e) {
+	char* filename = e->filename;
+	if (filename == NULL) {
+		filename = "untitled";
+	}
+
+	char title[128];
+	snprintf(title, sizeof(title), "%s - mdrgpalu", filename);
+	term_set_title(title);
+}
+
 void editor_print(struct editor* e) {
 	struct status* s = (struct status*) malloc(sizeof(struct status));
 	s->filename = e->filename;
+
+	editor_print_title(e);
 
 	term_clear_screen();
 	term_cursor_move(0, 0);

@@ -64,3 +64,7 @@ int term_width() {
 int term_height() {
 	return (int) term_size.ws_row;
 }
+
+void term_set_title(char* title) {
+	printf("%s%d;%s%c", OSC, OSC_SET_TITLE, title, OSC_END);
+}
