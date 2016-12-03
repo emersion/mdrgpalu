@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <uchar.h>
+#include <inttypes.h>
 #include <ctype.h>
 #include <signal.h>
 #include <dirent.h>

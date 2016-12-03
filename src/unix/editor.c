@@ -128,7 +128,7 @@ char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* va
 				acsel--;
 			}
 		} else if (!evt->key && !evt->modifiers) {
-			char32_t c = evt->ch;
+			uint32_t c = evt->ch;
 			if (c == '\n') {
 				break;
 			} else {

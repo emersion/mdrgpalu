@@ -1,14 +1,14 @@
 struct event* event_read(FILE* s) {
 	struct event* e = NULL;
-	char32_t c = 0;
-	char32_t prev = 0;
+	uint32_t c = 0;
+	uint32_t prev = 0;
 	while (1) {
 		int n = utf8_read_from(&c, s);
 		if (n == EOF) {
 			return NULL;
 		}
 
-		if (prev == (char32_t) CSI[0] && c == (char32_t) CSI[1]) { // This is a control sequence
+		if (prev == (uint32_t) CSI[0] && c == (uint32_t) CSI[1]) { // This is a control sequence
 			struct sequence* s = sequence_parse();
 			if (s == NULL) {
 				return NULL;
@@ -48,14 +48,14 @@ struct event* event_read(FILE* s) {
 			e->key = key;
 			e->modifiers = modifiers;
 			return e;
-		} else if (prev == (char32_t) CSI[0]) { // Esc
+		} else if (prev == (uint32_t) CSI[0]) { // Esc
 			// TODO: detect Esc key if no more data is available
 			//ungetc(c, s);
 
 			e = event_new();
 			e->key = KEY_ESC;
 			return e;
-		} else if (c != (char32_t) CSI[0]) { // Not the begining of a Control Sequence Introducer
+		} else if (c != (uint32_t) CSI[0]) { // Not the begining of a Control Sequence Introducer
 			if (c == '\r') {
 				return NULL;
 			}
