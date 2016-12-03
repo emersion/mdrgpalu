@@ -17,7 +17,7 @@
 // An event.
 struct event {
 	// If non-zero, contains the typed character.
-	wchar_t ch;
+	char32_t ch;
 	// If non-zero, contains the typed key.
 	int key;
 	// Contains the logical conjunction of modifiers pressed with ch and key.

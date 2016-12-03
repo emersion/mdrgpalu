@@ -37,7 +37,7 @@ size_t utf8_len(unsigned char c) {
 
 // utf8_format encodes codepoint to str. It returns the number of bytes written.
 // str must have a lenth of at least UTF8_MAX_LEN bytes.
-size_t utf8_format(char* str, wchar_t codepoint) {
+size_t utf8_format(char* str, char32_t codepoint) {
 	size_t len = 0;
 	int first;
 	if (codepoint < 0x80) {
@@ -65,7 +65,7 @@ size_t utf8_format(char* str, wchar_t codepoint) {
 
 // utf8_write_to writes codepoint to the stream s. It returns a non-zero value
 // on error.
-int utf8_write_to(wchar_t codepoint, FILE* s) {
+int utf8_write_to(char32_t codepoint, FILE* s) {
 	char str[UTF8_MAX_LEN];
 	size_t len = utf8_format((char*) &str, codepoint);
 	size_t n = fwrite(&str, sizeof(char), len, s);
@@ -77,12 +77,12 @@ int utf8_write_to(wchar_t codepoint, FILE* s) {
 
 // utf8_read_from reads a single codepoint from the stream s. It returns the
 // number of bytes read, or EOF on error.
-int utf8_read_from(wchar_t* codepoint, FILE* s) {
+int utf8_read_from(char32_t* codepoint, FILE* s) {
 	int c = fgetc(s);
 	if (c == EOF) {
 		return EOF;
 	}
-	*codepoint = (wchar_t) c;
+	*codepoint = (char32_t) c;
 
 	size_t len = utf8_len(c);
 	if (len == UTF8_CONTINUATION_BYTE) {

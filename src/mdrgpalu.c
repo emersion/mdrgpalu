@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <inttypes.h>
+#include <uchar.h>
 #include <ctype.h>
 #include <signal.h>
 #include <dirent.h>
