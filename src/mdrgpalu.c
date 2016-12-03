@@ -58,8 +58,6 @@
 
 // TODO: create windows counterparts for these
 #include "unix/sequence.c"
-#include "unix/clipboard_internal.c"
-#include "unix/clipboard_xclip.c"
 #include "unix/status.c"
 #include "unix/buffer.c"
 #include "unix/editor.c"
@@ -68,6 +66,8 @@
 #if defined(OS_POSIX)
 	#include "unix/term.c"
 	#if defined(OS_UNIX)
+		#include "unix/clipboard_internal.c"
+		#include "unix/clipboard_xclip.c"
 		#include "unix/clipboard.c"
 	#elif defined(OS_BSD)
 		#include "bsd/clipboard.c"
