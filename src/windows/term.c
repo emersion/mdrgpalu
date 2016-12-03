@@ -1,6 +1,7 @@
 HANDLE term_stdin;
 HANDLE term_stdout;
 CONSOLE_SCREEN_BUFFER_INFO term_csbi;
+DWORD term_cm_original;
 
 static void term_load_csbi() {
 	GetConsoleScreenBufferInfo(term_stdout, &term_csbi);
@@ -12,11 +13,12 @@ void term_setup() {
 
 	term_load_csbi();
 
+	GetConsoleMode(term_stdin, &term_cm_original);
 	SetConsoleMode(term_stdin, ENABLE_PROCESSED_INPUT);
 }
 
 void term_close() {
-	// TODO
+	SetConsoleMode(term_stdin, term_cm_original);
 }
 
 void term_clear_screen() {
