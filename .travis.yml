@@ -4,7 +4,6 @@ os:
   - linux
   - osx
 dist: trusty
-osx_image: xcode8.1
 compiler:
   - clang
   - gcc
