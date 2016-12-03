@@ -9,16 +9,33 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
-	#define POSIX
+#if defined(__APPLE__) && defined(__MACH__)
+	#define OS_DARWIN
+	#define OS_BSD
+	#define OS_POSIX
+#elif defined(_WIN32)
+	#define OS_WINDOWS
+#elif defined(__unix__)
+	#define OS_UNIX
+	#define OS_POSIX
+
+	#include <sys/param.h>
+	#if defined(BSD)
+		#define OS_BSD
+	#elif defined(__linux__)
+		#define OS_LINUX
+	#endif
+#endif
+
+#if defined(OS_POSIX)
 	#include <sys/termios.h>
 	#include <sys/ioctl.h>
-#elif _WIN32
+#elif defined(OS_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 #endif
 
-#ifdef _WIN32
+#if defined(OS_WINDOWS)
 	#define PATH_SEPARATOR '\\'
 #else
 	#define PATH_SEPARATOR '/'
@@ -27,6 +44,7 @@
 #include "status.h"
 #include "term.h"
 #include "trie.h"
+#include "clipboard.h"
 #include "editor.h"
 #include "command.h"
 
@@ -42,16 +60,21 @@
 #include "unix/sequence.c"
 #include "unix/clipboard_internal.c"
 #include "unix/clipboard_xclip.c"
-#include "unix/clipboard.c"
 #include "unix/status.c"
 #include "unix/buffer.c"
 #include "unix/editor.c"
 #include "unix/event.c"
 
-#ifdef POSIX
+#if defined(OS_POSIX)
 	#include "unix/term.c"
-#elif _WIN32
+	#if defined(OS_UNIX)
+		#include "unix/clipboard.c"
+	#elif defined(OS_BSD)
+		#include "bsd/clipboard.c"
+	#endif
+#elif defined(OS_WINDOWS)
 	#include "windows/term.c"
+	#include "windows/clipboard.c"
 #endif
 
 #include "command.c"
