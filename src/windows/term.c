@@ -22,7 +22,8 @@ void term_close() {
 void term_clear_screen() {
 	COORD origin = {0, 0};
 	DWORD n = term_csbi.dwSize.X * term_csbi.dwSize.Y;
-	FillConsoleOutputCharacter(term_stdout, (TCHAR) ' ', n, origin, NULL);
+	DWORD written;
+	FillConsoleOutputCharacter(term_stdout, (TCHAR) ' ', n, origin, &written);
 }
 
 void term_clear_line() {

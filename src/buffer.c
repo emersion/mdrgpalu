@@ -29,6 +29,8 @@ void buffer_reset(struct buffer* b) {
 // empty line and the selection is set to the first character.
 struct buffer* buffer_new() {
 	struct buffer* b = malloc(sizeof(struct buffer));
+	b->first = NULL; // Required otherwise buffer_reset will segfault
+	b->sel = NULL;
 	buffer_reset(b);
 	return b;
 }
