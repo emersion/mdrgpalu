@@ -22,8 +22,8 @@ void term_close() {
 }
 
 void term_clear_screen() {
-	COORD origin = {0, 0};
-	DWORD n = term_csbi.dwSize.X * term_csbi.dwSize.Y;
+	COORD origin = {term_csbi.srWindow.Left, term_csbi.srWindow.Top};
+	DWORD n = term_width() * term_height();
 	DWORD written;
 	FillConsoleOutputCharacter(term_stdout, (TCHAR) ' ', n, origin, &written);
 }
@@ -42,16 +42,16 @@ void term_cursor_toggle(int show) {
 }
 
 void term_cursor_move(int x, int y) {
-	COORD pos = {x, y};
+	COORD pos = {term_csbi.srWindow.Left + x, term_csbi.srWindow.Top + y};
 	SetConsoleCursorPosition(term_stdout, pos);
 }
 
 int term_width() {
-	return term_csbi.dwSize.X;
+	return term_csbi.srWindow.Right - term_csbi.srWindow.Left + 1;
 }
 
 int term_height() {
-	return term_csbi.dwSize.Y;
+	return term_csbi.srWindow.Bottom - term_csbi.srWindow.Top + 1;
 }
 
 void term_set_title(char* title) {
