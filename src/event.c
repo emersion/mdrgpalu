@@ -8,6 +8,9 @@
 #define KEY_DELETE 7
 #define KEY_BACKSPACE 8
 #define KEY_ESC 9
+#define KEY_PAGE_UP 10
+#define KEY_PAGE_DOWN 11
+#define KEY_INSERT 12
 
 // Event modifiers.
 #define MODIFIER_SHIFT 1<<1

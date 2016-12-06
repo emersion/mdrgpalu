@@ -59,7 +59,6 @@
 #include "trie.c"
 
 #include "ansi/ansi.c"
-#include "ansi/event.c"
 #include "ansi/term.c"
 
 // TODO: create windows counterparts for these
@@ -68,6 +67,7 @@
 #include "unix/editor.c"
 
 #if defined(OS_POSIX)
+	#include "ansi/event.c"
 	#include "unix/term.c"
 	#if defined(OS_UNIX)
 		#include "unix/clipboard_internal.c"
@@ -79,6 +79,7 @@
 #elif defined(OS_WINDOWS)
 	#include "windows/term.c"
 	#include "windows/clipboard.c"
+	#include "windows/event.c"
 #endif
 
 #include "command.c"

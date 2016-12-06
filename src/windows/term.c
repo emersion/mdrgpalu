@@ -22,13 +22,17 @@ void term_setup() {
 	GetConsoleMode(term_stdin, &term_stdin_mode_original);
 	GetConsoleMode(term_stdout, &term_stdout_mode_original);
 
-	SetConsoleMode(term_stdin, ENABLE_PROCESSED_INPUT);
+	SetConsoleMode(term_stdin, ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
 	SetConsoleMode(term_stdout, term_stdout_mode_original | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+
+	ansi_setup();
 }
 
 void term_close() {
 	SetConsoleMode(term_stdin, term_stdin_mode_original);
 	SetConsoleMode(term_stdout, term_stdout_mode_original);
+
+	ansi_close();
 }
 
 /*void term_clear_screen() {
