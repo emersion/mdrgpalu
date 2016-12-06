@@ -19,42 +19,17 @@ void term_setup() {
 	term_load_size();
 	signal(SIGWINCH, term_load_size);
 
-	print_escape(CODE_ALTSCREEN_ENABLE);
-	print_escape(CODE_MODIFYOTHERKEYS_ENABLE);
+	ansi_setup();
 }
 
 void term_close() {
 	tcsetattr(fileno(stdin), TCSANOW, &term_original);
 
-	print_escape(CODE_MODIFYOTHERKEYS_DISABLE);
-	print_escape(CODE_ALTSCREEN_DISABLE);
-}
-
-void term_clear_screen() {
-	print_escape(CODE_ED);
-}
-
-void term_clear_line() {
-	print_escape(CODE_EL);
+	ansi_close();
 }
 
 void term_flush() {
 	fflush(stdout);
-}
-
-void term_cursor_toggle(int show) {
-	if (show) {
-		print_escape(CODE_CURSOR_SHOW);
-	} else {
-		print_escape(CODE_CURSOR_HIDE);
-	}
-}
-
-void term_cursor_move(int x, int y) {
-	if (x < 0 || y < 0) {
-		return;
-	}
-	printf("%s%d;%d%c", CSI, y+1, x+1, CODE_CUP);
 }
 
 int term_width() {
@@ -63,8 +38,4 @@ int term_width() {
 
 int term_height() {
 	return (int) term_size.ws_row;
-}
-
-void term_set_title(char* title) {
-	printf("%s%d;%s%c", OSC, OSC_SET_TITLE, title, OSC_END);
 }

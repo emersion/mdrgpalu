@@ -12,6 +12,7 @@ void term_setup() {
 	term_stdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	term_load_csbi();
+	// TODO: call term_load_csbi when terminal size changes
 
 	GetConsoleMode(term_stdin, &term_cm_original);
 	SetConsoleMode(term_stdin, ENABLE_PROCESSED_INPUT);
@@ -21,22 +22,11 @@ void term_close() {
 	SetConsoleMode(term_stdin, term_cm_original);
 }
 
-void term_clear_screen() {
-	COORD origin = {0, 0};
-	DWORD n = term_csbi.dwSize.X * term_csbi.dwSize.Y;
-	DWORD written;
-	FillConsoleOutputCharacter(term_stdout, (TCHAR) ' ', n, origin, &written);
-}
-
-void term_clear_line() {
-	// TODO
-}
-
 void term_flush() {
 	fflush(stdout);
 }
 
-void term_cursor_toggle(int show) {
+/*void term_cursor_toggle(int show) {
 	CONSOLE_CURSOR_INFO ci = {100, (BOOL) show};
 	SetConsoleCursorInfo(term_stdout, &ci);
 }
@@ -44,7 +34,7 @@ void term_cursor_toggle(int show) {
 void term_cursor_move(int x, int y) {
 	COORD pos = {x, y};
 	SetConsoleCursorPosition(term_stdout, pos);
-}
+}*/
 
 int term_width() {
 	return term_csbi.dwSize.X;
@@ -54,6 +44,6 @@ int term_height() {
 	return term_csbi.dwSize.Y;
 }
 
-void term_set_title(char* title) {
+/*void term_set_title(char* title) {
 	SetConsoleTitle((LPCTSTR) title);
-}
+}*/

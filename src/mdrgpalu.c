@@ -48,6 +48,7 @@
 #include "clipboard.h"
 #include "editor.h"
 #include "command.h"
+#include "ansi/ansi.h"
 
 #include "utf8.c"
 #include "line.c"
@@ -57,12 +58,14 @@
 #include "event.c"
 #include "trie.c"
 
+#include "ansi/ansi.c"
+#include "ansi/event.c"
+#include "ansi/term.c"
+
 // TODO: create windows counterparts for these
-#include "unix/sequence.c"
 #include "unix/status.c"
 #include "unix/buffer.c"
 #include "unix/editor.c"
-#include "unix/event.c"
 
 #if defined(OS_POSIX)
 	#include "unix/term.c"

@@ -22,9 +22,9 @@ void editor_print(struct editor* e) {
 	buffer_print(e->buf, s);
 	term_cursor_move(0, term_height()-1);
 	if (e->status != NULL) {
-		print_format(FORMAT_DIM);
+		ansi_format(FORMAT_DIM);
 		printf("%s", e->status);
-		print_format(FORMAT_RESET);
+		ansi_format(FORMAT_RESET);
 		editor_set_status(e, NULL);
 	} else {
 		status_print(s);
@@ -52,14 +52,14 @@ static void editor_autocomplete(struct editor* e, int offset, char** list, int l
 	for (int i = 0; i < len; i++) {
 		term_cursor_move(offset, h - 1 - (i+1));
 		if (i == sel) {
-			print_foreground(EDITOR_AUTOCOMPLETE_COLOR);
-			print_background(COLOR_WHITE);
+			ansi_foreground(EDITOR_AUTOCOMPLETE_COLOR);
+			ansi_background(COLOR_WHITE);
 		} else {
-			print_foreground(COLOR_WHITE);
-			print_background(EDITOR_AUTOCOMPLETE_COLOR);
+			ansi_foreground(COLOR_WHITE);
+			ansi_background(EDITOR_AUTOCOMPLETE_COLOR);
 		}
 		printf("%-50s", list[i]);
-		print_format(FORMAT_RESET);
+		ansi_format(FORMAT_RESET);
 
 		if (i >= h - 1) {
 			break;
@@ -78,12 +78,12 @@ static void autocomplete_free(char** list, int len) {
 char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* val, char** results, int cap)) {
 	term_cursor_move(0, term_height() - 1);
 	term_clear_line();
-	print_format(FORMAT_DIM);
+	ansi_format(FORMAT_DIM);
 	int offset = 0;
 	if (prompt != NULL) {
 		offset = printf("%s: ", prompt);
 	}
-	print_format(FORMAT_RESET);
+	ansi_format(FORMAT_RESET);
 
 	int accap = term_height() - 1;
 	int aclen = 0;

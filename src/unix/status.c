@@ -1,5 +1,5 @@
 void status_print(struct status* s) {
-	print_format(FORMAT_DIM);
+	ansi_format(FORMAT_DIM);
 
 	// Print file status
 	char* filename = s->filename;
@@ -14,5 +14,5 @@ void status_print(struct status* s) {
 		printf(" (%d)", s->sellen);
 	}
 
-	print_format(FORMAT_RESET);
+	ansi_format(FORMAT_RESET);
 }

@@ -45,7 +45,7 @@ void buffer_print(struct buffer* b, struct status* s) {
 				c = l->chars[j];
 			}
 			if (sellen >= 0 && j == selch) {
-				print_format(FORMAT_REVERSE);
+				ansi_format(FORMAT_REVERSE);
 				curchar = j;
 				selch = -1;
 				if (j == l->len) {
@@ -60,7 +60,7 @@ void buffer_print(struct buffer* b, struct status* s) {
 			if (selch == -1 && sellen > 0) {
 				sellen--;
 				if (sellen <= 0) {
-					print_format(FORMAT_RESET);
+					ansi_format(FORMAT_RESET);
 				}
 			}
 		}
