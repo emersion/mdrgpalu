@@ -88,6 +88,7 @@ struct event* event_read(FILE* s) {
 		case MOUSE_EVENT:
 			break;
 		case WINDOW_BUFFER_SIZE_EVENT:
+			term_load_csbi();
 			break;
 		}
 	}
