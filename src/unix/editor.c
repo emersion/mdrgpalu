@@ -108,6 +108,7 @@ char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* va
 		if (evt == NULL || evt->key == KEY_ESC) {
 			free(res);
 			res = NULL;
+			event_free(evt);
 			break;
 		}
 
@@ -130,6 +131,7 @@ char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* va
 		} else if (!evt->key && !evt->modifiers) {
 			uint32_t c = evt->ch;
 			if (c == '\n') {
+				event_free(evt);
 				break;
 			} else {
 				utf8_write_to(c, stdout);
@@ -153,6 +155,7 @@ char* editor_prompt(struct editor* e, char* prompt, int (*autocomplete)(char* va
 			}
 			editor_autocomplete(e, offset, aclist, aclen, acsel);
 		}
+		event_free(evt);
 	}
 
 	term_cursor_toggle(0);
