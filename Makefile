@@ -1,4 +1,3 @@
-CC ?= gcc
 CFLAGS = -std=c11 -O2
 DBGFLAGS = -W -Wall -Werror -Wextra -Wno-unused-parameter -pedantic -pedantic-errors -ggdb3 -std=c11
 PREFIX = /usr/local
